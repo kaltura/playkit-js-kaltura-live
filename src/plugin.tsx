@@ -9,6 +9,7 @@ import {
     PlayerContribPlugin
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
+import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 
 const isDev = true; // TODO - should be provided by Omri Katz as part of the cli implementation
 const pluginName = `kaltura-live${isDev ? "-local" : ""}`;
@@ -30,20 +31,14 @@ export class KalturaLivePlugin extends PlayerContribPlugin
         });
     }
 
-    onRegisterUI(uiManager: UIManager): void {
-        console.log("The plugin kaltura-live compiled. ");
-    }
+    onRegisterUI(uiManager: UIManager): void {}
 
     onMediaLoad(config: OnMediaLoadConfig): void {}
 
     onMediaUnload(): void {}
 
-    private _pauseVideo() {
-        this.player.pause();
-    }
-
-    private _seekTo(time: number) {
-        this.player.currentTime = time;
+    getMiddlewareImpl(): any {
+        return new KalturaLiveMidddleware(this);
     }
 }
 
