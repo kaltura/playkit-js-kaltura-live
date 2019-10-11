@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "skipLibCheck": true,
+        "target": "ES5",
+        "module": "commonjs",
+        "allowJs": false,
+        "jsx": "react",
+        "jsxFactory": "h",
+        "sourceMap": true,
+        "strict": true,
+        "moduleResolution": "Node",
+        "baseUrl": "./src",
+        "preserveSymlinks": true,
+        "paths": {
+            "*": ["../node_modules/*"]
+        }
+    },
+    "include": ["src/**/*.tsx", "src/**/*.ts", "custom.d.ts"],
+    "exclude": ["node_modules"]
+}

@@ -1,0 +1,12 @@
+node_modules
+.DS_Store
+.idea/*
+
+build
+/.vscode
+.rpt2_cache
+dist
+
+.rpt2_cache
+.rpt2*
+stats.json

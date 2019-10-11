@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaltura Live - Player V7</title>
+
+    <!--
+        TEMPORARY DISABLED:
+        add here a url to player v7 for relevant partner / uiconf
+        ie:  https://cdnapisec.kaltura.com/p/{partner_id}/embedPlaykitJs/uiconf_id/{uiconf_id}
+        <script src=""></script>
+    -->
+
+    <!--
+        This plugin is developed against local kaltura player version which expose api not available yet in production!
+    -->
+    <script src="kaltura-ovp-player.js"></script>
+
+
+    <% for (var chunk in htmlWebpackPlugin.files.chunks) { %><script id="bundle" async src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script><% } %>
+    <link rel="stylesheet" href="resize.css">
+    <script src="resize.js"></script>
+
+    <style>
+        #player-div {
+            display: inline;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Kaltura Live - Player V7</h1>
+<button onclick="changeMedia()">test change media</button>
+<div style="position:relative;margin-top:10px">
+    <div class='resizable'>
+        <div id="player-div"></div>
+        <div class='resizers'>
+            <div class='resizer top-left'></div>
+            <div class='resizer top-right'></div>
+            <div class='resizer bottom-left'></div>
+            <div class='resizer bottom-right'></div>
+        </div>
+    </div>
+</div>
+
+<script>
+  var player;
+  function changeMedia() {
+    player.loadMedia({
+      entryId: '' <!-- TODO (optional) set here another entry id to test change media -->
+    });
+  }
+
+  var config = {
+    logLevel: "DEBUG",
+    targetId: "player-div",
+    provider: {
+      partnerId: "", <!-- TODO set here your partner id as set in the url above -->
+      uiConfId: "", <!-- TODO set here your uiconf id as set in the url above -->
+      env: {  <!-- TEMPORARY ADDED: needed when using local player -->
+        serviceUrl:"https://cdnapisec.kaltura.com/api_v3"
+      },
+      ks: undefined <!-- TODO (optional) provide ks if needed -->
+    },
+    plugins: {
+      'kaltura-live-local': {
+      }
+    }
+  };
+
+  document.getElementById("bundle").onload =  function(){
+
+    var mediaInfo = {entryId: ""}; <!-- TODO set here the entry you want to play -->
+    player = KalturaPlayer.setup(config);
+    player.loadMedia(mediaInfo).then(function() {
+      player.play();
+    });
+  }
+
+  makeResizableDiv('.resizable');
+</script>
+
+</body>
+
+</html>

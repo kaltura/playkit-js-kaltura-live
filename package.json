@@ -1,0 +1,69 @@
+{
+  "name": "@playkit-js/kaltura-live",
+  "version": "1.0.0-rc.0",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/kaltura/playkit-js-kaltura-live/issues"
+  },
+  "homepage": "https://github.com/kaltura/playkit-js-kaltura-live#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kaltura/playkit-js-kaltura-live.git"
+  },
+  "description": "",
+  "main": "dist/playkit-js-kaltura-live.js",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "reset": "npm run clean && rm -rf node_modules",
+    "prebuild": "npm run clean",
+    "build": "npm run clean && webpack --mode production",
+    "serve": "webpack-dev-server -d",
+    "analyze": "npm run build && npx source-map-explorer dist/playkit-js-kaltura-live.js",
+    "contrib:latest": "npm i @playkit-js-contrib/{ui,plugin,common}@latest",
+    "contrib:next": "npm i @playkit-js-contrib/{ui,plugin,common}@next",
+    "contrib:link": "npm link @playkit-js-contrib/common && npm link @playkit-js-contrib/ui && npm link @playkit-js-contrib/plugin"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "copy-webpack-plugin": "^5.0.2",
+    "html-webpack-plugin": "^3.2.0",
+    "husky": "^1.3.1",
+    "lint-staged": "^8.1.5",
+    "node-sass": "^4.5.3",
+    "npm": "^6.9.0",
+    "prettier": "^1.15.3",
+    "source-map-loader": "^0.2.4",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.17.0",
+    "tslint-consistent-codestyle": "^1.14.1",
+    "tslint-eslint-rules": "^5.4.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.2.1",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.2.1"
+  },
+  "dependencies": {
+    "@playkit-js-contrib/common": "^2.0.0",
+    "@playkit-js-contrib/plugin": "^2.0.0",
+    "@playkit-js-contrib/ui": "^2.0.0",
+    "deep-diff": "^1.0.2",
+    "kaltura-typescript-client": "file:libs/kaltura-typescript-client-7.0.0-v20190324-101134.tgz"
+  },
+  "files": [
+    "dist"
+  ],
+  "lint-staged": {
+    "*.{ts,tsx,json,css,html}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  }
+}
