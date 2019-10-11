@@ -6,16 +6,6 @@ export class KalturaLiveMidddleware extends BaseMiddleware {
     constructor(context: KalturaLivePlugin) {
         super();
         this._context = context;
-        context.player.addEventListener(context.player.Event.SOURCE_SELECTED, (e: any) => {
-            // find out if the entry is live or VOD.
-            if (context.player.config.sources.type === context.player.MediaType.LIVE) {
-                // this is Live
-                console.log("I am a live entry", context.player.config.sources);
-            } else {
-                // this is VOD
-                console.log("I am VOD entry", context.player.config.sources);
-            }
-        });
     }
 
     /**

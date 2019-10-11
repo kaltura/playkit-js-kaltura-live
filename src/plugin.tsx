@@ -1,4 +1,13 @@
-import { KalturaClient } from "kaltura-typescript-client";
+import {
+    KalturaClient,
+    KalturaClientException,
+    KalturaAPIException
+} from "kaltura-typescript-client";
+import {
+    LiveStreamIsLiveAction,
+    KalturaPlaybackProtocol
+} from "kaltura-typescript-client/api/types";
+
 import {
     ContribConfig,
     OnMediaLoad,
@@ -26,9 +35,13 @@ export class KalturaLivePlugin extends PlayerContribPlugin
             endpointUrl: config.server.serviceUrl
         });
 
-        this._kalturaClient.setDefaultRequestOptions({
-            ks: config.server.ks
-        });
+        if (this.config.checkLiveWithKs === true) {
+            this._kalturaClient.setDefaultRequestOptions({
+                ks: config.server.ks
+            });
+        }
+        this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this.checkIsLive);
+        this.checkIsLive();
     }
 
     onRegisterUI(uiManager: UIManager): void {}
@@ -40,6 +53,36 @@ export class KalturaLivePlugin extends PlayerContribPlugin
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this);
     }
+
+    public checkIsLive = () => {
+        if (this.player.config.sources.type === this.player.MediaType.LIVE) {
+            // this is Live
+            this.makeIsLiveApiCall(this.player.config.sources.id);
+        } else {
+            // this is VOD
+            console.log("I am VOD entry", this.player.config.sources);
+        }
+    };
+
+    public makeIsLiveApiCall = (id: string) => {
+        const protocol = KalturaPlaybackProtocol.auto;
+        const request = new LiveStreamIsLiveAction({ id, protocol });
+        this._kalturaClient.request(request).then(
+            response => {
+                console.log(
+                    `Made API call ${this.config.checkLiveWithKs === true ? "with" : "without"} KS`,
+                    response
+                );
+            },
+            error => {
+                if (error instanceof KalturaClientException) {
+                    console.log("network error etc");
+                } else if (error instanceof KalturaAPIException) {
+                    console.log("api exception");
+                }
+            }
+        );
+    };
 }
 
 KalturaPlayer.core.registerPlugin(pluginName, KalturaLivePlugin);
