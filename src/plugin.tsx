@@ -19,9 +19,15 @@ import {
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
+import { getContribLogger } from "@playkit-js-contrib/common";
 
 const isDev = true; // TODO - should be provided by Omri Katz as part of the cli implementation
 const pluginName = `kaltura-live${isDev ? "-local" : ""}`;
+
+const logger = getContribLogger({
+    class: "KalturaLivePlugin",
+    module: "kaltura-live-plugin"
+});
 
 export class KalturaLivePlugin extends PlayerContribPlugin
     implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
@@ -40,8 +46,12 @@ export class KalturaLivePlugin extends PlayerContribPlugin
                 ks: config.server.ks
             });
         }
-        this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this.checkIsLive);
-        this.checkIsLive();
+        this.eventManager.listen(
+            this.player,
+            this.player.Event.SOURCE_SELECTED,
+            this._isEntryLiveType
+        );
+        this._isEntryLiveType();
     }
 
     onRegisterUI(uiManager: UIManager): void {}
@@ -54,31 +64,40 @@ export class KalturaLivePlugin extends PlayerContribPlugin
         return new KalturaLiveMidddleware(this);
     }
 
-    public checkIsLive = () => {
+    private _isEntryLiveType = () => {
         if (this.player.config.sources.type === this.player.MediaType.LIVE) {
             // this is Live
-            this.makeIsLiveApiCall(this.player.config.sources.id);
-        } else {
-            // this is VOD
-            console.log("I am VOD entry", this.player.config.sources);
+            this._checkIsLive(this.player.config.sources.id);
         }
     };
 
-    public makeIsLiveApiCall = (id: string) => {
+    private _checkIsLive = (id: string) => {
         const protocol = KalturaPlaybackProtocol.auto;
         const request = new LiveStreamIsLiveAction({ id, protocol });
         this._kalturaClient.request(request).then(
-            response => {
-                console.log(
+            () => {
+                logger.trace(
                     `Made API call ${this.config.checkLiveWithKs === true ? "with" : "without"} KS`,
-                    response
+                    {
+                        method: "_checkIsLive"
+                    }
                 );
             },
             error => {
                 if (error instanceof KalturaClientException) {
-                    console.log("network error etc");
+                    logger.error("Network error etc", {
+                        method: "_checkIsLive",
+                        data: {
+                            error
+                        }
+                    });
                 } else if (error instanceof KalturaAPIException) {
-                    console.log("api exception");
+                    logger.error("Api exception", {
+                        method: "_checkIsLive",
+                        data: {
+                            error
+                        }
+                    });
                 }
             }
         );
