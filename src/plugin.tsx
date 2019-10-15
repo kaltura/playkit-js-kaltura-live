@@ -19,6 +19,7 @@ import {
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
+import { KalturaLiveEngineDecorator } from "./decorator/live-engine-decorator";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
 const isDev = true; // TODO - should be provided by Omri Katz as part of the cli implementation
@@ -62,6 +63,10 @@ export class KalturaLivePlugin extends PlayerContribPlugin
 
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this);
+    }
+
+    getEngineDecorator(engine: any): any {
+        return new KalturaLiveEngineDecorator(engine, this);
     }
 
     private _isEntryLiveType = () => {
