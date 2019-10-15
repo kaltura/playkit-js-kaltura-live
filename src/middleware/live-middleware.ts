@@ -1,8 +1,8 @@
-import BaseMiddleware from "./base-middleware";
+import BaseMiddleware from "./base-middleware"; // TODO: move it to contrib repo
 import { KalturaLivePlugin } from "../plugin";
 
 export class KalturaLiveMidddleware extends BaseMiddleware {
-    private _context: any;
+    private _context: KalturaLivePlugin;
     constructor(context: KalturaLivePlugin) {
         super();
         this._context = context;
