@@ -18,9 +18,10 @@ import {
     PlayerContribPlugin
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
-import { KalturaLiveMidddleware } from "./middleware/live-middleware";
+import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { KalturaLiveEngineDecorator } from "./decorator/live-engine-decorator";
 import { getContribLogger } from "@playkit-js-contrib/common";
+import { IEngineDecorator } from "./decorator/iEngineDecorator";
 
 const isDev = true; // TODO - should be provided by Omri Katz as part of the cli implementation
 const pluginName = `kaltura-live${isDev ? "-local" : ""}`;
@@ -62,10 +63,10 @@ export class KalturaLivePlugin extends PlayerContribPlugin
     onMediaUnload(): void {}
 
     getMiddlewareImpl(): any {
-        return new KalturaLiveMidddleware(this);
+        return new KalturaLiveMiddleware(this);
     }
 
-    getEngineDecorator(engine: any): any {
+    getEngineDecorator(engine: any): IEngineDecorator {
         return new KalturaLiveEngineDecorator(engine, this);
     }
 

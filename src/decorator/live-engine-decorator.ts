@@ -1,6 +1,7 @@
 import { KalturaLivePlugin } from "../plugin";
+import { IEngineDecorator } from "./iEngineDecorator";
 
-export class KalturaLiveEngineDecorator {
+export class KalturaLiveEngineDecorator implements IEngineDecorator {
     _plugin: KalturaLivePlugin;
     _engine: any;
 
@@ -10,7 +11,11 @@ export class KalturaLiveEngineDecorator {
     }
 
     get active(): boolean {
-        return this._plugin.playOnMainVideoTag() && this._plugin.isAdPlaying();
+        return true;
+    }
+
+    set currentTime(to: number) {
+        // Do nothing
     }
 
     dispatchEvent(event: any): boolean {
@@ -18,14 +23,20 @@ export class KalturaLiveEngineDecorator {
     }
 
     get duration(): number {
-        return this._plugin.getContentDuration();
+        return this._engine.duration || 0;
     }
 
     get currentTime(): number {
-        return this._plugin.getContentTime();
+        return this._engine.currentTime;
     }
 
     get paused(): boolean {
-        return true;
+        console.log("Pause");
+        return this._engine.paused;
+    }
+
+    get ended(): boolean {
+        console.log("End");
+        return this._engine.ended;
     }
 }

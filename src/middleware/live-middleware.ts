@@ -1,7 +1,7 @@
 import BaseMiddleware from "./base-middleware";
 import { KalturaLivePlugin } from "../plugin";
 
-export class KalturaLiveMidddleware extends BaseMiddleware {
+export class KalturaLiveMiddleware extends BaseMiddleware {
     private _context: any;
     constructor(context: KalturaLivePlugin) {
         super();
@@ -12,10 +12,10 @@ export class KalturaLiveMidddleware extends BaseMiddleware {
      * Load middleware handler.
      * @param {Function} next - The load play handler in the middleware chain.
      * @returns {void}
-     * @memberof KalturaLiveMidddleware
+     * @memberof KalturaLiveMiddleware
      */
     public load(next: Function): void {
-        console.log("load");
+        console.log("middleware load");
         this.callNext(next);
     }
 
@@ -23,7 +23,7 @@ export class KalturaLiveMidddleware extends BaseMiddleware {
      * Play middleware handler.
      * @param {Function} next - The next play handler in the middleware chain.
      * @returns {void}
-     * @memberof KalturaLiveMidddleware
+     * @memberof KalturaLiveMiddleware
      */
     public play(next: Function): void {
         console.log("Requested to play");
@@ -37,10 +37,10 @@ export class KalturaLiveMidddleware extends BaseMiddleware {
      * Pause middleware handler.
      * @param {Function} next - The next pause handler in the middleware chain.
      * @returns {void}
-     * @memberof KalturaLiveMidddleware
+     * @memberof KalturaLiveMiddleware
      */
     public pause(next: Function): void {
-        console.log("pause");
+        console.log("middleware pause");
         this.callNext(next);
     }
 }
