@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaltura Live plugin for player V7 - Test page </title>
+    <title>Kaltura Live plugin for player V7 - Test page</title>
 
 
 
@@ -53,13 +53,15 @@
 
         // Step 3: choose which environment to use at runtime (qa / production)
         // qa server
-        const env = {
+        let env = {
             serviceUrl:"https://qa-apache-php7.dev.kaltura.com/api_v3",
             cdnUrl: "https://qa-nginx-vod.dev.kaltura.com"
         };
 
         // uncomment this to use production
-        //const env = undefined;
+        // env = {
+        //     serviceUrl:"https://cdnapisec.kaltura.com/api_v3",
+        // };
 
         // Step 4: configure relevant plugins
         const plugins =  {
@@ -87,7 +89,7 @@
 </head>
 
 <body>
-<h1>Qna - Player V7</h1>
+<h1>Kaltura Live plugin for player V7 - Test page</h1>
 <button onclick="changeMedia()">test change media</button>
 <div style="position:relative;margin-top:10px">
     <div class='resizable'>
@@ -133,9 +135,7 @@
 
         var mediaInfo = {entryId};
         player = KalturaPlayer.setup(config);
-        player.loadMedia(mediaInfo).then(function() {
-            player.play();
-        });
+        player.loadMedia(mediaInfo);
     }
 
     makeResizableDiv('.resizable');
