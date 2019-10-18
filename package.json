@@ -21,7 +21,7 @@
     "analyze": "npm run build && npx source-map-explorer dist/playkit-js-kaltura-live.js",
     "contrib:latest": "npm i @playkit-js-contrib/{ui,plugin,common}@latest",
     "contrib:next": "npm i @playkit-js-contrib/{ui,plugin,common}@next",
-    "contrib:link": "npm link @playkit-js-contrib/common && npm link @playkit-js-contrib/ui && npm link @playkit-js-contrib/plugin"
+    "contrib:local": "npm link @playkit-js-contrib/common && npm link @playkit-js-contrib/ui && npm link @playkit-js-contrib/plugin"
   },
   "keywords": [],
   "author": "",

@@ -3,37 +3,34 @@ import {
     KalturaClientException,
     KalturaAPIException
 } from "kaltura-typescript-client";
-import {
-    LiveStreamIsLiveAction,
-    KalturaPlaybackProtocol
-} from "kaltura-typescript-client/api/types";
+import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
+import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
 
 import {
     ContribConfig,
+    ContribPluginData,
+    ContribPluginManager,
+    ContribServices,
+    CorePlugin,
     OnMediaLoad,
     OnMediaLoadConfig,
     OnMediaUnload,
     OnPluginSetup,
-    OnRegisterUI,
-    PlayerContribPlugin
+    OnRegisterUI
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
-
-const isDev = true; // TODO - should be provided by Omri Katz as part of the cli implementation
-const pluginName = `kaltura-live${isDev ? "-local" : ""}`;
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
     module: "kaltura-live-plugin"
 });
 
-export class KalturaLivePlugin extends PlayerContribPlugin
-    implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
-    static defaultConfig = {};
-
+export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
+
+    constructor(private _corePlugin: CorePlugin, private _contribServices: ContribServices) {}
 
     onPluginSetup(config: ContribConfig): void {
         this._kalturaClient.setOptions({
@@ -41,14 +38,13 @@ export class KalturaLivePlugin extends PlayerContribPlugin
             endpointUrl: config.server.serviceUrl
         });
 
-        if (this.config.checkLiveWithKs === true) {
+        if (this._corePlugin.config.checkLiveWithKs === true) {
             this._kalturaClient.setDefaultRequestOptions({
                 ks: config.server.ks
             });
         }
-        this.eventManager.listen(
-            this.player,
-            this.player.Event.SOURCE_SELECTED,
+        this._corePlugin.player.addEventListener(
+            this._corePlugin.player.Event.SOURCE_SELECTED,
             this._isEntryLiveType
         );
         this._isEntryLiveType();
@@ -65,10 +61,13 @@ export class KalturaLivePlugin extends PlayerContribPlugin
     }
 
     private _isEntryLiveType = () => {
-        if (this.player.config.sources.type === this.player.MediaType.LIVE) {
-            // this is Live
-            this._checkIsLive(this.player.config.sources.id);
-        }
+        const config = this._contribServices.getContribConfig();
+        // TODO serhii please update the contrib this._contribServices.getContribConfig() with relevant information
+
+        // if (config.sources && config.sources.type === this._corePlugin.player.MediaType.LIVE) {
+        //     // this is Live
+        //     this._checkIsLive(use here the config object);
+        // }
     };
 
     private _checkIsLive = (id: string) => {
@@ -77,7 +76,9 @@ export class KalturaLivePlugin extends PlayerContribPlugin
         this._kalturaClient.request(request).then(
             () => {
                 logger.trace(
-                    `Made API call ${this.config.checkLiveWithKs === true ? "with" : "without"} KS`,
+                    `Made API call ${
+                        this._corePlugin.config.checkLiveWithKs === true ? "with" : "without"
+                    } KS`,
                     {
                         method: "_checkIsLive"
                     }
@@ -104,4 +105,12 @@ export class KalturaLivePlugin extends PlayerContribPlugin
     };
 }
 
-KalturaPlayer.core.registerPlugin(pluginName, KalturaLivePlugin);
+ContribPluginManager.registerPlugin(
+    "kaltura-live",
+    (data: ContribPluginData) => {
+        return new KalturaLivePlugin(data.corePlugin, data.contribServices);
+    },
+    {
+        defaultConfig: {}
+    }
+);
