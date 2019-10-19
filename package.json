@@ -19,7 +19,7 @@
     "build:dev": "webpack --config webpack.dev.js",
     "serve": "webpack-dev-server --open --config webpack.dev.js",
     "serve:external": "npm run serve -- --host 0.0.0.0",
-    "analyze": "npm run build && npx source-map-explorer dist/playkit-js-qna.js",
+    "analyze": "npm run build && npx source-map-explorer dist/playkit-js-kaltura-live.js",
     "contrib:latest": "npm i @playkit-js-contrib/{common,ui,plugin}@latest",
     "contrib:next": "npm i @playkit-js-contrib/{common,ui,plugin}@next",
     "contrib:local": "npm link @playkit-js-contrib/{common,ui,plugin} --production"
