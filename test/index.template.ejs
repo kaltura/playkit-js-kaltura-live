@@ -4,22 +4,76 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaltura Live - Player V7</title>
+    <title>Kaltura Live plugin for player V7 - Test page</title>
+
+
 
     <!--
-        TEMPORARY DISABLED:
-        add here a url to player v7 for relevant partner / uiconf
-        ie:  https://cdnapisec.kaltura.com/p/{partner_id}/embedPlaykitJs/uiconf_id/{uiconf_id}
-        <script src=""></script>
+        Step 1: Choose how to fetch the player
+
+        Note:
+        - You can use any version that exists in the QA bundler.
+        - You can still stream entries from production.
+        - Partner 6560 in QA was created specially for the development of player v7 VAMB plugins.
+        - Feel free to add entries and enable features, avoid altering existing entries.
+
+        For latest version:
+        -------------------
+        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252"></script>
+
+
+        Specific player version:
+        -------------------
+        - replace {version-number} with valid version in QA server (like 0.47.8-vamb.1)
+
+        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player={version-number}"></script>
+
+
+        Test integration with additional plugins:
+        -------------------------------------------
+        - Replace {list-of-plugins-separated-with-comma} with list of plugins (like qna=4.0.1,transcript=1.0.0)
+        - Avoid listing this repo plugin otherwise it will cause duplication.
+
+        <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/{list-of-plugins-separated-with-comma}"></script>
+
     -->
 
-    <!--
-        This plugin is developed against local kaltura player version which expose api not available yet in production!
-    -->
-    <script src="kaltura-ovp-player.js"></script>
+    <!-- Using specific version of player until core player will include infrastructure needed by VAMB plugins -->
+    <script src="https://qa-apache-php7.dev.kaltura.com/p/6560/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.47.8-vamb.1"></script>
 
+    <script>
+        // Step 2: configure the player with relevant information
 
+        const partnerId = "6560"; // 6560 = partner in QA dedicated for plugins test page
+        const uiConfId = "15224252"; // 15224252 = uiConf of 6560 in QA dedicated for plugins test page
+        const ks = "";
+        const userId = ""; // usually optional, mandatory for webcast plugins (ie Shimi)
+        const entryId = "0_dbwcaqfq"; // 0_dbwcaqfq = sample entry of 6560 in QA
+        const switchMediaEntryId = ""; // optional
+
+        // Step 3: choose which environment to use at runtime (qa / production)
+        // qa server
+        let env = {
+            serviceUrl:"https://qa-apache-php7.dev.kaltura.com/api_v3",
+            cdnUrl: "https://qa-nginx-vod.dev.kaltura.com"
+        };
+
+        // uncomment this to use production
+        // env = {
+        //     serviceUrl:"https://cdnapisec.kaltura.com/api_v3",
+        // };
+
+        // Step 4: configure relevant plugins
+        const plugins =  {
+            'kaltura-live': {
+            }
+        };
+
+    </script>
+
+    <!-- Note: Don't modify this part -->
     <% for (var chunk in htmlWebpackPlugin.files.chunks) { %><script id="bundle" async src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script><% } %>
+
     <link rel="stylesheet" href="resize.css">
     <script src="resize.js"></script>
 
@@ -31,10 +85,11 @@
             height: 100%;
         }
     </style>
+    <!-- End of Note: Don't modify this part -->
 </head>
 
 <body>
-<h1>Kaltura Live - Player V7</h1>
+<h1>Kaltura Live plugin for player V7 - Test page</h1>
 <button onclick="changeMedia()">test change media</button>
 <div style="position:relative;margin-top:10px">
     <div class='resizable'>
@@ -49,40 +104,41 @@
 </div>
 
 <script>
-  var player;
-  function changeMedia() {
-    player.loadMedia({
-      entryId: '' <!-- TODO (optional) set here another entry id to test change media -->
-    });
-  }
+    var player;
 
-  var config = {
-    logLevel: "DEBUG",
-    targetId: "player-div",
-    provider: {
-      partnerId: "", <!-- TODO set here your partner id as set in the url above -->
-      uiConfId: "", <!-- TODO set here your uiconf id as set in the url above -->
-      env: {  <!-- TEMPORARY ADDED: needed when using local player -->
-        serviceUrl:"https://cdnapisec.kaltura.com/api_v3"
-      },
-      ks: undefined <!-- TODO (optional) provide ks if needed -->
-    },
-    plugins: {
-      'kaltura-live-local': {
-      }
+
+    function changeMedia() {
+        player.loadMedia({
+            entryId: switchMediaEntryId
+        });
     }
-  };
 
-  document.getElementById("bundle").onload =  function(){
+    var config = {
+        logLevel: "DEBUG",
+        targetId: "player-div",
+        provider: {
+            env,
+            partnerId,
+            uiConfId,
+            ks
+        },
+        session: {
+            userId
+        },
+        plugins,
+        ui: {
+            debug: true
+        }
+    };
 
-    var mediaInfo = {entryId: ""}; <!-- TODO set here the entry you want to play -->
-    player = KalturaPlayer.setup(config);
-    player.loadMedia(mediaInfo).then(function() {
-      player.play();
-    });
-  }
+    document.getElementById("bundle").onload =  function(){
 
-  makeResizableDiv('.resizable');
+        var mediaInfo = {entryId};
+        player = KalturaPlayer.setup(config);
+        player.loadMedia(mediaInfo);
+    }
+
+    makeResizableDiv('.resizable');
 </script>
 
 </body>
