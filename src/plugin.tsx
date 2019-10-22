@@ -20,6 +20,8 @@ import {
 import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
+import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
+import { IEngineDecoratorProvider } from "./decorator/IEngineDecoratorProvider";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -108,9 +110,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     };
 }
 
-class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> {
+export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> {
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this._contribPlugin);
+    }
+    getEngineDecorator(engine: any): any {
+        return new KalturaLiveEngineDecorator(engine, this);
     }
 }
 
