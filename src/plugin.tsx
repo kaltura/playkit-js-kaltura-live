@@ -124,7 +124,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         // interval - todo handle clear and cancel
         setTimeout(this._checkIsLive, 10000);
     };
-
     // TODO - implement destroy
 }
 
