@@ -6,32 +6,17 @@ export class KalturaLiveEngineDecorator implements IEngineDecorator {
     _engine: any;
 
     constructor(engine: any, plugin: KalturaLiveCorePlugin) {
-        console.log(">>>> plugin", plugin);
         this._plugin = plugin;
         this._engine = engine;
     }
 
     get active(): boolean {
-        return this._engine.currentTime;
+        return this._plugin.active();
     }
 
     dispatchEvent(event: any): boolean {
-        console.log(">>>> KalturaLiveEngineDecorator dispatchEvent ", event);
-        return event.defaultPrevented;
-    }
-
-    get duration(): number {
-        console.log(">>>> KalturaLiveEngineDecorator duration ", this._engine.duration);
-        return this._engine.duration;
-    }
-
-    get currentTime(): number {
-        console.log(">>>> KalturaLiveEngineDecorator currentTime ", this._engine.currentTime);
-        return this._engine.currentTime;
-    }
-
-    get paused(): boolean {
-        console.log(">>>> KalturaLiveEngineDecorator paused ", this._engine.paused);
-        return this._engine.paused;
+        // todo - TS this better
+        // for now - naive decorator that does not interfere with events logic
+        return (this._plugin.player as any).dispatchEvent(event);
     }
 }

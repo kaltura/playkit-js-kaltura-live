@@ -34,28 +34,32 @@ interface KalturaLivePluginConfig {
 
 export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
+    // represents if the entry type is a live entry
+    private _isLiveEntry = false;
+    // represents if the entry is in live mode or unknown
+    private _isLive: undefined | boolean = undefined;
 
     constructor(
         private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
         private _player: KalturaPlayerTypes.Player
-    ) {}
-
-    onPluginSetup(): void {
+    ) {
         const { playerConfig, pluginConfig } = this._configs;
         this._kalturaClient.setOptions({
             clientTag: "playkit-js-kaltura-live",
             endpointUrl: playerConfig.provider.env.serviceUrl
         });
-
         if (pluginConfig.checkLiveWithKs === true) {
             this._kalturaClient.setDefaultRequestOptions({
                 ks: playerConfig.provider.ks
             });
         }
+        // once we have the source we can tell if this is a live entry
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
-        this._isEntryLiveType();
     }
+
+    // implementations methods - todo - implement if necessary
+    onPluginSetup(): void {}
 
     onRegisterUI(uiManager: UIManager): void {}
 
@@ -63,23 +67,35 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     onMediaUnload(): void {}
 
+    public isLiveEntry(): boolean {
+        return this._isLiveEntry;
+    }
+
+    // isLive value of last API call
+    public isLive(): boolean | undefined {
+        return this._isLive;
+    }
+
     private _isEntryLiveType = () => {
         const { playerConfig } = this._configs;
-
-        // TODO serhii please refactor
-
-        // if (config.sources && config.sources.type === this._player.MediaType.LIVE) {
-        //     // this is Live
-        //     this._checkIsLive(use here the config object);
-        // }
+        if (playerConfig && playerConfig.sources.type === "Live") {
+            this._isLiveEntry = true;
+            this._checkIsLive();
+        }
     };
 
-    private _checkIsLive = (id: string) => {
+    private _checkIsLive = () => {
         const { pluginConfig } = this._configs;
-        const protocol = KalturaPlaybackProtocol.auto;
+        const protocol = KalturaPlaybackProtocol.hls;
+        const id = this._player.config.sources.id; // todo - consider do this once on  media load
         const request = new LiveStreamIsLiveAction({ id, protocol });
+        console.log(">>>> IS LIVE REQUEST");
         this._kalturaClient.request(request).then(
-            () => {
+            data => {
+                console.log(">>>> IS LIVE RESPONSE !");
+                if (data) {
+                    this._isLive = data;
+                }
                 logger.trace(
                     `Made API call ${
                         pluginConfig.checkLiveWithKs === true ? "with" : "without"
@@ -107,15 +123,26 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 }
             }
         );
+        // interval - todo handle clear and cancel
+        setTimeout(this._checkIsLive, 10000);
     };
+
+    // TODO - implement destroy
 }
 
-export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> {
+export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
+    implements IEngineDecoratorProvider {
+    private _active: boolean = false;
+    private _activeCounter: number = 0;
+
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this._contribPlugin);
     }
     getEngineDecorator(engine: any): any {
         return new KalturaLiveEngineDecorator(engine, this);
+    }
+    public active() {
+        return this._contribPlugin.isLiveEntry();
     }
 }
 
