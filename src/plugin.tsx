@@ -89,10 +89,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         const protocol = KalturaPlaybackProtocol.hls;
         const id = this._player.config.sources.id; // todo - consider do this once on  media load
         const request = new LiveStreamIsLiveAction({ id, protocol });
-        console.log(">>>> IS LIVE REQUEST");
         this._kalturaClient.request(request).then(
             data => {
-                console.log(">>>> IS LIVE RESPONSE !");
                 if (data) {
                     this._isLive = data;
                 }
@@ -138,9 +136,11 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this._contribPlugin);
     }
+
     getEngineDecorator(engine: any): any {
         return new KalturaLiveEngineDecorator(engine, this);
     }
+
     public active() {
         return this._contribPlugin.isLiveEntry();
     }
