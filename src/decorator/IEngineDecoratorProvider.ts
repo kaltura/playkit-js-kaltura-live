@@ -1,3 +1,4 @@
+// TODO - consult Eran if we need entire interface / use 'any' and/or host in contrib
 export interface IEngineDecorator {
     active: boolean;
     dispatchEvent(event: FakeEvent): boolean;
