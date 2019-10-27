@@ -1,15 +1,16 @@
-import { KalturaLiveCorePlugin } from "../plugin";
+import { KalturaLivePlugin } from "../plugin";
 import { IEngineDecorator } from "./IEngineDecoratorProvider";
 
 export class KalturaLiveEngineDecorator implements IEngineDecorator {
-    _plugin: KalturaLiveCorePlugin;
+    _plugin: KalturaLivePlugin;
     _engine: any;
 
-    constructor(engine: any, plugin: KalturaLiveCorePlugin) {
+    constructor(engine: any, plugin: KalturaLivePlugin) {
         this._plugin = plugin;
         this._engine = engine;
     }
 
+    // this is part of the engine decorator -
     get active(): boolean {
         return this._plugin.active();
     }

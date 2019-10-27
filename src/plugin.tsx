@@ -32,12 +32,18 @@ interface KalturaLivePluginConfig {
     checkLiveWithKs: boolean;
 }
 
+export enum LiveBroadcastState {
+    Unknown = "unknown",
+    Live = "live",
+    NotLive = "notLive"
+}
+
 export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
     // represents if the entry type is a live entry
     private _isLiveEntry = false;
     // represents if the entry is in live mode or unknown
-    private _isLive: undefined | boolean = undefined;
+    private _broadcastState: LiveBroadcastState = LiveBroadcastState.Unknown;
 
     constructor(
         private _contribServices: ContribServices,
@@ -67,13 +73,20 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     onMediaUnload(): void {}
 
+    public active() {
+        return this.isLiveEntry();
+    }
     public isLiveEntry(): boolean {
         return this._isLiveEntry;
     }
 
+    public get player() {
+        return this._player;
+    }
+
     // isLive value of last API call
-    public isLive(): boolean | undefined {
-        return this._isLive;
+    public get broadcastState(): LiveBroadcastState {
+        return this._broadcastState;
     }
 
     private _isEntryLiveType = () => {
@@ -91,8 +104,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         const request = new LiveStreamIsLiveAction({ id, protocol });
         this._kalturaClient.request(request).then(
             data => {
-                if (data) {
-                    this._isLive = data;
+                if (data === true) {
+                    this._broadcastState = LiveBroadcastState.Live;
                 }
                 logger.trace(
                     `Made API call ${
@@ -112,6 +125,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                         }
                     });
                 } else if (error instanceof KalturaAPIException) {
+                    // TODO - remove to the success part once TS client is fixed
+                    this._broadcastState = LiveBroadcastState.NotLive;
                     logger.error("Api exception", {
                         method: "_checkIsLive",
                         data: {
@@ -137,11 +152,7 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
     }
 
     getEngineDecorator(engine: any): any {
-        return new KalturaLiveEngineDecorator(engine, this);
-    }
-
-    public active() {
-        return this._contribPlugin.isLiveEntry();
+        return new KalturaLiveEngineDecorator(engine, this._contribPlugin);
     }
 }
 
