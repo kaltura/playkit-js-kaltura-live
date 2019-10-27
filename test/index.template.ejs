@@ -118,15 +118,15 @@
         logLevel: "DEBUG",
         targetId: "player-div",
         provider: {
-            env,
-            partnerId,
-            uiConfId,
-            ks
+            env: env,
+            partnerId: partnerId,
+            uiConfId: uiConfId,
+            ks: ks
         },
         session: {
-            userId
+            userId: userId
         },
-        plugins,
+        plugins: plugins,
         ui: {
             debug: true
         }
@@ -134,7 +134,7 @@
 
     document.getElementById("bundle").onload =  function(){
 
-        var mediaInfo = {entryId};
+        var mediaInfo = { entryId: entryId };
         player = KalturaPlayer.setup(config);
         player.loadMedia(mediaInfo);
     }
