@@ -2,10 +2,10 @@ import BaseMiddleware from "./base-middleware"; // TODO: move it to contrib repo
 import { KalturaLivePlugin } from "../plugin";
 
 export class KalturaLiveMidddleware extends BaseMiddleware {
-    private _context: KalturaLivePlugin;
-    constructor(context: KalturaLivePlugin) {
+    private _livePlugin: KalturaLivePlugin;
+    constructor(plugin: KalturaLivePlugin) {
         super();
-        this._context = context;
+        this._livePlugin = plugin;
     }
 
     /**
