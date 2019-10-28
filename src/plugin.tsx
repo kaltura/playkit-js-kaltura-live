@@ -1,3 +1,4 @@
+import { h } from "preact";
 import {
     KalturaClient,
     KalturaClientException,
@@ -17,9 +18,10 @@ import {
     OnPluginSetup,
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
-import { UIManager } from "@playkit-js-contrib/ui";
+import { UIManager, PresetItemData } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
+import { Offline } from "./components/offline";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -55,21 +57,29 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._isEntryLiveType();
     }
 
-    onRegisterUI(uiManager: UIManager): void {}
+    onRegisterUI(uiManager: UIManager): void {
+        const test: PresetItemData = {
+            label: "string",
+            fillContainer: true,
+            presets: ["Live"],
+            container: { name: "InteractiveArea" },
+            renderChild: () => <Offline />
+        };
+        uiManager.presetComponents.add(test);
+        debugger;
+    }
 
     onMediaLoad(): void {}
 
     onMediaUnload(): void {}
 
     private _isEntryLiveType = () => {
-        const { playerConfig } = this._configs;
-
-        // TODO serhii please refactor
-
-        // if (config.sources && config.sources.type === this._player.MediaType.LIVE) {
-        //     // this is Live
-        //     this._checkIsLive(use here the config object);
-        // }
+        const {
+            playerConfig: { sources }
+        } = this._configs;
+        if (sources && sources.type === "Live") {
+            this._checkIsLive(sources.id);
+        }
     };
 
     private _checkIsLive = (id: string) => {
