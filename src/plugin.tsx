@@ -84,7 +84,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         return this._player;
     }
 
-    // isLive value of last API call
+    // value of last 'isLive' API call
     public get broadcastState(): LiveBroadcastStates {
         return this._broadcastState;
     }
