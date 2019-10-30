@@ -34,7 +34,7 @@ interface KalturaLivePluginConfig {
 export enum LiveBroadcastStates {
     Unknown = "Unknown",
     Live = "Live",
-    NotLive = "NotLive"
+    Offline = "Offline"
 }
 
 export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
@@ -126,7 +126,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     });
                 } else if (error instanceof KalturaAPIException) {
                     // TODO - remove to the success part once TS client is fixed
-                    this._broadcastState = LiveBroadcastStates.NotLive;
+                    this._broadcastState = LiveBroadcastStates.Offline;
                     logger.error("Api exception", {
                         method: "_checkIsLive",
                         data: {
