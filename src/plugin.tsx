@@ -29,6 +29,7 @@ const logger = getContribLogger({
 
 interface KalturaLivePluginConfig {
     checkLiveWithKs: boolean;
+    isLiveInterval: number;
 }
 
 export enum LiveBroadcastStates {
@@ -93,11 +94,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         const { playerConfig } = this._configs;
         if (playerConfig && playerConfig.sources.type === "Live") {
             this._isLiveEntry = true;
-            this._checkIsLive();
+            this.updateLiveStatus();
         }
     };
 
-    private _checkIsLive = () => {
+    // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
+    private updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
         const protocol = KalturaPlaybackProtocol.hls;
         const id = this._player.config.sources.id; // todo - consider do this once on  media load
@@ -112,14 +114,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                         pluginConfig.checkLiveWithKs === true ? "with" : "without"
                     } KS`,
                     {
-                        method: "_checkIsLive"
+                        method: "updateLiveStatus"
                     }
                 );
             },
             error => {
                 if (error instanceof KalturaClientException) {
                     logger.error("Network error etc", {
-                        method: "_checkIsLive",
+                        method: "updateLiveStatus",
                         data: {
                             error
                         }
@@ -128,7 +130,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     // TODO - remove to the success part once TS client is fixed
                     this._broadcastState = LiveBroadcastStates.Offline;
                     logger.error("Api exception", {
-                        method: "_checkIsLive",
+                        method: "updateLiveStatus",
                         data: {
                             error
                         }
@@ -137,7 +139,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
             }
         );
         // interval - todo handle clear and cancel
-        setTimeout(this._checkIsLive, 10000);
+        setTimeout(this.updateLiveStatus, pluginConfig.isLiveInterval);
     };
     // TODO - implement destroy
 }
@@ -160,7 +162,8 @@ ContribPluginManager.registerPlugin(
     },
     {
         defaultConfig: {
-            checkLiveWithKs: false
+            checkLiveWithKs: false,
+            isLiveInterval: 10000
         },
         corePluginFactory(...args: any[]) {
             return new KalturaLiveCorePlugin(...args);
