@@ -1,7 +1,6 @@
-import BaseMiddleware from "./base-middleware"; // TODO: move it to contrib repo
 import { KalturaLivePlugin } from "../plugin";
 
-export class KalturaLiveMidddleware extends BaseMiddleware {
+export class KalturaLiveMidddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
 
     constructor(plugin: KalturaLivePlugin) {
@@ -10,14 +9,14 @@ export class KalturaLiveMidddleware extends BaseMiddleware {
     }
 
     public load(next: Function): void {
-        this.callNext(next);
+        super.callNext(next);
     }
 
     public play(next: Function): void {
-        this.callNext(next);
+        super.callNext(next);
     }
 
     public pause(next: Function): void {
-        this.callNext(next);
+        super.callNext(next);
     }
 }

@@ -21,7 +21,7 @@ import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import { IEngineDecoratorProvider } from "./decorator/IEngineDecoratorProvider";
+import IEngineDecoratorProvider = KalturaPlayerTypes.IEngineDecoratorProvider;
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",

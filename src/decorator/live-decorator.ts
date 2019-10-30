@@ -1,5 +1,5 @@
 import { KalturaLivePlugin } from "../plugin";
-import { IEngineDecorator } from "./IEngineDecoratorProvider";
+import IEngineDecorator = KalturaPlayerTypes.IEngineDecorator;
 
 export class KalturaLiveEngineDecorator implements IEngineDecorator {
     _plugin: KalturaLivePlugin;
@@ -10,14 +10,11 @@ export class KalturaLiveEngineDecorator implements IEngineDecorator {
         this._engine = engine;
     }
 
-    // this is part of the engine decorator -
     get active(): boolean {
         return this._plugin.active();
     }
 
-    dispatchEvent(event: any): boolean {
-        // todo - TS this better
-        // for now - naive decorator that does not interfere with events logic
-        return (this._plugin.player as any).dispatchEvent(event);
+    dispatchEvent(event: any): any {
+        return this._plugin.player.dispatchEvent(event);
     }
 }
