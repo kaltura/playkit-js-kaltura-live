@@ -32,10 +32,10 @@ interface KalturaLivePluginConfig {
     checkLiveWithKs: boolean;
 }
 
-export enum LiveBroadcastState {
-    Unknown = "unknown",
-    Live = "live",
-    NotLive = "notLive"
+export enum LiveBroadcastStates {
+    Unknown = "Unknown",
+    Live = "Live",
+    NotLive = "NotLive"
 }
 
 export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
@@ -43,7 +43,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // represents if the entry type is a live entry
     private _isLiveEntry = false;
     // represents if the entry is in live mode or unknown
-    private _broadcastState: LiveBroadcastState = LiveBroadcastState.Unknown;
+    private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
     constructor(
         private _contribServices: ContribServices,
@@ -86,7 +86,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     }
 
     // isLive value of last API call
-    public get broadcastState(): LiveBroadcastState {
+    public get broadcastState(): LiveBroadcastStates {
         return this._broadcastState;
     }
 
@@ -106,7 +106,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
-                    this._broadcastState = LiveBroadcastState.Live;
+                    this._broadcastState = LiveBroadcastStates.Live;
                 }
                 logger.trace(
                     `Made API call ${
@@ -127,7 +127,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     });
                 } else if (error instanceof KalturaAPIException) {
                     // TODO - remove to the success part once TS client is fixed
-                    this._broadcastState = LiveBroadcastState.NotLive;
+                    this._broadcastState = LiveBroadcastStates.NotLive;
                     logger.error("Api exception", {
                         method: "_checkIsLive",
                         data: {
