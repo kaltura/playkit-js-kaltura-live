@@ -21,7 +21,6 @@ import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import IEngineDecoratorProvider = KalturaPlayerTypes.IEngineDecoratorProvider;
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -144,7 +143,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 }
 
 export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
-    implements IEngineDecoratorProvider {
+    implements KalturaPlayerTypes.IEngineDecoratorProvider {
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this._contribPlugin);
     }

@@ -1,7 +1,6 @@
 import { KalturaLivePlugin } from "../plugin";
-import IEngineDecorator = KalturaPlayerTypes.IEngineDecorator;
 
-export class KalturaLiveEngineDecorator implements IEngineDecorator {
+export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDecorator {
     _plugin: KalturaLivePlugin;
     _engine: any;
 
