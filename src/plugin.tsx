@@ -76,6 +76,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     public active() {
         return this.isLiveEntry();
     }
+
     public isLiveEntry(): boolean {
         return this._isLiveEntry;
     }
@@ -144,9 +145,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
 export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
     implements IEngineDecoratorProvider {
-    private _active: boolean = false;
-    private _activeCounter: number = 0;
-
     getMiddlewareImpl(): any {
         return new KalturaLiveMidddleware(this._contribPlugin);
     }
