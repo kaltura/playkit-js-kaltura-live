@@ -1,6 +1,6 @@
 import { KalturaLivePlugin } from "../plugin";
 
-export class KalturaLiveMidddleware extends KalturaPlayer.core.BaseMiddleware {
+export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
 
     constructor(plugin: KalturaLivePlugin) {

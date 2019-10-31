@@ -18,7 +18,7 @@ import {
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
 import { UIManager } from "@playkit-js-contrib/ui";
-import { KalturaLiveMidddleware } from "./middleware/live-middleware";
+import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 
@@ -73,6 +73,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     onMediaUnload(): void {}
 
+    //TODO: Eitan - seems redundant to have both active and isLiveEntry doing the same thing.
     public active() {
         return this.isLiveEntry();
     }
@@ -147,7 +148,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
     implements KalturaPlayerTypes.IEngineDecoratorProvider {
     getMiddlewareImpl(): any {
-        return new KalturaLiveMidddleware(this._contribPlugin);
+        return new KalturaLiveMiddleware(this._contribPlugin);
     }
 
     getEngineDecorator(engine: any): any {
