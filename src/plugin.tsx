@@ -18,7 +18,7 @@ import {
     OnPluginSetup,
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
-import { UIManager, PresetItemData } from "@playkit-js-contrib/ui";
+import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMidddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { Offline } from "./components/offline";
@@ -58,15 +58,27 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     }
 
     onRegisterUI(uiManager: UIManager): void {
-        const test: PresetItemData = {
-            label: "string",
-            fillContainer: true,
-            presets: ["Live"],
-            container: { name: "InteractiveArea" },
-            renderChild: () => <Offline />
-        };
-        uiManager.presetComponents.add(test);
-        debugger;
+        setTimeout(() => {
+            uiManager.overlay.add({
+                label: "offline-overlay",
+                renderContent: () => <Offline />
+            });
+        }, 2000);
+
+        setTimeout(() => {
+            uiManager.overlay.remove();
+        }, 5000);
+
+        setTimeout(() => {
+            uiManager.overlay.add({
+                label: "offline-overlay",
+                renderContent: () => <Offline />
+            });
+        }, 8000);
+
+        setTimeout(() => {
+            uiManager.overlay.remove();
+        }, 10000);
     }
 
     onMediaLoad(): void {}
