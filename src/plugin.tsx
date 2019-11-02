@@ -1,3 +1,4 @@
+import { h } from "preact";
 import {
     KalturaClient,
     KalturaClientException,
@@ -21,6 +22,7 @@ import { UIManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
+import { Offline } from "./components/offline";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -67,7 +69,29 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // implementations methods - todo - implement if necessary
     onPluginSetup(): void {}
 
-    onRegisterUI(uiManager: UIManager): void {}
+    onRegisterUI(uiManager: UIManager): void {
+        setTimeout(() => {
+            uiManager.overlay.add({
+                label: "offline-overlay",
+                renderContent: () => <Offline />
+            });
+        }, 2000);
+
+        setTimeout(() => {
+            uiManager.overlay.remove();
+        }, 5000);
+
+        setTimeout(() => {
+            uiManager.overlay.add({
+                label: "offline-overlay",
+                renderContent: () => <Offline />
+            });
+        }, 8000);
+
+        setTimeout(() => {
+            uiManager.overlay.remove();
+        }, 10000);
+    }
 
     onMediaLoad(): void {}
 
