@@ -18,7 +18,7 @@ import {
     OnPluginSetup,
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
-import { UIManager } from "@playkit-js-contrib/ui";
+import { UIManager, OverlayManager } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
@@ -47,7 +47,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // represents if the entry is in live mode or unknown
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
-    private _overlayManager: any = null;
+    private _overlayManager: OverlayManager | null = null;
+    private _overlayActive = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -99,6 +100,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _isEntryLiveType = () => {
         const { playerConfig } = this._configs;
+        // TODO: can we check it with this._player.isLive() ?
         if (playerConfig && playerConfig.sources.type === "Live") {
             this._isLiveEntry = true;
             this.updateLiveStatus();
@@ -106,16 +108,28 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     };
 
     private _setLive = () => {
+        if (!this._overlayActive || !this._overlayManager) {
+            return;
+        }
         this._broadcastState = LiveBroadcastStates.Live;
         this._overlayManager.remove();
+        this._overlayActive = false;
     };
 
     private _setOffline = () => {
+        if (
+            this._overlayActive ||
+            !this._overlayManager
+            // TODO should we check paused state? || !this._player.paused
+        ) {
+            return;
+        }
         this._broadcastState = LiveBroadcastStates.Offline;
         this._overlayManager.add({
             label: "offline-overlay",
             renderContent: () => <Offline />
         });
+        this._overlayActive = true;
     };
 
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
