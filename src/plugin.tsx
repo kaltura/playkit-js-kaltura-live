@@ -47,6 +47,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // represents if the entry is in live mode or unknown
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
+    private _overlayManager: any = null;
+
     constructor(
         private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
@@ -70,27 +72,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     onPluginSetup(): void {}
 
     onRegisterUI(uiManager: UIManager): void {
-        setTimeout(() => {
-            uiManager.overlay.add({
-                label: "offline-overlay",
-                renderContent: () => <Offline />
-            });
-        }, 2000);
-
-        setTimeout(() => {
-            uiManager.overlay.remove();
-        }, 5000);
-
-        setTimeout(() => {
-            uiManager.overlay.add({
-                label: "offline-overlay",
-                renderContent: () => <Offline />
-            });
-        }, 8000);
-
-        setTimeout(() => {
-            uiManager.overlay.remove();
-        }, 10000);
+        this._overlayManager = uiManager.overlay;
     }
 
     onMediaLoad(): void {}
@@ -123,6 +105,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
     };
 
+    private _setLive = () => {
+        this._broadcastState = LiveBroadcastStates.Live;
+        this._overlayManager.remove();
+    };
+
+    private _setOffline = () => {
+        this._broadcastState = LiveBroadcastStates.Offline;
+        this._overlayManager.add({
+            label: "offline-overlay",
+            renderContent: () => <Offline />
+        });
+    };
+
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
@@ -132,7 +127,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
-                    this._broadcastState = LiveBroadcastStates.Live;
+                    this._setLive();
                 }
                 logger.trace(
                     `Made API call ${
@@ -153,7 +148,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     });
                 } else if (error instanceof KalturaAPIException) {
                     // TODO - remove to the success part once TS client is fixed
-                    this._broadcastState = LiveBroadcastStates.Offline;
+                    this._setOffline();
                     logger.error("Api exception", {
                         method: "updateLiveStatus",
                         data: {
