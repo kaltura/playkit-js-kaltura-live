@@ -47,6 +47,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // represents if the entry is in live mode or unknown
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
+    private _isLiveApiCallTimeout: any = null;
     private _overlayManager: OverlayManager | null = null;
     private _overlayActive = false;
 
@@ -78,7 +79,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     onMediaLoad(): void {}
 
-    onMediaUnload(): void {}
+    onMediaUnload(): void {
+        this._resetTimeout();
+    }
 
     //TODO: Eitan - seems redundant to have both active and isLiveEntry doing the same thing.
     public active() {
@@ -132,8 +135,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._overlayActive = true;
     };
 
+    private _resetTimeout = () => {
+        clearTimeout(this._isLiveApiCallTimeout);
+        this._isLiveApiCallTimeout = null;
+    };
+
+    private _initTimeout = () => {
+        const { pluginConfig } = this._configs;
+        this._isLiveApiCallTimeout = setTimeout(this.updateLiveStatus, pluginConfig.isLiveInterval);
+    };
+
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
+        // TODO: should we check isLive till first play happens?
         const { pluginConfig } = this._configs;
         const protocol = KalturaPlaybackProtocol.hls;
         const id = this._player.config.sources.id; // todo - consider do this once on  media load
@@ -151,6 +165,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                         method: "updateLiveStatus"
                     }
                 );
+                // re-check isLive on timeout
+                this._initTimeout();
             },
             error => {
                 if (error instanceof KalturaClientException) {
@@ -170,10 +186,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                         }
                     });
                 }
+                // re-check isLive on timeout
+                this._initTimeout();
             }
         );
-        // interval - todo handle clear and cancel
-        setTimeout(this.updateLiveStatus, pluginConfig.isLiveInterval);
     };
     // TODO - implement destroy
 }
