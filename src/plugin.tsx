@@ -103,6 +103,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _isEntryLiveType = () => {
         const { playerConfig } = this._configs;
+        // TODO S.M.- check if this is a safer way to check if this entry is a live-entry
+        // E.G. (this._player as any).isLive();
         // TODO: can we check it with this._player.isLive() ?
         if (playerConfig && playerConfig.sources.type === "Live") {
             this._isLiveEntry = true;
