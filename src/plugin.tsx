@@ -18,11 +18,12 @@ import {
     OnPluginSetup,
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
-import { UIManager, OverlayManager } from "@playkit-js-contrib/ui";
+import { UIManager, OverlayManager, OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 import { Offline } from "./components/offline";
+import { OverlayItem } from "@playkit-js-contrib/ui";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -48,8 +49,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
     private _isLiveApiCallTimeout: any = null;
-    private _overlayManager: OverlayManager | null = null;
-    private _overlayActive = false;
+    private _overlayItem: OverlayItem | null = null;
 
     constructor(
         private _contribServices: ContribServices,
@@ -70,22 +70,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
     }
 
+    onRegisterUI() {
+        // TODO eitan - use proper API
+        const bla = this._contribServices.overlayManager;
+        const bla2 = this._contribServices.uiManager;
+    }
+
     // implementations methods - todo - implement if necessary
     onPluginSetup(): void {}
-
-    onRegisterUI(uiManager: UIManager): void {
-        this._overlayManager = uiManager.overlay;
-    }
 
     onMediaLoad(): void {}
 
     onMediaUnload(): void {
         this._resetTimeout();
-    }
-
-    //TODO: Eitan - seems redundant to have both active and isLiveEntry doing the same thing.
-    public active() {
-        return this.isLiveEntry();
     }
 
     public isLiveEntry(): boolean {
@@ -113,28 +110,23 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     };
 
     private _setLive = () => {
-        if (!this._overlayActive || !this._overlayManager) {
-            return;
+        if (this._overlayItem) {
+            this._contribServices.overlayManager.remove(this._overlayItem);
+            this._overlayItem = null;
         }
         this._broadcastState = LiveBroadcastStates.Live;
-        this._overlayManager.remove();
-        this._overlayActive = false;
     };
 
     private _setOffline = () => {
-        if (
-            this._overlayActive ||
-            !this._overlayManager
-            // TODO should we check paused state? || !this._player.paused
-        ) {
+        this._broadcastState = LiveBroadcastStates.Offline;
+        if (this._overlayItem) {
             return;
         }
-        this._broadcastState = LiveBroadcastStates.Offline;
-        this._overlayManager.add({
+        this._overlayItem = this._contribServices.overlayManager.add({
             label: "offline-overlay",
+            position: OverlayPositions.PlayerArea,
             renderContent: () => <Offline />
         });
-        this._overlayActive = true;
     };
 
     private _resetTimeout = () => {
@@ -142,9 +134,24 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._isLiveApiCallTimeout = null;
     };
 
+    public later = () => {
+        const myPlayer = (KalturaPlayer as any).getPlayer("player-div");
+        console.log(">>>> myPlayer", myPlayer);
+        const myMediaInfo = myPlayer.getMediaInfo();
+        console.log(">>>> myMediaInfo", myMediaInfo);
+        console.log(">>>> loadMedia", myPlayer, myPlayer.loadMedia);
+        console.log(">>>> LOADING");
+        setTimeout(() => {
+            myPlayer.loadMedia(myPlayer.loadMedia(myMediaInfo));
+        }, 200);
+    };
+
     private _initTimeout = () => {
         const { pluginConfig } = this._configs;
-        this._isLiveApiCallTimeout = setTimeout(this.updateLiveStatus, pluginConfig.isLiveInterval);
+        this._isLiveApiCallTimeout = setTimeout(
+            this.updateLiveStatus,
+            pluginConfig.isLiveInterval * 1000
+        );
     };
 
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
@@ -157,6 +164,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
+                    console.log(">>>> ONLINE !!!");
                     this._setLive();
                 }
                 logger.trace(
@@ -181,6 +189,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 } else if (error instanceof KalturaAPIException) {
                     // TODO - remove to the success part once TS client is fixed
                     this._setOffline();
+                    setTimeout(this.later, 2000);
+                    console.log(">>>> OFFLINE :(");
                     logger.error("Api exception", {
                         method: "updateLiveStatus",
                         data: {
@@ -215,7 +225,7 @@ ContribPluginManager.registerPlugin(
     {
         defaultConfig: {
             checkLiveWithKs: false,
-            isLiveInterval: 10000
+            isLiveInterval: 5
         },
         corePluginFactory(...args: any[]) {
             return new KalturaLiveCorePlugin(...args);

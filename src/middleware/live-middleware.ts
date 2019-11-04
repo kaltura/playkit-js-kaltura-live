@@ -24,6 +24,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
             this._nextLoad = null;
             this._nextPlay = null;
         } else {
+            // TODO - manage this (stop the timeout when the plugin / class is destroyed)
             setTimeout(() => {
                 this.checkLiveStatus();
             }, 250);
@@ -37,11 +38,10 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
 
     public load(next: Function): void {
         // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.active()) {
+        if (!this._livePlugin.isLiveEntry()) {
             this.callNext(next);
         }
         //we want to halt the load lifecycle method if we are in the 1st play or if we are not online
-        //Todo: Eitan - try simplifying or make more readable.
         if (this._isFirstPlay || this._checkIfLive()) {
             this.checkLiveStatus();
             this._nextLoad = next;
@@ -52,7 +52,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
 
     public play(next: Function): void {
         // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.active()) {
+        if (!this._livePlugin.isLiveEntry()) {
             this.callNext(next);
         }
         //Todo: Eitan - try simplifying or make more readable.

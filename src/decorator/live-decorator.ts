@@ -10,7 +10,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     get active(): boolean {
-        return this._plugin.active();
+        return this._plugin.isLiveEntry();
     }
 
     dispatchEvent(event: any): any {
