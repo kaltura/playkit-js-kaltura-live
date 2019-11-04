@@ -136,11 +136,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     public later = () => {
         const myPlayer = (KalturaPlayer as any).getPlayer("player-div");
-        console.log(">>>> myPlayer", myPlayer);
         const myMediaInfo = myPlayer.getMediaInfo();
-        console.log(">>>> myMediaInfo", myMediaInfo);
-        console.log(">>>> loadMedia", myPlayer, myPlayer.loadMedia);
-        console.log(">>>> LOADING");
+        // TODO - Eitan to sit with Oren
         setTimeout(() => {
             myPlayer.loadMedia(myPlayer.loadMedia(myMediaInfo));
         }, 200);
@@ -190,7 +187,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     // TODO - remove to the success part once TS client is fixed
                     this._setOffline();
                     setTimeout(this.later, 2000);
-                    console.log(">>>> OFFLINE :(");
                     logger.error("Api exception", {
                         method: "updateLiveStatus",
                         data: {
