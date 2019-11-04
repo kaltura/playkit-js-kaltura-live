@@ -50,6 +50,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _isLiveApiCallTimeout: any = null;
     private _overlayItem: OverlayItem | null = null;
+    private _overlayManager: OverlayManager | null = null;
 
     constructor(
         private _contribServices: ContribServices,
@@ -70,10 +71,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
     }
 
-    onRegisterUI() {
-        // TODO eitan - use proper API
-        const bla = this._contribServices.overlayManager;
-        const bla2 = this._contribServices.uiManager;
+    onRegisterUI(uiManager: UIManager) {
+        this._overlayManager = this._contribServices.overlayManager;
     }
 
     // implementations methods - todo - implement if necessary
@@ -134,15 +133,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._isLiveApiCallTimeout = null;
     };
 
-    public later = () => {
-        const myPlayer = (KalturaPlayer as any).getPlayer("player-div");
-        const myMediaInfo = myPlayer.getMediaInfo();
-        // TODO - Eitan to sit with Oren
-        setTimeout(() => {
-            myPlayer.loadMedia(myPlayer.loadMedia(myMediaInfo));
-        }, 200);
-    };
-
     private _initTimeout = () => {
         const { pluginConfig } = this._configs;
         this._isLiveApiCallTimeout = setTimeout(
@@ -186,7 +176,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 } else if (error instanceof KalturaAPIException) {
                     // TODO - remove to the success part once TS client is fixed
                     this._setOffline();
-                    setTimeout(this.later, 2000);
                     logger.error("Api exception", {
                         method: "updateLiveStatus",
                         data: {
