@@ -143,7 +143,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
-        // TODO: should we check isLive till first play happens?
         const { pluginConfig } = this._configs;
         const protocol = KalturaPlaybackProtocol.hls;
         const id = this._player.config.sources.id; // todo - consider do this once on  media load
@@ -209,7 +208,7 @@ ContribPluginManager.registerPlugin(
     {
         defaultConfig: {
             checkLiveWithKs: false,
-            isLiveInterval: 5
+            isLiveInterval: 10
         },
         corePluginFactory(...args: any[]) {
             return new KalturaLiveCorePlugin(...args);
