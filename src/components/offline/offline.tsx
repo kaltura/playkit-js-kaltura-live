@@ -5,7 +5,7 @@ export class Offline extends Component {
     render() {
         return (
             <div className={styles.offlineWrapper}>
-                <div className={styles.offlineIcon} />
+                <div className={`${styles.offlineIcon} kaltura-live__offline-icon`} />
                 <p className={styles.primaryText}>Currently not broadcasting</p>
                 <p className={styles.secondaryText}>video will play once broadcasting starts</p>
             </div>

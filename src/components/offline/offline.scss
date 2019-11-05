@@ -12,9 +12,13 @@ $layout-color: #000000;
     border-radius: 4px;
     background-color: $layout-color;
     .offline-icon {
-        width: 184px;
-        height: 184px;
+        width: 100%;
+        height: 100%;
+        max-width: 184px;
+        max-height: 184px;
         background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
         background-image: url('./assets/Offline.svg');
     }
     .primary-text {
@@ -30,9 +34,12 @@ $layout-color: #000000;
         text-align: center;
         color: $text-color;
     }
-    @media screen and (max-width: 281px) {
-        .offline-icon {
-          display: none;
+}
+
+:global {
+    .playkit-player.playkit-size-ty {
+        .kaltura-live__offline-icon {
+            display: none;
         }
     }
 }
