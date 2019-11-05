@@ -151,7 +151,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
-                    console.log(">>>> ONLINE !!!");
                     this._setLive();
                 }
                 logger.trace(
