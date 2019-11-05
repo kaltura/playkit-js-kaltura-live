@@ -1,37 +1,38 @@
+$text-color: #999999;
+$layout-color: #000000;
+
 .offline-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     width: 100%;
+    min-width: 280px;
     height: 100%;
     border-radius: 4px;
-    background-color: #000000;
+    background-color: $layout-color;
     .offline-icon {
-        width: 20vh;
-        height: 20vh;
-        background-size: cover;
+        width: 184px;
+        height: 184px;
+        background-size: contain;
         background-image: url('./assets/Offline.svg');
     }
     .primary-text {
-        font-family: Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-        "Oxygen", "Ubuntu", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-        "Segoe UI Emoji", "Segoe UI Symbol";
-        
-        margin: 10px 0 4px 0;
+        margin: 16px 0 4px 0;
         font-size: 18px;
         font-weight: bold;
         text-align: center;
-        color: #999999;
+        color: $text-color;
     }
     .secondary-text {
-        font-family: Lato, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-        "Oxygen", "Ubuntu", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji",
-        "Segoe UI Emoji", "Segoe UI Symbol";
-
         margin: 0;
         font-size: 14px;
         text-align: center;
-        color: #999999;
+        color: $text-color;
+    }
+    @media screen and (max-width: 281px) {
+        .offline-icon {
+          display: none;
+        }
     }
 }
