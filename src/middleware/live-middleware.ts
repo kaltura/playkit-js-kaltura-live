@@ -1,4 +1,10 @@
 import { KalturaLivePlugin, LiveBroadcastStates } from "../plugin";
+import { getContribLogger } from "@playkit-js-contrib/common";
+
+const logger = getContribLogger({
+    class: "KalturaLiveMiddleWare",
+    module: "kaltura-live-plugin"
+});
 
 export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
@@ -15,24 +21,29 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     // plugin does not have reference/direct API to the middleware - so we are sampling this.
     // once we understand that we have a positive isLive - we clean and release the middleware
     // if not - try again
-    checkLiveStatus() {
-        if (this._nextPlay && this._nextLoad && this._checkIfLive()) {
+    initialPlayHandling() {
+        // no need to apply this unless we are in the firstPlay
+        if (!this._isFirstPlay) {
+            return;
+        }
+        if (this._nextPlay && this._nextLoad && this.isPlayerLive()) {
             // clear flag and release 2 methods
             this._isFirstPlay = false;
             this.callNext(this._nextLoad);
             this.callNext(this._nextPlay);
             this._nextLoad = null;
             this._nextPlay = null;
+            logger.info("interrupt play", { method: "play" });
         } else {
             // TODO - manage this (stop the timeout when the plugin / class is destroyed)
             setTimeout(() => {
-                this.checkLiveStatus();
+                this.initialPlayHandling();
             }, 250);
         }
     }
 
-    // sample the plugin if it live
-    private _checkIfLive() {
+    // check if the entry live status is 'live'
+    private isPlayerLive() {
         return this._livePlugin.broadcastState === LiveBroadcastStates.Live;
     }
 
@@ -40,13 +51,16 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
         // if plugin is not active (E.G. in VOD) the middleware will not work
         if (!this._livePlugin.isLiveEntry()) {
             this.callNext(next);
+            return;
         }
-        //we want to halt the load lifecycle method if we are in the 1st play or if we are not online
-        if (this._isFirstPlay || this._checkIfLive()) {
-            this.checkLiveStatus();
-            this._nextLoad = next;
-        } else {
+        // halt the load lifecycle method if we are in the 1st play or if we are not online
+        if (this.isPlayerLive()) {
+            // we know that we are live (isLive returned true)
             this.callNext(next);
+        } else {
+            this._nextLoad = next;
+            this.initialPlayHandling();
+            logger.info("interrupt load", { method: "load" });
         }
     }
 
@@ -54,10 +68,11 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
         // if plugin is not active (E.G. in VOD) the middleware will not work
         if (!this._livePlugin.isLiveEntry()) {
             this.callNext(next);
+            return;
         }
-        //Todo: Eitan - try simplifying or make more readable.
-        if (this._isFirstPlay || this._checkIfLive()) {
+        if (this._isFirstPlay) {
             this._nextPlay = next;
+            logger.info("interrupt play", { method: "play" });
         } else {
             this.callNext(next);
         }
