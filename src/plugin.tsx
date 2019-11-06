@@ -1,8 +1,5 @@
-import {
-    KalturaClient,
-    KalturaClientException,
-    KalturaAPIException
-} from "kaltura-typescript-client";
+import { h } from "preact";
+import { KalturaClient } from "kaltura-typescript-client";
 import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
 import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
 
@@ -17,10 +14,12 @@ import {
     OnPluginSetup,
     OnRegisterUI
 } from "@playkit-js-contrib/plugin";
-import { UIManager } from "@playkit-js-contrib/ui";
+import { OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
+import { Offline } from "./components/offline";
+import { OverlayItem } from "@playkit-js-contrib/ui";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -45,6 +44,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // represents if the entry is in live mode or unknown
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
 
+    private _isLiveApiCallTimeout: any = null;
+    private _overlayItem: OverlayItem | null = null;
+
     constructor(
         private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
@@ -64,18 +66,16 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
     }
 
-    // implementations methods - todo - implement if necessary
-    onPluginSetup(): void {}
+    onRegisterUI(): void {
+        this._contribServices.overlayManager;
+    }
 
-    onRegisterUI(uiManager: UIManager): void {}
+    onPluginSetup(): void {}
 
     onMediaLoad(): void {}
 
-    onMediaUnload(): void {}
-
-    //TODO: Eitan - seems redundant to have both active and isLiveEntry doing the same thing.
-    public active() {
-        return this.isLiveEntry();
+    onMediaUnload(): void {
+        this._resetTimeout();
     }
 
     public isLiveEntry(): boolean {
@@ -92,23 +92,57 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     }
 
     private _isEntryLiveType = () => {
-        const { playerConfig } = this._configs;
-        if (playerConfig && playerConfig.sources.type === "Live") {
+        if (this._player.isLive()) {
             this._isLiveEntry = true;
             this.updateLiveStatus();
         }
+    };
+
+    private _setLive = () => {
+        this._broadcastState = LiveBroadcastStates.Live;
+        if (this._overlayItem) {
+            this._contribServices.overlayManager.remove(this._overlayItem);
+            this._overlayItem = null;
+        }
+    };
+
+    private _setOffline = () => {
+        this._broadcastState = LiveBroadcastStates.Offline;
+        if (this._overlayItem) {
+            return;
+        }
+        this._overlayItem = this._contribServices.overlayManager.add({
+            label: "offline-overlay",
+            position: OverlayPositions.PlayerArea,
+            renderContent: () => <Offline />
+        });
+    };
+
+    private _resetTimeout = () => {
+        clearTimeout(this._isLiveApiCallTimeout);
+        this._isLiveApiCallTimeout = null;
+    };
+
+    private _initTimeout = () => {
+        const { pluginConfig } = this._configs;
+        this._isLiveApiCallTimeout = setTimeout(
+            this.updateLiveStatus,
+            pluginConfig.isLiveInterval * 1000
+        );
     };
 
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
         const protocol = KalturaPlaybackProtocol.hls;
-        const id = this._player.config.sources.id; // todo - consider do this once on  media load
+        const { id } = this._player.config.sources;
         const request = new LiveStreamIsLiveAction({ id, protocol });
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
-                    this._broadcastState = LiveBroadcastStates.Live;
+                    this._setLive();
+                } else if (data === false) {
+                    this._setOffline();
                 }
                 logger.trace(
                     `Made API call ${
@@ -118,31 +152,22 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                         method: "updateLiveStatus"
                     }
                 );
+                // re-check isLive on timeout
+                this._initTimeout();
             },
             error => {
-                if (error instanceof KalturaClientException) {
-                    logger.error("Network error etc", {
-                        method: "updateLiveStatus",
-                        data: {
-                            error
-                        }
-                    });
-                } else if (error instanceof KalturaAPIException) {
-                    // TODO - remove to the success part once TS client is fixed
-                    this._broadcastState = LiveBroadcastStates.Offline;
-                    logger.error("Api exception", {
-                        method: "updateLiveStatus",
-                        data: {
-                            error
-                        }
-                    });
-                }
+                logger.error("Failed to call isLive API", {
+                    method: "updateLiveStatus",
+                    data: {
+                        error
+                    }
+                });
+                this._setOffline();
+                // re-check isLive on timeout
+                this._initTimeout();
             }
         );
-        // interval - todo handle clear and cancel
-        setTimeout(this.updateLiveStatus, pluginConfig.isLiveInterval);
     };
-    // TODO - implement destroy
 }
 
 export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
@@ -164,7 +189,7 @@ ContribPluginManager.registerPlugin(
     {
         defaultConfig: {
             checkLiveWithKs: false,
-            isLiveInterval: 10000
+            isLiveInterval: 10
         },
         corePluginFactory(...args: any[]) {
             return new KalturaLiveCorePlugin(...args);

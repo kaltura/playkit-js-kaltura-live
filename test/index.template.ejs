@@ -68,6 +68,23 @@
         const plugins =  {
             'kaltura-live': {
             }
+        }
+
+        // Step 5: configure plugins font style
+        const contrib = {
+            ui: {
+                fonts: {
+                    fontFamily: 'Lato, sans-serif',
+                    // optional property for overriding font existence testing
+                    // testingFont: { text: 'aaaaa', size: 72, fontName : 'Lato'}
+                    // optional property. relevant only for this test page
+                    // mediaspace will provide Lato font by default
+                    downloadData: {
+                        url: 'https://fonts.googleapis.com/css?family=Lato&display=swap',
+                        name: 'Lato'
+                    }
+                }
+            }
         };
 
     </script>
