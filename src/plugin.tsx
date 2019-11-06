@@ -46,7 +46,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _isLiveApiCallTimeout: any = null;
     private _overlayItem: OverlayItem | null = null;
-    private _videoEnded = false;
+    private _videoEnded = false; // TODO: consider usage of this._player.ended
 
     constructor(
         private _contribServices: ContribServices,
@@ -65,6 +65,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
         // once we have the source we can tell if this is a live entry
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
+        // handle end of the video
+        this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
     }
 
     onRegisterUI(): void {
@@ -105,11 +107,22 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
             this._contribServices.overlayManager.remove(this._overlayItem);
             this._overlayItem = null;
         }
+        if (this._videoEnded) {
+            this._reloadVideo();
+        }
     };
 
-    public handleOnEnd = () => {
+    private _handleOnEnd = () => {
         this._videoEnded = true;
         this._setOffline();
+    };
+
+    private _reloadVideo = () => {
+        this._videoEnded = false;
+        (this._player as any)._detachMediaSource();
+        (this._player as any)._attachMediaSource();
+        this._player.play();
+        (this._player as any).seekToLiveEdge();
     };
 
     private _setOffline = () => {
