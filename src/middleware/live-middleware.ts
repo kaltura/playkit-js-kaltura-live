@@ -66,7 +66,8 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
 
     public play(next: Function): void {
         // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.isLiveEntry()) {
+        if (!this._livePlugin.isLiveEntry() || this.isPlayerLive()) {
+            this._isFirstPlay = false;
             this.callNext(next);
             return;
         }
