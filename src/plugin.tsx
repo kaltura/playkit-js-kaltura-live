@@ -46,6 +46,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _isLiveApiCallTimeout: any = null;
     private _overlayItem: OverlayItem | null = null;
+    private _videoEnded = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -106,9 +107,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
     };
 
+    public handleOnEnd = () => {
+        this._videoEnded = true;
+        this._setOffline();
+    };
+
     private _setOffline = () => {
         this._broadcastState = LiveBroadcastStates.Offline;
-        if (this._overlayItem) {
+        if (this._overlayItem || this._player.config.sources.dvr) {
             return;
         }
         this._overlayItem = this._contribServices.overlayManager.add({
