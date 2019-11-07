@@ -119,15 +119,17 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _reloadVideo = () => {
         this._videoEnded = false;
-        (this._player as any)._detachMediaSource();
-        (this._player as any)._attachMediaSource();
+        this._player._detachMediaSource();
+        this._player._attachMediaSource();
         this._player.play();
-        (this._player as any).seekToLiveEdge();
     };
 
     private _setOffline = () => {
         this._broadcastState = LiveBroadcastStates.Offline;
-        if (this._overlayItem || this._player.config.sources.dvr) {
+        if (
+            this._overlayItem ||
+            (this._player.config.sources.dvr && this._player.currentTime > 0)
+        ) {
             return;
         }
         this._overlayItem = this._contribServices.overlayManager.add({
