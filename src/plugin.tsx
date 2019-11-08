@@ -94,6 +94,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         return this._broadcastState;
     }
 
+    private _seetToLiveEdge = () => {
+        console.log("seek to live edge");
+        (this._player as any).seekToLiveEdge();
+        this._player.removeEventListener(this._player.Event.PLAYING, this._seetToLiveEdge);
+    };
+
     private _isEntryLiveType = () => {
         if (this._player.isLive()) {
             this._isLiveEntry = true;
@@ -121,6 +127,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         this._videoEnded = false;
         this._player._detachMediaSource();
         this._player._attachMediaSource();
+        this._player.addEventListener(this._player.Event.PLAYING, this._seetToLiveEdge);
         this._player.play();
     };
 
