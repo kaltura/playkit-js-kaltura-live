@@ -127,6 +127,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _setOffline = () => {
         this._broadcastState = LiveBroadcastStates.Offline;
+        // Don't show the offline slate if the user is playing DVR
+        // if the player is in DVR playback, the currentTime is not 0.
         if (
             this._overlayItem ||
             (this._player.config.sources.dvr && this._player.currentTime > 0)
