@@ -95,7 +95,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     }
 
     private _seetToLiveEdge = () => {
-        console.log("seek to live edge");
         (this._player as any).seekToLiveEdge();
         this._player.removeEventListener(this._player.Event.PLAYING, this._seetToLiveEdge);
     };
