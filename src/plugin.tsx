@@ -119,6 +119,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     private _reloadVideo = () => {
         this._videoEnded = false;
+        // TODO - fix once FEC-9488 implemented by core team
         this._player._detachMediaSource();
         this._player._attachMediaSource();
         this._player.play();
