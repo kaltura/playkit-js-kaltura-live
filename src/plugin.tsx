@@ -172,7 +172,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         const ended = (this.player as any).ended;
         const firstPlay = this._firstPlay;
         this._broadcastState = receivedState;
-        logger.info("Got a new isLive results with value " + receivedState, {
+        logger.info("isLive with value: " + receivedState, {
             method: "handleLiveStatusReceived",
             data: {
                 hasDVR: hasDVR,
@@ -189,10 +189,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
             if ((ended && !hasDVR) || !firstPlay) {
                 this._addSlate();
+                logger.info("Showing offline slate ", {
+                    method: "handleLiveStatusReceived"
+                });
             }
-            logger.info("Showing offline slate ", {
-                method: "handleLiveStatusReceived"
-            });
             return;
         }
 
