@@ -64,8 +64,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
         // once we have the source we can tell if this is a live entry
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
-        // handle end of the video
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+        // handle end of the video
         this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
     }
 
@@ -109,14 +109,25 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     // use this method so that engine-decorator can notify the plugin of an error
     private _httpError: boolean = false;
+
     public handleHttpError() {
         this._httpError = true;
     }
 
-    public _reloadVideo = () => {
+    private _seekedtoLiveEdge = () => {
+        // todo TS and add contrib type
+        (this._player as any).seekToLiveEdge();
+        this._player.removeEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
+    };
+
+    private _reloadVideo = (seekToLiveEdge: boolean = false) => {
         // TODO - fix once FEC-9488 implemented by core team
         this._player._detachMediaSource();
         this._player._attachMediaSource();
+        if (seekToLiveEdge) {
+            // not using this now - but will probably use in future
+            this._player.addEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
+        }
         this._player.play();
     };
 
@@ -143,6 +154,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
         if (this._broadcastState === LiveBroadcastStates.Live) {
             // we reached the end of video but stream went back online meanwhile - reset player
+            // this gets the player back to the current position and does not seek to liveEdge
             this._reloadVideo();
         }
     };
@@ -155,8 +167,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         const firstPlay = this._firstPlay;
         this._broadcastState = newState;
 
-        // Note - while DVR playback - even if after playback ended - we get false on player.ended
-        // Note - (this.player as any)._firstPlay = true means that player had not played yet - this is confusing. We will use our own flag
+        // Note1 - while DVR playback - even after playback ended - we get false on player.ended
+        // Note2 - (this.player as any)._firstPlay = true means that player had not played yet - this is confusing. We will use our own flag
+
         /**
          * case loaded player - had not played yet and offline
          * action: place slate if not there yet
@@ -189,10 +202,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 this._reloadVideo();
             }
             if (this._httpError) {
-                this._httpError = false;
-                // Dead end. reload player does not help here. v2 is not recovering from such error either.
+                // Dead end. reset video does not help here. v2 is not recovering from such error either.
                 // consider showing an error slate for the user - or not block the natural player error (phase2)
-                // or work with KMS to reload entire player
+                // or work with KMS to reload entire player (consult product)
+                // this._httpError = false;
                 // location.reload();
             }
         }
