@@ -11,8 +11,7 @@ import {
     CorePlugin,
     OnMediaLoad,
     OnMediaUnload,
-    OnPluginSetup,
-    OnRegisterUI
+    OnPluginSetup
 } from "@playkit-js-contrib/plugin";
 import { OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
@@ -37,13 +36,12 @@ export enum LiveBroadcastStates {
     Offline = "Offline"
 }
 
-export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLoad, OnPluginSetup {
+export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
-    // represents if the entry type is a live entry
     private _isLiveEntry = false;
-    // represents if the entry is in live mode or unknown
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
-
+    private _wasPlayed: boolean = false;
+    private _httpError: boolean = false;
     private _isLiveApiCallTimeout: any = null;
     private _overlayItem: OverlayItem | null = null;
 
@@ -62,15 +60,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 ks: playerConfig.provider.ks
             });
         }
-        // once we have the source we can tell if this is a live entry
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-        // handle end of the video
         this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
-    }
-
-    onRegisterUI(): void {
-        this._contribServices.overlayManager;
     }
 
     onPluginSetup(): void {}
@@ -89,7 +81,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         return this._player;
     }
 
-    // value of last 'isLive' API call
     public get broadcastState(): LiveBroadcastStates {
         return this._broadcastState;
     }
@@ -101,22 +92,17 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
         }
     };
 
-    // TODO - check with player if player.firstPlay is valid to use as it looks like flipped logic
-    private _firstPlay: boolean = false;
     private _handleFirstPlay = () => {
-        this._firstPlay = true;
+        this._wasPlayed = true;
     };
 
     // use this method so that engine-decorator can notify the plugin of an error
-    private _httpError: boolean = false;
-
     public handleHttpError() {
         this._httpError = true;
     }
 
     private _seekedtoLiveEdge = () => {
-        // todo TS and add contrib type
-        (this._player as any).seekToLiveEdge();
+        this._player.seekToLiveEdge();
         this._player.removeEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
     };
 
@@ -128,7 +114,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
             // not using this now - but will probably use in future
             this._player.addEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
         }
+        // if (this.player.config.playback.autoplay) {
+        // todo - known issue for now
         this._player.play();
+        // }
     };
 
     private _resetTimeout = () => {
@@ -146,9 +135,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
     // once reached ended - check status and react accordingly
     private _handleOnEnd = () => {
-        // todo - TS and add isDvr to contrib types
-        if (!(this._player as any).isDvr()) {
-            // no DVR - show offline slate - TODO - test!!!
+        if (!this._player.isDvr()) {
             this._addSlate();
             logger.info("No DVR entry reached end", {
                 method: "_handleOnEnd"
@@ -168,9 +155,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
     // this functions is called whenever isLive receives any value.
     // This is where the magic happens
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
-        const hasDVR = (this._player as any).isDvr(); // TODO - TS and contrib types
-        const ended = (this.player as any).ended;
-        const firstPlay = this._firstPlay;
+        const hasDVR = this._player.isDvr();
+        const ended = this.player.ended;
+        const firstPlay = this._wasPlayed;
         this._broadcastState = receivedState;
         logger.info("isLive with value: " + receivedState, {
             method: "handleLiveStatusReceived",
@@ -183,7 +170,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
 
         // Note1 - while DVR playback - even after playback ended - we get false on player.ended
         // Note2 - (this.player as any)._firstPlay = true means that player had not played yet - this is confusing. We will use our own flag
-
         if (receivedState === LiveBroadcastStates.Offline) {
             // offline before firstPlay, or offline on video-end with no DVR - show offline slate
 
@@ -193,6 +179,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                     method: "handleLiveStatusReceived"
                 });
             }
+
+            if (this._httpError) {
+                logger.info("got httpError - adding offline slate", {
+                    method: "handleLiveStatusReceived"
+                });
+                this._addSlate();
+            }
+
             return;
         }
 
@@ -201,7 +195,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
             if (this._overlayItem) {
                 this._contribServices.overlayManager.remove(this._overlayItem);
                 this._overlayItem = null;
-                return;
             }
             if (ended) {
                 // we are online and player is ended - reset player engine
@@ -212,14 +205,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnRegisterUI, OnMediaLo
                 this._reloadVideo();
             }
             if (this._httpError) {
-                logger.info("httpError", {
+                logger.info("had httpError - trying to reload", {
                     method: "handleLiveStatusReceived"
                 });
                 // Dead end. reset video does not help here. v2 is not recovering from such error either.
                 // consider showing an error slate for the user - or not block the natural player error (phase2)
                 // or work with KMS to reload entire player (consult product)
-                // this._httpError = false;
-                // location.reload();
+                this._httpError = false;
+                this._reloadVideo();
             }
         }
     }
