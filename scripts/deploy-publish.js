@@ -8,13 +8,23 @@ const os = require("os");
 var inquirer = require('inquirer');
 
 const extraArgs = process.argv.splice(2);
+let skipRebuild = false;
+
+(() => {
+  const skipRebuildIndex = extraArgs.indexOf('--skip-rebuild');
+
+  if (skipRebuildIndex !== -1) {
+    skipRebuild = true;
+    extraArgs.splice(skipRebuildIndex, 1);
+  }
+})();
 
 const rootFolder = path.resolve(__dirname, '../');
 const packageJsonPath = path.resolve(rootFolder, 'package.json');
 
 function runSpawn(command, args, extra = {}) {
   const stdio = typeof extra.stdio === 'string' ? [extra.stdio,extra.stdio, 'pipe'] :
-    Array.isArray(extra.stdio) && extra.stdio.length === 3 ? [extra.stdio[0], extra.stdio[1], 'pipe'] : 'inherit' // 'pipe'
+      Array.isArray(extra.stdio) && extra.stdio.length === 3 ? [extra.stdio[0], extra.stdio[1], 'pipe'] : 'inherit' // 'pipe'
   const result = spawnSync(command, args, { ...extra, stdio});
 
   if (result.status === null || result.status !== 0) {
@@ -43,27 +53,39 @@ async function promptWelcome() {
 This script will publish version {bold ${version}} to npm.
 `);
   const answers = await inquirer.prompt(
-    [{
-      name: 'ready',
-      type: 'confirm',
-      message: 'Are you ready to begin?'
-    },
-      {
-        name: 'confirmVersion',
+      [{
+        name: 'ready',
         type: 'confirm',
-        message: `Are you trying to publish version ${version}?`
+        message: 'Are you ready to begin?'
       },
-      {
-        name: 'tag',
-        type: 'rawlist',
-        choices: ['Latest', 'Next'],
-        message: `What is the type of version you want to publish?`,
-        when: answers => answers.confirmVersion
-      }]
+        {
+          name: 'confirmVersion',
+          type: 'confirm',
+          message: `Are you trying to publish version ${version}?`
+        },
+        {
+          name: 'tag',
+          type: 'rawlist',
+          choices: ['Latest', 'Next'],
+          message: `What is the type of version you want to publish?`,
+          when: answers => answers.confirmVersion
+        },
+        {
+          name: 'skipRebuild',
+          type: 'confirm',
+          message: `Are you sure you want to skip rebuild (accept only if you just ran the prepare locally)?`,
+          default: false,
+          when: _ => skipRebuild
+        },]
   );
 
   if (!answers.ready) {
     console.log('See you next time....');
+    return false;
+  }
+
+  if (skipRebuild && !answers.skipRebuild) {
+    console.log(chalk.red(`Cannot continue with the publish. argument 'skipRebuild' was falsy provided.`));
     return false;
   }
 
@@ -97,12 +119,14 @@ function getPluginVersion() {
       return;
     }
 
-    console.log(chalk.blue(`delete dist folder and node_modules`));
-    runSpawn('npm', ['run','reset'], { cwd: rootFolder});
-    console.log(chalk.blue(`install dependencies`));
-    runSpawn('npm', ['install'], { cwd: rootFolder});
-    console.log(chalk.blue(`build code`));
-    runSpawn('npm', ['run', 'build'], { cwd: rootFolder});
+    if (!skipRebuild) {
+      console.log(chalk.blue(`delete dist folder and node_modules`));
+      runSpawn('npm', ['run','reset'], { cwd: rootFolder});
+      console.log(chalk.blue(`install dependencies`));
+      runSpawn('npm', ['install'], { cwd: rootFolder});
+      console.log(chalk.blue(`build code`));
+      runSpawn('npm', ['run', 'build'], { cwd: rootFolder});
+    }
     console.log(chalk.blue(`publish to npm`));
     runSpawn('npm', ['publish', '--access', 'public', ...extraArgs], { cwd: rootFolder});
 

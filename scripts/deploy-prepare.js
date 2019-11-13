@@ -49,7 +49,7 @@ function showSummary() {
     {bold git push --follow-tags}  
     
     Then, publish to npm:
-    {bold npm run ${isNext ? 'deploy:next:publish-to-npm': 'deploy:publish-to-npm'}}
+    {bold npm run ${isNext ? 'deploy:next:publish-to-npm' : 'deploy:publish-to-npm'} -- --skip-rebuild}
   `);
 }
 
