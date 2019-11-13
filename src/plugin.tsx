@@ -114,9 +114,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             // not using this now - but will probably use in future
             this._player.addEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
         }
-        // if (this.player.config.playback.autoplay) {
-        // todo - known issue for now
         this._player.play();
+        // if (!this.player.config.playback.autoplay) {
+        // handle autoplay=false
         // }
     };
 
@@ -135,13 +135,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     // once reached ended - check status and react accordingly
     private _handleOnEnd = () => {
-        if (!this._player.isDvr()) {
-            this._addSlate();
-            logger.info("No DVR entry reached end", {
-                method: "_handleOnEnd"
-            });
-            return;
-        }
         if (this._broadcastState === LiveBroadcastStates.Live) {
             // we reached the end of video but stream went back online meanwhile - reset player
             // this gets the player back to the current position and does not seek to liveEdge
@@ -149,7 +142,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 method: "_handleOnEnd"
             });
             this._reloadVideo();
+            return;
         }
+        this._addSlate();
+        logger.info("No DVR entry reached end", {
+            method: "_handleOnEnd"
+        });
     };
 
     // this functions is called whenever isLive receives any value.
@@ -157,45 +155,36 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
-        const firstPlay = this._wasPlayed;
         this._broadcastState = receivedState;
         logger.info("isLive with value: " + receivedState, {
             method: "handleLiveStatusReceived",
             data: {
                 hasDVR: hasDVR,
-                firstPlay: firstPlay,
+                wasPlayed: this._wasPlayed,
                 ended: ended
             }
         });
 
-        // Note1 - while DVR playback - even after playback ended - we get false on player.ended
-        // Note2 - (this.player as any)._firstPlay = true means that player had not played yet - this is confusing. We will use our own flag
         if (receivedState === LiveBroadcastStates.Offline) {
-            // offline before firstPlay, or offline on video-end with no DVR - show offline slate
-
-            if ((ended && !hasDVR) || !firstPlay) {
+            if ((ended && !hasDVR) || !this._wasPlayed) {
                 this._addSlate();
                 logger.info("Showing offline slate ", {
                     method: "handleLiveStatusReceived"
                 });
+                return;
             }
-
             if (this._httpError) {
                 logger.info("got httpError - adding offline slate", {
                     method: "handleLiveStatusReceived"
                 });
                 this._addSlate();
             }
-
             return;
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
             // Live. Remove slate
-            if (this._overlayItem) {
-                this._contribServices.overlayManager.remove(this._overlayItem);
-                this._overlayItem = null;
-            }
+            this._removeSlate();
             if (ended) {
                 // we are online and player is ended - reset player engine
                 // this resumes from latest position - it does not go back to liveEdge !
@@ -208,12 +197,16 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 logger.info("had httpError - trying to reload", {
                     method: "handleLiveStatusReceived"
                 });
-                // Dead end. reset video does not help here. v2 is not recovering from such error either.
-                // consider showing an error slate for the user - or not block the natural player error (phase2)
-                // or work with KMS to reload entire player (consult product)
                 this._httpError = false;
                 this._reloadVideo();
             }
+        }
+    }
+
+    private _removeSlate() {
+        if (this._overlayItem) {
+            this._contribServices.overlayManager.remove(this._overlayItem);
+            this._overlayItem = null;
         }
     }
 
