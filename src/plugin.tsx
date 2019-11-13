@@ -197,8 +197,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 logger.info("had httpError - trying to reload", {
                     method: "handleLiveStatusReceived"
                 });
-                this._httpError = false;
-                this._reloadVideo();
+                // this._httpError = false;
+                // this._reloadVideo();
             }
         }
     }
