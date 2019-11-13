@@ -101,9 +101,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._httpError = true;
     }
 
-    private _seekedtoLiveEdge = () => {
+    private _seektoLiveEdge = () => {
+        this._player.removeEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
         this._player.seekToLiveEdge();
-        this._player.removeEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
     };
 
     private _reloadVideo = (seekToLiveEdge: boolean = false) => {
@@ -112,7 +112,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._player._attachMediaSource();
         if (seekToLiveEdge) {
             // not using this now - but will probably use in future
-            this._player.addEventListener(this._player.Event.PLAYING, this._seekedtoLiveEdge);
+            this._player.addEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
         }
         // if (this.player.config.playback.autoplay) {
         // todo - known issue for now
