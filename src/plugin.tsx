@@ -211,6 +211,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     }
 
     private _addSlate() {
+        if (this._overlayItem) {
+            return;
+        }
+
         this._overlayItem = this._contribServices.overlayManager.add({
             label: "offline-overlay",
             position: OverlayPositions.PlayerArea,
