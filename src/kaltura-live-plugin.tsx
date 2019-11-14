@@ -17,8 +17,9 @@ import { OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import { Offline } from "./components/offline";
 import { OverlayItem } from "@playkit-js-contrib/ui";
+import { Offline } from "./components/offline";
+import { NoLongerLive } from "./components/no-longer-live";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -36,6 +37,11 @@ export enum LiveBroadcastStates {
     Offline = "Offline"
 }
 
+export enum OverlayItemTypes {
+    Offline = "offline-overlay",
+    NoLongerLive = "no-longer-live-overlay"
+}
+
 export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
     private _isLiveEntry = false;
@@ -43,7 +49,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _wasPlayed: boolean = false;
     private _httpError: boolean = false;
     private _isLiveApiCallTimeout: any = null;
-    private _overlayItem: OverlayItem | null = null;
+    private _overlayItems: Record<OverlayItemTypes, OverlayItem | null> = {
+        [OverlayItemTypes.Offline]: null,
+        [OverlayItemTypes.NoLongerLive]: null
+    };
 
     constructor(
         private _contribServices: ContribServices,
@@ -144,7 +153,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._reloadVideo();
             return;
         }
-        this._addSlate();
+        this._addOfflineSlate();
         logger.info("No DVR entry reached end", {
             method: "_handleOnEnd"
         });
@@ -167,7 +176,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
         if (receivedState === LiveBroadcastStates.Offline) {
             if ((ended && !hasDVR) || !this._wasPlayed) {
-                this._addSlate();
+                this._addOfflineSlate();
                 logger.info("Showing offline slate ", {
                     method: "handleLiveStatusReceived"
                 });
@@ -177,14 +186,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 logger.info("got httpError - adding offline slate", {
                     method: "handleLiveStatusReceived"
                 });
-                this._addSlate();
+                this._addOfflineSlate();
             }
             return;
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
             // Live. Remove slate
-            this._removeSlate();
+            this._removeSlate(OverlayItemTypes.Offline);
             if (ended) {
                 // we are online and player is ended - reset player engine
                 // this resumes from latest position - it does not go back to liveEdge !
@@ -203,25 +212,40 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
     }
 
-    private _removeSlate() {
-        if (this._overlayItem) {
-            this._contribServices.overlayManager.remove(this._overlayItem);
-            this._overlayItem = null;
+    private _removeSlate(type: OverlayItemTypes) {
+        if (this._overlayItems[type]) {
+            this._contribServices.overlayManager.remove(this._overlayItems[type] as OverlayItem);
+            this._overlayItems[type] = null;
         }
     }
 
-    private _addSlate() {
-        if (this._overlayItem) {
+    private _addOfflineSlate() {
+        if (this._overlayItems[OverlayItemTypes.Offline]) {
             return;
         }
-
-        this._overlayItem = this._contribServices.overlayManager.add({
-            label: "offline-overlay",
+        this._overlayItems[OverlayItemTypes.Offline] = this._contribServices.overlayManager.add({
+            label: OverlayItemTypes.Offline,
             position: OverlayPositions.PlayerArea,
             renderContent: () => <Offline />
         });
         logger.info("Show offline slate", {
-            method: "_addSlate"
+            method: "_addOfflineSlate"
+        });
+    }
+
+    private _addNoLongerLiveSlate() {
+        if (this._overlayItems[OverlayItemTypes.NoLongerLive]) {
+            return;
+        }
+        this._overlayItems[
+            OverlayItemTypes.NoLongerLive
+        ] = this._contribServices.overlayManager.add({
+            label: OverlayItemTypes.NoLongerLive,
+            position: OverlayPositions.PlayerArea,
+            renderContent: () => <NoLongerLive />
+        });
+        logger.info("Show NoLongerLiveSlate slate", {
+            method: "_addNoLongerLiveSlate"
         });
     }
 
