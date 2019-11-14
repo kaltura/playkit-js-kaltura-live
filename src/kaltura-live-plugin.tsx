@@ -72,9 +72,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
+        // this._player.addEventListener(this._player.Event.UI.USER_CLICKED_LIVE_TAG, this._handleClickOnLiveTag);
     }
 
-    onPluginSetup(): void {}
+    onPluginSetup(): void {
+        // (window as any).____player = this._player;
+    }
 
     onMediaLoad(): void {}
 
@@ -153,7 +156,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._reloadVideo();
             return;
         }
-        this._addOfflineSlate();
+        this._addNoLongerLiveSlate();
         logger.info("No DVR entry reached end", {
             method: "_handleOnEnd"
         });
@@ -193,7 +196,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
         if (receivedState === LiveBroadcastStates.Live) {
             // Live. Remove slate
-            this._removeSlate(OverlayItemTypes.Offline);
+            this._removeSlates();
             if (ended) {
                 // we are online and player is ended - reset player engine
                 // this resumes from latest position - it does not go back to liveEdge !
@@ -212,10 +215,30 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
     }
 
-    private _removeSlate(type: OverlayItemTypes) {
-        if (this._overlayItems[type]) {
-            this._contribServices.overlayManager.remove(this._overlayItems[type] as OverlayItem);
-            this._overlayItems[type] = null;
+    private _handleClickOnLiveTag() {
+        if (this._broadcastState === LiveBroadcastStates.Offline) {
+            this._addNoLongerLiveSlate();
+            this._player.pause();
+        }
+    }
+
+    private _handleReplayClick = () => {
+        this._removeSlates();
+        this._player.play();
+    };
+
+    private _removeSlates() {
+        if (this._overlayItems[OverlayItemTypes.Offline]) {
+            this._contribServices.overlayManager.remove(this._overlayItems[
+                OverlayItemTypes.Offline
+            ] as OverlayItem);
+            this._overlayItems[OverlayItemTypes.Offline] = null;
+        }
+        if (this._overlayItems[OverlayItemTypes.NoLongerLive]) {
+            this._contribServices.overlayManager.remove(this._overlayItems[
+                OverlayItemTypes.NoLongerLive
+            ] as OverlayItem);
+            this._overlayItems[OverlayItemTypes.NoLongerLive] = null;
         }
     }
 
@@ -242,7 +265,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         ] = this._contribServices.overlayManager.add({
             label: OverlayItemTypes.NoLongerLive,
             position: OverlayPositions.PlayerArea,
-            renderContent: () => <NoLongerLive />
+            renderContent: () => <NoLongerLive onClick={this._handleReplayClick} />
         });
         logger.info("Show NoLongerLiveSlate slate", {
             method: "_addNoLongerLiveSlate"
