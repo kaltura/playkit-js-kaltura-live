@@ -1,4 +1,4 @@
-import { KalturaLivePlugin } from "../plugin";
+import { KalturaLivePlugin } from "../kaltura-live-plugin";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
 const HTTP_ERROR = 1002;

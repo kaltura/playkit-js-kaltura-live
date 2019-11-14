@@ -1,4 +1,4 @@
-import { KalturaLivePlugin, LiveBroadcastStates } from "../plugin";
+import { KalturaLivePlugin, LiveBroadcastStates } from "../kaltura-live-plugin";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
 const logger = getContribLogger({

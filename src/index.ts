@@ -1,3 +1,2 @@
 /// <reference path="./global.d.ts" />
-
-import "./plugin";
+import "./kaltura-live-plugin";
