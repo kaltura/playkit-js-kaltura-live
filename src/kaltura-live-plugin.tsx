@@ -71,7 +71,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-        this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
         // this._player.addEventListener(this._player.Event.UI.USER_CLICKED_LIVE_TAG, this._handleClickOnLiveTag);
     }
 
@@ -83,6 +82,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     onMediaUnload(): void {
         this._resetTimeout();
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleOnEnd);
     }
 
     public isLiveEntry(): boolean {
@@ -100,6 +100,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _isEntryLiveType = () => {
         if (this._player.isLive()) {
             this._isLiveEntry = true;
+            this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this.updateLiveStatus();
         }
     };
@@ -156,7 +157,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._reloadVideo();
             return;
         }
-        this._addNoLongerLiveSlate();
+        if (this._player.isDvr()) {
+            this._addNoLongerLiveSlate();
+            logger.info("DVR entry reached end", {
+                method: "_handleOnEnd"
+            });
+            return;
+        }
+        this._addOfflineSlate();
         logger.info("No DVR entry reached end", {
             method: "_handleOnEnd"
         });
@@ -243,7 +251,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     }
 
     private _addOfflineSlate() {
-        if (this._overlayItems[OverlayItemTypes.Offline]) {
+        if (this._overlayItems[OverlayItemTypes.Offline] || !this._isLiveEntry) {
             return;
         }
         this._overlayItems[OverlayItemTypes.Offline] = this._contribServices.overlayManager.add({
@@ -257,7 +265,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     }
 
     private _addNoLongerLiveSlate() {
-        if (this._overlayItems[OverlayItemTypes.NoLongerLive]) {
+        if (this._overlayItems[OverlayItemTypes.NoLongerLive] || !this._isLiveEntry) {
             return;
         }
         this._overlayItems[
