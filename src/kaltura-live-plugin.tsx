@@ -47,7 +47,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _isLiveEntry = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed: boolean = false;
-    private _httpError: boolean = false;
     private _isLiveApiCallTimeout: any = null;
     private _overlayItems: Record<OverlayItemTypes, OverlayItem | null> = {
         [OverlayItemTypes.Offline]: null,
@@ -74,9 +73,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         // this._player.addEventListener(this._player.Event.UI.USER_CLICKED_LIVE_TAG, this._handleClickOnLiveTag);
     }
 
-    onPluginSetup(): void {
-        // (window as any).____player = this._player;
-    }
+    onPluginSetup(): void {}
 
     onMediaLoad(): void {}
 
@@ -111,7 +108,11 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     // use this method so that engine-decorator can notify the plugin of an error
     public handleHttpError() {
-        this._httpError = true;
+        logger.info("got httpError - adding network-error slate", {
+            method: "handleHttpError"
+        });
+        // TODO: Temporary added offlineSlate, here should be added new slate about network issue
+        this._addOfflineSlate();
     }
 
     private _seektoLiveEdge = () => {
@@ -185,20 +186,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             }
         });
 
-        if (receivedState === LiveBroadcastStates.Offline) {
-            if ((ended && !hasDVR) || !this._wasPlayed) {
-                this._addOfflineSlate();
-                logger.info("Showing offline slate ", {
-                    method: "handleLiveStatusReceived"
-                });
-                return;
-            }
-            if (this._httpError) {
-                logger.info("got httpError - adding offline slate", {
-                    method: "handleLiveStatusReceived"
-                });
-                this._addOfflineSlate();
-            }
+        if (
+            receivedState === LiveBroadcastStates.Offline &&
+            ((ended && !hasDVR) || !this._wasPlayed)
+        ) {
+            this._addOfflineSlate();
+            logger.info("Showing offline slate ", {
+                method: "handleLiveStatusReceived"
+            });
             return;
         }
 
@@ -212,13 +207,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                     method: "handleLiveStatusReceived"
                 });
                 this._reloadVideo();
-            }
-            if (this._httpError) {
-                logger.info("had httpError - trying to reload", {
-                    method: "handleLiveStatusReceived"
-                });
-                // this._httpError = false;
-                // this._reloadVideo();
             }
         }
     }
