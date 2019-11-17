@@ -39,8 +39,8 @@ export enum LiveBroadcastStates {
 
 export enum OverlayItemTypes {
     None = "None",
-    Offline = "offline-overlay",
-    NoLongerLive = "no-longer-live-overlay"
+    Offline = "Offline",
+    NoLongerLive = "NoLongerLive"
 }
 
 export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
@@ -239,14 +239,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
                 this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: OverlayItemTypes.NoLongerLive,
+                    label: "no-longer-live-overlay",
                     position: OverlayPositions.PlayerArea,
                     renderContent: () => <NoLongerLive onClick={this._handleReplayClick} />
                 });
                 break;
             case OverlayItemTypes.Offline:
                 this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: OverlayItemTypes.Offline,
+                    label: "offline-overlay",
                     position: OverlayPositions.PlayerArea,
                     renderContent: () => <Offline />
                 });
