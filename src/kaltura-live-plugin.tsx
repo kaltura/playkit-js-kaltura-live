@@ -223,14 +223,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
-        logger.info("Show offline slate", {
-            method: "_manageOfflineSlate"
-        });
-
         if (type === this._currentOverlayType) {
             return;
         }
-
         if (this._currentOverlay) {
             this._contribServices.overlayManager.remove(this._currentOverlay);
             this._currentOverlay = null;
