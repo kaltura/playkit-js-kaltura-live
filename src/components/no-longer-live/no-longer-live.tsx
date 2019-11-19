@@ -10,9 +10,6 @@ export class NoLongerLive extends Component<NoLongerLiveProps> {
         return (
             <div className={styles.noLongerLiveWrapper}>
                 <div className={`${styles.noLongerLiveIcon} kaltura-live__no-longer-live-icon`} />
-                <p className={`${styles.primaryText} kaltura-live__primary-text`}>
-                    Broadcast is no longer live
-                </p>
                 <a
                     className={styles.replayIconWrapper}
                     tabIndex={0}
@@ -21,6 +18,9 @@ export class NoLongerLive extends Component<NoLongerLiveProps> {
                 >
                     <i className={styles.replayIcon} />
                 </a>
+                <p className={`${styles.primaryText} kaltura-live__primary-text`}>
+                    Broadcast is no longer live
+                </p>
             </div>
         );
     }

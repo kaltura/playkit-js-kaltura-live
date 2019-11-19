@@ -1,5 +1,4 @@
 @import "../../variables.scss";
-
 .no-longer-live-wrapper {
     position: relative;
     display: flex;
@@ -11,11 +10,13 @@
     height: 100%;
     border-radius: 4px;
     background-color: $layout-color;
+
+
     .no-longer-live-icon {
         width: 100%;
         height: 100%;
         max-width: 250px;
-        max-height: 288px;
+        max-height: 359px;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -39,7 +40,6 @@
         transform: translate(-50%, -50%);
         border-radius: 54px;
         padding: 20px;
-        cursor: pointer;
         cursor: pointer;
         &:hover {
             border-color: rgba(255, 255, 255, 0.4);
@@ -65,6 +65,25 @@
 }
 
 :global {
+    .kaltura-live__primary-text {
+        position: absolute;
+        bottom: 20%;
+    }
+    .playkit-player.playkit-size-md .kaltura-live__primary-text {
+        bottom: 10%;
+    }
+    .playkit-player.playkit-size-sm .kaltura-live__primary-text {
+        bottom: 14%;
+    }
+    .playkit-player.playkit-size-xs {
+        .kaltura-live__no-longer-live-icon {
+            display: none;
+        }
+        .kaltura-live__primary-text {
+            bottom: 4%;
+        }
+    }
+
     .playkit-player.playkit-size-sm .kaltura-live__no-longer-live-icon,
     .playkit-player.playkit-size-xs .kaltura-live__no-longer-live-icon {
         max-width: 195px;
