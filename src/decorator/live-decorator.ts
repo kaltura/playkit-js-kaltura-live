@@ -1,7 +1,7 @@
 import { KalturaLivePlugin } from "../kaltura-live-plugin";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
-const HTTP_ERROR = 1002;
+const HTTP_ERRORS = [1002, 1003];
 const EVENT_ERROR_TYPE = "error";
 
 const logger = getContribLogger({
@@ -23,8 +23,11 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
-        if (event.type === EVENT_ERROR_TYPE && event.payload && event.payload.code === HTTP_ERROR) {
-            // prevent the player from showing the error.
+        if (
+            event.type === EVENT_ERROR_TYPE &&
+            event.payload &&
+            HTTP_ERRORS.indexOf(event.payload.code) > -1
+        ) {
             logger.info(
                 `Kaltura live-decorator prevented interrupted error ${event.payload.code}`,
                 {
