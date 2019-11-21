@@ -10,91 +10,103 @@
     height: 100%;
     border-radius: 4px;
     background-color: $layout-color;
-
-
-    .no-longer-live-icon {
+    .icon-wrapper {
+        position: relative;
+        display: flex;
+        justify-content: center;
         width: 100%;
         height: 100%;
         max-width: 250px;
         max-height: 359px;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        background-image: url('./assets/no-longer-live-big.svg');
-    }
-    .primary-text {
-        margin: 16px 0 4px 0;
-        font-size: 18px;
-        font-weight: bold;
-        text-align: center;
-        color: $text-color;
-    }
-    .replay-icon-wrapper {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        height: 108px;
-        width: 108px;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        background-color: rgba(0, 0, 0, 0.5);
-        transform: translate(-50%, -50%);
-        border-radius: 54px;
-        padding: 20px;
-        cursor: pointer;
-        &:hover {
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-        &:active {
-            opacity: 0.7;
-            transform: scale(1) translate(-50%, -50%);
-        }
-        .replay-icon {
-            display: inline-block;
-            font-size: 0;
+        .no-longer-live-icon {
             width: 100%;
             height: 100%;
-            max-width: 64px;
-            max-height: 64px;
-            margin: 0 auto;
-            background-size: cover;
+            background-size: contain;
             background-repeat: no-repeat;
-            background-position: 50% 50%;
-            background-image: url('./assets/replay.svg');
+            background-position: center;
+            background-image: url('./assets/no-longer-live-big.svg');
+        }
+        .replay-icon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 108px;
+            width: 108px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.5);
+            transform: translate(-50%, -50%);
+            border-radius: 54px;
+            padding: 20px;
+            cursor: pointer;
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+            &:active {
+                opacity: 0.7;
+                transform: scale(1) translate(-50%, -50%);
+            }
+            .replay-icon {
+                display: inline-block;
+                font-size: 0;
+                width: 100%;
+                height: 100%;
+                max-width: 64px;
+                max-height: 64px;
+                margin: 0 auto;
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: 50% 50%;
+                background-image: url('./assets/replay.svg');
+            }
+        }
+    }
+    .text-wrapper {
+        position: relative;
+        bottom: 58px;
+        & > p {
+            margin: 0;
+            text-align: center;
+            color: $text-color;
+        }
+        .primary-text {
+            font-size: 18px;
+            font-weight: bold;
+
+        }
+        .secondary-text {
+            margin-top: 3px;
+            font-size: 14px;
         }
     }
 }
 
 :global {
-    .kaltura-live__primary-text {
-        position: absolute;
-        bottom: 20%;
-    }
-    .playkit-player.playkit-size-md .kaltura-live__primary-text {
-        bottom: 10%;
-    }
-    .playkit-player.playkit-size-sm .kaltura-live__primary-text {
-        bottom: 14%;
+    .playkit-player.playkit-size-sm,
+    .playkit-player.playkit-size-xs {
+        .kaltura-live__icon-wrapper {
+            max-width: 195px;
+            max-height: 280px;
+            .kaltura-live__no-longer-live-icon {
+                background-image: url('./assets/no-longer-live-small.svg');
+            }
+        }
+        .kaltura-live__text-wrapper {
+            bottom: 52px;
+        }
     }
     .playkit-player.playkit-size-xs {
         .kaltura-live__no-longer-live-icon {
             display: none;
         }
-        .kaltura-live__primary-text {
-            bottom: 4%;
+        .kaltura-live__text-wrapper {
+            bottom: 72px;
         }
-    }
-
-    .playkit-player.playkit-size-sm .kaltura-live__no-longer-live-icon,
-    .playkit-player.playkit-size-xs .kaltura-live__no-longer-live-icon {
-        max-width: 195px;
-        max-height: 280px;
-        background-image: url('./assets/no-longer-live-small.svg');
     }
     .playkit-player.playkit-size-ty {
         .kaltura-live__no-longer-live-icon {
             display: none;
         }
-        .kaltura-live__primary-text {
+        .kaltura-live__text-wrapper {
             display: none;
         }
     }
