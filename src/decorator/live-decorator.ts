@@ -26,6 +26,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
         if (
             event.type === EVENT_ERROR_TYPE &&
             event.payload &&
+            event.payload.code &&
             HTTP_ERRORS.indexOf(event.payload.code) > -1
         ) {
             logger.info(
