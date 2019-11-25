@@ -9,18 +9,23 @@ export class NoLongerLive extends Component<NoLongerLiveProps> {
     render(props: NoLongerLiveProps) {
         return (
             <div className={styles.noLongerLiveWrapper}>
-                <div className={`${styles.noLongerLiveIcon} kaltura-live__no-longer-live-icon`} />
-                <p className={`${styles.primaryText} kaltura-live__primary-text`}>
-                    Broadcast is no longer live
-                </p>
-                <a
-                    className={styles.replayIconWrapper}
-                    tabIndex={0}
-                    aria-label="Start over"
-                    onClick={props.onClick}
-                >
-                    <i className={styles.replayIcon} />
-                </a>
+                <div className={`${styles.iconWrapper} kaltura-live__icon-wrapper`}>
+                    <div
+                        className={`${styles.noLongerLiveIcon} kaltura-live__no-longer-live-icon`}
+                    />
+                    <a
+                        className={styles.replayIconWrapper}
+                        tabIndex={0}
+                        aria-label="Start over"
+                        onClick={props.onClick}
+                    >
+                        <i className={styles.replayIcon} />
+                    </a>
+                </div>
+                <div className={`${styles.textWrapper} kaltura-live__text-wrapper`}>
+                    <p className={styles.primaryText}>Broadcast is no longer live</p>
+                    <p className={styles.secondaryText}>Replay to view the recording</p>
+                </div>
             </div>
         );
     }
