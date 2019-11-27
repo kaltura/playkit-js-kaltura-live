@@ -255,7 +255,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 break;
             case OverlayItemTypes.HttpError:
                 this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: "http-overlay",
+                    label: "http-problem-overlay",
                     position: OverlayPositions.PlayerArea,
                     renderContent: () => <Offline httpError={true} />
                 });
