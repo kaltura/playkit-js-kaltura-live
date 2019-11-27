@@ -40,6 +40,7 @@ export enum LiveBroadcastStates {
 export enum OverlayItemTypes {
     None = "None",
     Offline = "Offline",
+    HttpError = "HttpError",
     NoLongerLive = "NoLongerLive"
 }
 
@@ -107,13 +108,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     // use this method so that engine-decorator can notify the plugin of an error
+    // this is triggered after player had not got internet back and this is non-recoverable problem
+    // this._httpError never changes back to false
     public handleHttpError() {
         this._httpError = true;
         logger.info("got httpError - adding network-error slate", {
             method: "handleHttpError"
         });
-        // TODO: Temporary added offlineSlate, here should be added new slate about network issue
-        this._manageOfflineSlate(OverlayItemTypes.Offline);
+        this._manageOfflineSlate(OverlayItemTypes.HttpError);
     }
 
     // private _seektoLiveEdge = () => {
@@ -152,7 +154,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     // once reached ended - check status and react accordingly
     private _handleOnEnd = () => {
         if (this._httpError) {
-            this._manageOfflineSlate(OverlayItemTypes.Offline);
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
             logger.warn("Kaltura player triggered http error ! non-recoverable", {
                 method: "_handleOnEnd"
             });
@@ -194,6 +196,18 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 ended: ended
             }
         });
+
+        if (this._httpError) {
+            // TODO change slate when switching from offline to isLive false
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            logger.warn(
+                "Got new isLive results after http error ! Non recoverable state - show internet error slate",
+                {
+                    method: "handleLiveStatusReceived"
+                }
+            );
+            return;
+        }
 
         if (!this._wasPlayed && receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OverlayItemTypes.Offline);
@@ -244,6 +258,13 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                     label: "offline-overlay",
                     position: OverlayPositions.PlayerArea,
                     renderContent: () => <Offline />
+                });
+                break;
+            case OverlayItemTypes.HttpError:
+                this._currentOverlay = this._contribServices.overlayManager.add({
+                    label: "http-overlay",
+                    position: OverlayPositions.PlayerArea,
+                    renderContent: () => <Offline httpError={true} />
                 });
                 break;
             case OverlayItemTypes.None:
