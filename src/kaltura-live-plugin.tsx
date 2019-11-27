@@ -197,15 +197,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             }
         });
 
+        // if we had http error we do not want to change the state!
         if (this._httpError) {
-            // TODO change slate when switching from offline to isLive false
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
-            logger.warn(
-                "Got new isLive results after http error ! Non recoverable state - show internet error slate",
-                {
-                    method: "handleLiveStatusReceived"
-                }
-            );
             return;
         }
 
