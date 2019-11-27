@@ -33,6 +33,7 @@ interface KalturaLivePluginConfig {
 
 export enum LiveBroadcastStates {
     Unknown = "Unknown",
+    Error = "Error",
     Live = "Live",
     Offline = "Offline"
 }
@@ -53,6 +54,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
+    private _currentOverlayHttpError = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -169,15 +171,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._reloadVideo();
             return;
         }
-        if (this._player.isDvr()) {
-            this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
-            logger.info("DVR entry reached end - show offline slate with replay button", {
-                method: "_handleOnEnd"
-            });
-            return;
-        }
-        this._manageOfflineSlate(OverlayItemTypes.Offline);
-        logger.info("No DVR entry reached end - show offline slate", {
+        this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
+        logger.info("No Longer live", {
             method: "_handleOnEnd"
         });
     };
@@ -198,7 +193,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         });
 
         // if we had http error we do not want to change the state!
-        if (this._httpError) {
+        if (this._httpError || (ended && receivedState === LiveBroadcastStates.Error)) {
+            if (receivedState === LiveBroadcastStates.Offline) {
+                this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
+            } else {
+                this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            }
             return;
         }
 
@@ -222,6 +222,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 this._reloadVideo();
             }
         }
+        if (receivedState === LiveBroadcastStates.Offline && ended) {
+            this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
+            logger.info("NoLongerLive", {
+                method: "handleLiveStatusReceived"
+            });
+        }
     }
 
     private _handleReplayClick = () => {
@@ -230,7 +236,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
-        if (type === this._currentOverlayType) {
+        if (
+            type === this._currentOverlayType &&
+            this._currentOverlayHttpError === this._httpError
+        ) {
             return;
         }
         if (this._currentOverlay) {
@@ -238,12 +247,18 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._currentOverlay = null;
         }
         this._currentOverlayType = type;
+        this._currentOverlayHttpError = this._httpError;
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
                 this._currentOverlay = this._contribServices.overlayManager.add({
                     label: "no-longer-live-overlay",
                     position: OverlayPositions.PlayerArea,
-                    renderContent: () => <NoLongerLive onClick={this._handleReplayClick} />
+                    renderContent: () => (
+                        <NoLongerLive
+                            onClick={this._handleReplayClick}
+                            showReplay={this._player.isDvr() && !this._httpError}
+                        />
+                    )
                 });
                 break;
             case OverlayItemTypes.Offline:
@@ -290,13 +305,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 this._initTimeout();
             },
             error => {
-                logger.error("Failed to call isLive API", {
-                    method: "updateLiveStatus",
-                    data: {
-                        error
-                    }
-                });
-                this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                const isOffline = (error as any).code === "client::response_type_error";
+                // remove once client is fixed !
+                if (isOffline) {
+                    this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                } else {
+                    this.handleLiveStatusReceived(LiveBroadcastStates.Error);
+                    logger.error("Failed to call isLive API", {
+                        method: "updateLiveStatus",
+                        data: {
+                            error
+                        }
+                    });
+                }
                 // re-check isLive on timeout
                 this._initTimeout();
             }
