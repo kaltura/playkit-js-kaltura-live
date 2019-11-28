@@ -172,7 +172,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             return;
         }
         this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
-        logger.info("No Longer live", {
+        logger.info("No Longer live - show NoLongerLive slate", {
             method: "_handleOnEnd"
         });
     };
@@ -183,7 +183,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
-        logger.info("received isLive with value: " + receivedState, {
+        logger.info("Received isLive with value: " + receivedState, {
             method: "handleLiveStatusReceived",
             data: {
                 hasDVR: hasDVR,
@@ -224,7 +224,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
         if (receivedState === LiveBroadcastStates.Offline && ended) {
             this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
-            logger.info("NoLongerLive", {
+            logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
             });
         }
