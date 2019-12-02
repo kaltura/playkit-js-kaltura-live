@@ -127,9 +127,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     private _reloadVideo = () => {
         // TODO - fix once FEC-9519 implemented by core team
-        if ((KalturaPlayer as any).core.Env.browser.name === "Safari") {
+        if (this.player.env.browser.name === "Safari") {
             // Safari did not get a valid handle for detach and attach the media sources.
-            (this.player as any).getVideoElement().load();
+            this.player.getVideoElement().load();
             logger.info("Reloading in Safari", {
                 method: "_reloadVideo"
             });
