@@ -126,9 +126,21 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     // };
 
     private _reloadVideo = () => {
-        // TODO - fix once FEC-9488 implemented by core team
-        this._player._detachMediaSource();
-        this._player._attachMediaSource();
+        // TODO - fix once FEC-9519 implemented by core team
+        if ((KalturaPlayer as any).core.Env.browser.name === "Safari") {
+            // Safari did not get a valid handle for detach and attach the media sources.
+            (this.player as any).getVideoElement().load();
+            logger.info("Reloading in Safari", {
+                method: "_reloadVideo"
+            });
+        } else {
+            // TODO - fix once FEC-9488 implemented by core team
+            this._player._detachMediaSource();
+            this._player._attachMediaSource();
+            logger.info("Reloading video with detach/attach media functions", {
+                method: "_reloadVideo"
+            });
+        }
         // if (seekToLiveEdge) {
         //     // not using this now - but will probably use in future
         //     this._player.addEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
