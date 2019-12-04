@@ -7,12 +7,10 @@ export interface props {
 
 const noInternetTitle = "No Internet Connection";
 const noInternetBody = "Check your network and refresh the page";
-
 const offlineTitle = "Currently not broadcasting";
 const offlineBody = "Video will play once broadcasting starts";
-
-const httpProblemTitle = "There was a problem";
-const httpProblemBody = "Please try to refresh the page";
+const httpProblemTitle = "Something went wrong";
+const httpProblemBody = "Try refreshing the page";
 
 export class Offline extends Component<props> {
     static defaultProps = {
