@@ -117,27 +117,40 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         logger.info("got httpError - adding network-error slate", {
             method: "handleHttpError"
         });
+        // TODO - do not remove this line !
         this._manageOfflineSlate(OverlayItemTypes.HttpError);
     }
 
-    // private _seektoLiveEdge = () => {
-    //     this._player.removeEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
-    //     this._player.seekToLiveEdge();
-    // };
-
     private _reloadVideo = () => {
-        // TODO - fix once FEC-9488 implemented by core team
-        this._player._detachMediaSource();
-        this._player._attachMediaSource();
-        // if (seekToLiveEdge) {
-        //     // not using this now - but will probably use in future
-        //     this._player.addEventListener(this._player.Event.PLAYING, this._seektoLiveEdge);
-        // }
-        this._player.play();
-        // TODO - open a story with autoplay=false issue
-        // if (!this.player.config.playback.autoplay) {
-        // handle autoplay=false
-        // }
+        try {
+            // TODO - fix once FEC-9519 implemented by core team
+            if (this.player.env.browser.name === "Safari") {
+                // Safari did not get a valid handle for detach and attach the media sources.
+                const video = this.player.getVideoElement();
+                if (video) {
+                    this.player.getVideoElement().load();
+                }
+                logger.info("Reloading in Safari", {
+                    method: "_reloadVideo"
+                });
+            } else {
+                // TODO - fix once FEC-9488 implemented by core team
+                this._player._detachMediaSource();
+                this._player._attachMediaSource();
+                logger.info("Reloading video with detach/attach media functions", {
+                    method: "_reloadVideo"
+                });
+            }
+            this._player.play();
+        } catch (e) {
+            // failed resetting video engine - apply non-recoverable slate
+            this._httpError = true;
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            logger.info("Failed to reload video", {
+                method: "_reloadVideo",
+                data: e
+            });
+        }
     };
 
     private _resetTimeout = () => {
@@ -168,6 +181,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             logger.info("DVR entry reached end while last isLive is true. Reload the video", {
                 method: "_handleOnEnd"
             });
+            // TODO - block IE7 here?
             this._reloadVideo();
             return;
         }
@@ -211,6 +225,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
+            // TODO - block IE7 here?
             // Live. Remove slate
             this._manageOfflineSlate(OverlayItemTypes.None);
             if (ended) {
