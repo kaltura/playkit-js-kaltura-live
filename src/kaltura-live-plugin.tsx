@@ -73,9 +73,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         // cache ie11Win7 check
-        if (this._isIE11Win7()) {
-            this._ie11Windows7 = true;
-        }
+        this._ie11Windows7 = this._isIE11Win7();
     }
 
     onPluginSetup(): void {}
