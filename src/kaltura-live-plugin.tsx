@@ -127,8 +127,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         // prevent reset IE11 W7
         if (this._ie11Windows7) {
             // TODO - follow core fix FEC-9523
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
             this._httpError = true;
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
             return;
         }
 
