@@ -133,7 +133,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             logger.warn("IE11 Windows7 cannot reload video ! non-recoverable error", {
                 method: "_reloadVideo"
             });
-            // consider stop sampling the API for isLive ?
             return;
         }
 
@@ -169,7 +168,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _isIE11Win7() {
-        // alert((this.player.env as any).os.version === "7");
         const ua = window.navigator.userAgent;
         return (
             this.player.env.os.name === "Windows" &&
