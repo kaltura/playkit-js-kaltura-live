@@ -2,7 +2,6 @@ import { h } from "preact";
 import { KalturaClient } from "kaltura-typescript-client";
 import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
 import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
-
 import {
     ContribPluginConfigs,
     ContribPluginData,
@@ -51,10 +50,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed: boolean = false;
     private _httpError: boolean = false;
+    private _ie11Win7Block = false;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
     private _currentOverlayHttpError = false;
+    readonly _ie11Windows7: boolean = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -72,6 +73,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             });
         }
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
+        // cache ie11Win7 check
+        this._ie11Windows7 = this._isIE11Win7();
     }
 
     onPluginSetup(): void {}
@@ -122,6 +125,17 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     }
 
     private _reloadVideo = () => {
+        // TODO - fix once FEC-9523 implemented by core team
+        // IE11-Win7 edge case - cannot reload video engine. Show non-recoverable slate and prevent future changes
+        if (this._ie11Windows7) {
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            this._ie11Win7Block = true;
+            logger.warn("IE11 Windows7 cannot reload video ! non-recoverable error", {
+                method: "_reloadVideo"
+            });
+            return;
+        }
+
         try {
             // TODO - fix once FEC-9519 implemented by core team
             if (this.player.env.browser.name === "Safari") {
@@ -153,6 +167,16 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
     };
 
+    private _isIE11Win7() {
+        const ua = window.navigator.userAgent;
+        return (
+            this.player.env.os.name === "Windows" &&
+            this.player.env.os.version === "7" &&
+            this.player.env.browser.name === "IE" &&
+            ua.indexOf("Trident/7.0") > -1
+        );
+    }
+
     private _resetTimeout = () => {
         clearTimeout(this._isLiveApiCallTimeout);
         this._isLiveApiCallTimeout = null;
@@ -181,7 +205,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             logger.info("DVR entry reached end while last isLive is true. Reload the video", {
                 method: "_handleOnEnd"
             });
-            // TODO - block IE7 here?
             this._reloadVideo();
             return;
         }
@@ -225,7 +248,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            // TODO - block IE7 here?
             // Live. Remove slate
             this._manageOfflineSlate(OverlayItemTypes.None);
             if (ended) {
@@ -252,8 +274,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
         if (
-            type === this._currentOverlayType &&
-            this._currentOverlayHttpError === this._httpError
+            (type === this._currentOverlayType &&
+                this._currentOverlayHttpError === this._httpError) ||
+            this._ie11Win7Block
         ) {
             return;
         }
@@ -345,6 +368,7 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
     getMiddlewareImpl(): any {
         return new KalturaLiveMiddleware(this._contribPlugin);
     }
+
     getEngineDecorator(engine: any): any {
         return new KalturaLiveEngineDecorator(engine, this._contribPlugin);
     }
