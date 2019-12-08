@@ -50,6 +50,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed: boolean = false;
     private _httpError: boolean = false;
+    private _ie11Win7Block = false;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
@@ -124,11 +125,15 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     }
 
     private _reloadVideo = () => {
-        // prevent reset IE11 W7
+        // TODO - fix once FEC-9523 implemented by core team
+        // IE11-Win7 edge case - cannot reload video engine. Show non-recoverable slate and prevent future changes
         if (this._ie11Windows7) {
-            // TODO - follow core fix FEC-9523
-            this._httpError = true;
             this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            this._ie11Win7Block = true;
+            logger.warn("IE11 Windows7 cannot reload video ! non-recoverable error", {
+                method: "_reloadVideo"
+            });
+            // consider stop sampling the API for isLive ?
             return;
         }
 
@@ -163,7 +168,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         }
     };
 
-    // todo - contrib?
     private _isIE11Win7() {
         // alert((this.player.env as any).os.version === "7");
         const ua = window.navigator.userAgent;
@@ -272,8 +276,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
         if (
-            type === this._currentOverlayType &&
-            this._currentOverlayHttpError === this._httpError
+            (type === this._currentOverlayType &&
+                this._currentOverlayHttpError === this._httpError) ||
+            this._ie11Win7Block
         ) {
             return;
         }
