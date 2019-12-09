@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.8](https://github.com/kaltura/playkit-js-kaltura-live/compare/v1.0.7...v1.0.8) (2019-12-09)
+
+
+### Bug Fixes
+
+* FEV-438 - wrong dispatcher function ([#37](https://github.com/kaltura/playkit-js-kaltura-live/issues/37)) ([25dec53](https://github.com/kaltura/playkit-js-kaltura-live/commit/25dec5337b2e30cf7c6b94de010450dddb572af7))
+
 ### [1.0.7](https://github.com/kaltura/playkit-js-kaltura-live/compare/v1.0.6...v1.0.7) (2019-12-08)
 
 
