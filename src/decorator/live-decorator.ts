@@ -12,10 +12,12 @@ const logger = getContribLogger({
 export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDecorator {
     _plugin: KalturaLivePlugin;
     _engine: any;
+    _dispatcher: Function;
 
-    constructor(engine: any, plugin: KalturaLivePlugin) {
+    constructor(engine: any, plugin: KalturaLivePlugin, dispatcher: Function) {
         this._plugin = plugin;
         this._engine = engine;
+        this._dispatcher = dispatcher;
     }
 
     get active(): boolean {
@@ -38,6 +40,6 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
             this._plugin.handleHttpError();
             return true;
         }
-        return this._plugin.player.dispatchEvent(event);
+        return this._dispatcher(event);
     }
 }
