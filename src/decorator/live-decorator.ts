@@ -12,7 +12,7 @@ const logger = getContribLogger({
 export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDecorator {
     _plugin: KalturaLivePlugin;
     _engine: any;
-    _dispatcher: any;
+    _dispatcher: Function;
 
     constructor(engine: any, plugin: KalturaLivePlugin, dispatcher: Function) {
         this._plugin = plugin;
