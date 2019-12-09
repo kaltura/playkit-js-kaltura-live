@@ -369,8 +369,8 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
         return new KalturaLiveMiddleware(this._contribPlugin);
     }
 
-    getEngineDecorator(engine: any): any {
-        return new KalturaLiveEngineDecorator(engine, this._contribPlugin);
+    getEngineDecorator(engine: any, dispatcher: Function): any {
+        return new KalturaLiveEngineDecorator(engine, this._contribPlugin, dispatcher);
     }
 }
 
