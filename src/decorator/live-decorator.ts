@@ -1,7 +1,7 @@
 import { KalturaLivePlugin } from "../kaltura-live-plugin";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
-const HTTP_ERRORS = [1002, 1003];
+const HTTP_ERRORS = [1002, 1003, 3016, 3022];
 const EVENT_ERROR_TYPE = "error";
 
 const logger = getContribLogger({
