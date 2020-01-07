@@ -20,12 +20,10 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     // if not - try again
     initialPlayHandling() {
         if (this._nextLoad && this.isLive()) {
-            // clear flag and release 2 methods
-            // this._isFirstPlay = false;
+            // clear flag and release load interrupt
             this.callNext(this._nextLoad);
-            // this.callNext(this._nextPlay);
             this._nextLoad = null;
-            logger.info("interrupt play", { method: "play" });
+            logger.info("interrupted load released", { method: "initialPlayHandling" });
         } else {
             // TODO - manage this (stop the timeout when the plugin / class is destroyed)
             setTimeout(() => {
@@ -52,7 +50,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
         } else {
             this._nextLoad = next;
             this.initialPlayHandling();
-            logger.info("interrupt load", { method: "load" });
+            logger.info("interrupt load cycle - wait for isLive true", { method: "load" });
         }
     }
 }
