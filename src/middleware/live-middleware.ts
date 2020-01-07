@@ -8,10 +8,7 @@ const logger = getContribLogger({
 
 export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
-    // false means that this is not the 1st play ever
-    private _isFirstPlay = true;
     private _nextLoad: Function | null = null;
-    private _nextPlay: Function | null = null;
 
     constructor(plugin: KalturaLivePlugin) {
         super();
@@ -22,17 +19,12 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     // once we understand that we have a positive isLive - we clean and release the middleware
     // if not - try again
     initialPlayHandling() {
-        // no need to apply this unless we are in the firstPlay
-        if (!this._isFirstPlay) {
-            return;
-        }
-        if (this._nextPlay && this._nextLoad && this.isPlayerLive()) {
+        if (this._nextLoad && this.isLive()) {
             // clear flag and release 2 methods
-            this._isFirstPlay = false;
+            // this._isFirstPlay = false;
             this.callNext(this._nextLoad);
-            this.callNext(this._nextPlay);
+            // this.callNext(this._nextPlay);
             this._nextLoad = null;
-            this._nextPlay = null;
             logger.info("interrupt play", { method: "play" });
         } else {
             // TODO - manage this (stop the timeout when the plugin / class is destroyed)
@@ -43,7 +35,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     }
 
     // check if the entry live status is 'live'
-    private isPlayerLive() {
+    private isLive() {
         return this._livePlugin.broadcastState === LiveBroadcastStates.Live;
     }
 
@@ -54,7 +46,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
             return;
         }
         // halt the load lifecycle method if we are in the 1st play or if we are not online
-        if (this.isPlayerLive()) {
+        if (this.isLive()) {
             // we know that we are live (isLive returned true)
             this.callNext(next);
         } else {
@@ -62,24 +54,5 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
             this.initialPlayHandling();
             logger.info("interrupt load", { method: "load" });
         }
-    }
-
-    public play(next: Function): void {
-        // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.isLiveEntry() || this.isPlayerLive()) {
-            this._isFirstPlay = false;
-            this.callNext(next);
-            return;
-        }
-        if (this._isFirstPlay) {
-            this._nextPlay = next;
-            logger.info("interrupt play", { method: "play" });
-        } else {
-            this.callNext(next);
-        }
-    }
-
-    public pause(next: Function): void {
-        super.callNext(next);
     }
 }
