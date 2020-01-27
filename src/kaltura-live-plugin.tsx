@@ -51,6 +51,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _wasPlayed: boolean = false;
     private _httpError: boolean = false;
     private _ie11Win7Block = false;
+    private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
@@ -67,7 +68,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             clientTag: "playkit-js-kaltura-live",
             endpointUrl: playerConfig.provider.env.serviceUrl
         });
-        if (pluginConfig.checkLiveWithKs === true) {
+        if (pluginConfig.checkLiveWithKs) {
             this._kalturaClient.setDefaultRequestOptions({
                 ks: playerConfig.provider.ks
             });
@@ -104,8 +105,41 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._isLiveEntry = true;
             this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+            this._player.addEventListener("timedmetadata", this._timedmetadata);
+            this._player.configure({
+                plugins: { kava: { tamperAnalyticsHandler: this.tamperAnalyticsHandler } }
+            });
             this.updateLiveStatus();
         }
+    };
+
+    private _timedmetadata = (e: any) => {
+        if (
+            !e ||
+            !e.payload ||
+            !e.payload.cues ||
+            !e.payload.cues[0] ||
+            !e.payload.cues[0].value ||
+            !e.payload.cues[0].value.data
+        ) {
+            this._absolutePosition = null;
+            return;
+        }
+        try {
+            this._absolutePosition = JSON.parse(e.payload.cues[0].value.data).timestamp;
+        } catch (error) {
+            logger.warn("Reloading video with detach/attach media functions", {
+                method: "timedmetadata"
+            });
+        }
+    };
+
+    private tamperAnalyticsHandler = (e: any) => {
+        // add my attribute if necessary
+        if (this._absolutePosition) {
+            e.absolutePosition = this._absolutePosition;
+        }
+        return true;
     };
 
     private _handleFirstPlay = () => {
@@ -326,12 +360,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         const protocol = KalturaPlaybackProtocol.hls;
         const { id } = this._player.config.sources;
         const request = new LiveStreamIsLiveAction({ id, protocol });
-        logger.info(
-            `Calling isLive ${pluginConfig.checkLiveWithKs === true ? "with" : "without"} KS`,
-            {
-                method: "updateLiveStatus"
-            }
-        );
+        logger.info(`Calling isLive ${pluginConfig.checkLiveWithKs ? "with" : "without"} KS`, {
+            method: "updateLiveStatus"
+        });
         this._kalturaClient.request(request).then(
             data => {
                 if (data === true) {
