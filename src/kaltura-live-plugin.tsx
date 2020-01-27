@@ -128,6 +128,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         try {
             this._absolutePosition = JSON.parse(e.payload.cues[0].value.data).timestamp;
         } catch (error) {
+            this._absolutePosition = null;
             logger.warn("Failed parsing timedmetadata payload cue " + error, {
                 method: "_timedmetadataReceived",
                 data: e.payload
@@ -136,7 +137,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _tamperAnalyticsHandler = (e: any) => {
-        // add my attribute if necessary
         if (this._absolutePosition) {
             e.absolutePosition = this._absolutePosition;
         }
