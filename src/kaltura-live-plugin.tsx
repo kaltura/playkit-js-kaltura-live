@@ -114,19 +114,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _timedmetadataReceived = (e: any) => {
-        if (
-            !e ||
-            !e.payload ||
-            !e.payload.cues ||
-            !e.payload.cues[0] ||
-            !e.payload.cues[0].value ||
-            !e.payload.cues[0].value.data
-        ) {
+        if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;
         }
         try {
-            this._absolutePosition = JSON.parse(e.payload.cues[0].value.data).timestamp;
+            this._absolutePosition = JSON.parse(
+                e.payload.cues[e.payload.cues.length - 1].value.data
+            ).timestamp;
         } catch (error) {
             this._absolutePosition = null;
             logger.warn("Failed parsing timedmetadata payload cue " + error, {
