@@ -105,15 +105,15 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._isLiveEntry = true;
             this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.addEventListener("timedmetadata", this._timedmetadata);
+            this._player.addEventListener("timedmetadata", this._timedmetadataReceived);
             this._player.configure({
-                plugins: { kava: { tamperAnalyticsHandler: this.tamperAnalyticsHandler } }
+                plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
             });
             this.updateLiveStatus();
         }
     };
 
-    private _timedmetadata = (e: any) => {
+    private _timedmetadataReceived = (e: any) => {
         if (
             !e ||
             !e.payload ||
@@ -128,13 +128,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         try {
             this._absolutePosition = JSON.parse(e.payload.cues[0].value.data).timestamp;
         } catch (error) {
-            logger.warn("Reloading video with detach/attach media functions", {
-                method: "timedmetadata"
+            logger.warn("Failed parsing timedmetadata payload cue " + error, {
+                method: "_timedmetadataReceived",
+                data: e.payload
             });
         }
     };
 
-    private tamperAnalyticsHandler = (e: any) => {
+    private _tamperAnalyticsHandler = (e: any) => {
         // add my attribute if necessary
         if (this._absolutePosition) {
             e.absolutePosition = this._absolutePosition;
