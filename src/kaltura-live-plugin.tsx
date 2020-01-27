@@ -85,6 +85,11 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     onMediaUnload(): void {
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.ENDED, this._handleOnEnd);
+        this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+        this._player.removeEventListener(
+            this._player.Event.TIMED_METADATA,
+            this._timedmetadataReceived
+        );
     }
 
     public isLiveEntry(): boolean {
@@ -105,7 +110,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._isLiveEntry = true;
             this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.addEventListener("timedmetadata", this._timedmetadataReceived);
+            this._player.addEventListener(
+                this._player.Event.TIMED_METADATA,
+                this._timedmetadataReceived
+            );
             this._player.configure({
                 plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
             });
