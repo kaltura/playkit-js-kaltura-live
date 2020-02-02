@@ -2,6 +2,7 @@ import { h } from "preact";
 import { KalturaClient } from "kaltura-typescript-client";
 import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
 import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
+import { LiveStreamGetDetailsAction } from "kaltura-typescript-client/api/types/LiveStreamGetDetailsAction";
 import {
     ContribPluginConfigs,
     ContribPluginData,
@@ -12,13 +13,13 @@ import {
     OnMediaUnload,
     OnPluginSetup
 } from "@playkit-js-contrib/plugin";
-import { OverlayPositions } from "@playkit-js-contrib/ui";
+import { OverlayItem, OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import { OverlayItem } from "@playkit-js-contrib/ui";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
+import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -51,6 +52,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _wasPlayed: boolean = false;
     private _httpError: boolean = false;
     private _ie11Win7Block = false;
+    private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
@@ -67,7 +69,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             clientTag: "playkit-js-kaltura-live",
             endpointUrl: playerConfig.provider.env.serviceUrl
         });
-        if (pluginConfig.checkLiveWithKs === true) {
+        if (pluginConfig.checkLiveWithKs) {
             this._kalturaClient.setDefaultRequestOptions({
                 ks: playerConfig.provider.ks
             });
@@ -84,6 +86,11 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     onMediaUnload(): void {
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.ENDED, this._handleOnEnd);
+        this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+        this._player.removeEventListener(
+            this._player.Event.TIMED_METADATA,
+            this._handleTimedMetadata
+        );
     }
 
     public isLiveEntry(): boolean {
@@ -104,8 +111,40 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._isLiveEntry = true;
             this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+            this._player.addEventListener(
+                this._player.Event.TIMED_METADATA,
+                this._handleTimedMetadata
+            );
+            this._player.configure({
+                plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
+            });
             this.updateLiveStatus();
         }
+    };
+
+    private _handleTimedMetadata = (e: any) => {
+        if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
+            this._absolutePosition = null;
+            return;
+        }
+        try {
+            this._absolutePosition = JSON.parse(
+                e.payload.cues[e.payload.cues.length - 1].value.data
+            ).timestamp;
+        } catch (error) {
+            this._absolutePosition = null;
+            logger.warn("Failed parsing timedmetadata payload cue " + error, {
+                method: "_timedmetadataReceived",
+                data: e.payload
+            });
+        }
+    };
+
+    private _tamperAnalyticsHandler = (e: any) => {
+        if (this._absolutePosition) {
+            e.absolutePosition = this._absolutePosition;
+        }
+        return true;
     };
 
     private _handleFirstPlay = () => {
@@ -323,40 +362,56 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
-        const protocol = KalturaPlaybackProtocol.hls;
         const { id } = this._player.config.sources;
-        const request = new LiveStreamIsLiveAction({ id, protocol });
+        const request = new LiveStreamGetDetailsAction({ id });
+
         logger.info(
-            `Calling isLive ${pluginConfig.checkLiveWithKs === true ? "with" : "without"} KS`,
+            `Calling LiveStreamGetDetailsAction ${
+                pluginConfig.checkLiveWithKs ? "with" : "without"
+            } KS`,
             {
                 method: "updateLiveStatus"
             }
         );
+
         this._kalturaClient.request(request).then(
             data => {
-                if (data === true) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Live);
-                } else if (data === false) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                if (!data || !data.broadcastStatus) {
+                    // bad response
+                    this._initTimeout();
+                    return;
                 }
-                // re-check isLive on timeout
+                switch (data.broadcastStatus) {
+                    case KalturaLiveStreamBroadcastStatus.live:
+                        this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+                        break;
+                    case KalturaLiveStreamBroadcastStatus.offline:
+                        this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                        break;
+                    case KalturaLiveStreamBroadcastStatus.preview:
+                        if (pluginConfig.checkLiveWithKs) {
+                            this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+                        } else {
+                            this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                        }
+                        break;
+                }
                 this._initTimeout();
+                logger.info("LiveStreamGetDetails received ", {
+                    method: "updateLiveStatus",
+                    data: {
+                        data
+                    }
+                });
             },
             error => {
-                const isOffline = (error as any).code === "client::response_type_error";
-                // remove once client is fixed !
-                if (isOffline) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
-                } else {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Error);
-                    logger.error("Failed to call isLive API", {
-                        method: "updateLiveStatus",
-                        data: {
-                            error
-                        }
-                    });
-                }
-                // re-check isLive on timeout
+                this.handleLiveStatusReceived(LiveBroadcastStates.Error);
+                logger.error("Failed to call isLive API", {
+                    method: "updateLiveStatus",
+                    data: {
+                        error
+                    }
+                });
                 this._initTimeout();
             }
         );
