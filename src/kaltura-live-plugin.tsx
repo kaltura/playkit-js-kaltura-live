@@ -397,12 +397,15 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                         break;
                 }
                 this._initTimeout();
-                logger.info("LiveStreamGetDetails received ", {
-                    method: "updateLiveStatus",
-                    data: {
-                        data
+                logger.info(
+                    "LiveStreamGetDetails received. data.broadcastStatus " + data.broadcastStatus,
+                    {
+                        method: "updateLiveStatus",
+                        data: {
+                            data
+                        }
                     }
-                });
+                );
             },
             error => {
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
