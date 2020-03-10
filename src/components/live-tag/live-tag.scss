@@ -1,0 +1,22 @@
+.live-tag {
+    padding: 3px 4px;
+    opacity: 0.94;
+    border-radius: 4px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 15px;
+    text-transform: uppercase;
+    &.preview {
+        background-color: #a56a04;
+    }
+    &.live {
+        background-color: #da1f26;
+    }
+    &.offline {
+        background-color: #666666;
+    }
+}
+
+.isolated-preset-item {
+    display: inline-block;
+}

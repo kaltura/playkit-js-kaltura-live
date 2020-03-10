@@ -10,15 +10,24 @@ import {
     CorePlugin,
     OnMediaLoad,
     OnMediaUnload,
-    OnPluginSetup
+    OnPluginSetup,
+    OnRegisterPresetsComponents
 } from "@playkit-js-contrib/plugin";
-import { OverlayPositions } from "@playkit-js-contrib/ui";
+import {
+    OverlayPositions,
+    RelativeToTypes,
+    ReservedPresetNames,
+    ReservedPresetAreas,
+    PresetManager
+} from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 import { OverlayItem } from "@playkit-js-contrib/ui";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
+import { LiveTag } from "./components/live-tag";
+import * as liveTagStyles from "./components/live-tag/live-tag.scss";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -44,7 +53,8 @@ export enum OverlayItemTypes {
     NoLongerLive = "NoLongerLive"
 }
 
-export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
+export class KalturaLivePlugin
+    implements OnMediaUnload, OnMediaLoad, OnPluginSetup, OnRegisterPresetsComponents {
     private _kalturaClient = new KalturaClient();
     private _isLiveEntry = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
@@ -76,6 +86,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         // cache ie11Win7 check
         this._ie11Windows7 = this._isIE11Win7();
+    }
+
+    onRegisterPresetsComponents(presetManager: PresetManager): void {
+        presetManager.add({
+            label: "kaltura-live-tag",
+            renderChild: () => <LiveTag />,
+            relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
+            presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
+            isolatedMode: true,
+            isolatedOptions: {
+                className: liveTagStyles.isolatedPresetItem
+            }
+        });
     }
 
     onPluginSetup(): void {}
