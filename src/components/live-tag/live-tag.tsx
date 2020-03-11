@@ -3,31 +3,30 @@ import * as styles from "./live-tag.scss";
 
 export interface props {
     isLive: boolean;
-    isDvr: boolean;
     isPreview: boolean;
     isOnLiveEdge: boolean;
 }
 
 export class LiveTag extends Component<props> {
     private _getStyles = () => {
-        const { isDvr, isOnLiveEdge, isPreview } = this.props;
-        if (isDvr && !isOnLiveEdge) {
-            return styles.offline;
+        const { isOnLiveEdge, isPreview, isLive } = this.props;
+        if (isOnLiveEdge && isLive) {
+            return styles.live;
         }
-        if (isPreview && isOnLiveEdge) {
+        if (isOnLiveEdge && isPreview) {
             return styles.preview;
         }
-        return styles.live;
+        return styles.offline;
     };
     private _getLabel = () => {
-        const { isPreview, isDvr } = this.props;
+        const { isPreview, isLive } = this.props;
         if (isPreview) {
             return "preview";
         }
-        if (isDvr) {
-            return "offline";
+        if (isLive) {
+            return "live";
         }
-        return "live";
+        return "offline";
     };
     render() {
         return (

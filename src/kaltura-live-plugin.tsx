@@ -72,6 +72,7 @@ export class KalturaLivePlugin
     readonly _ie11Windows7: boolean = false;
     private _componentRef: ManagedComponent | null = null;
     private _isPreview = false;
+    private _isLive = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -96,7 +97,7 @@ export class KalturaLivePlugin
     onRegisterPresetsComponents(presetManager: PresetManager): void {
         presetManager.add({
             label: "kaltura-live-tag",
-            renderChild: () => this._renderLiveTag(),
+            renderChild: this._renderLiveTag,
             relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
             presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
             isolatedMode: true,
@@ -134,10 +135,9 @@ export class KalturaLivePlugin
                 isShown={() => true}
                 renderChildren={() => (
                     <LiveTag
-                        isDvr={this._player.isDvr()}
-                        isLive={this._player.isLive()}
+                        isLive={this._isLive}
                         isPreview={this._isPreview}
-                        isOnLiveEdge={this._player.isOnLiveEdge()}
+                        isOnLiveEdge={this._player.duration - this._player.currentTime < 10}
                     />
                 )}
                 ref={node => {
@@ -311,6 +311,7 @@ export class KalturaLivePlugin
     // this functions is called whenever isLive receives any value.
     // This is where the magic happens
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
+        this._updateLiveTag();
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
@@ -428,10 +429,10 @@ export class KalturaLivePlugin
                 method: "updateLiveStatus"
             }
         );
-
-        this._isPreview = false;
         this._kalturaClient.request(request).then(
             data => {
+                this._isLive = false;
+                this._isPreview = false;
                 if (!data || !data.broadcastStatus) {
                     // bad response
                     this._initTimeout();
@@ -439,6 +440,7 @@ export class KalturaLivePlugin
                 }
                 switch (data.broadcastStatus) {
                     case KalturaLiveStreamBroadcastStatus.live:
+                        this._isLive = true;
                         this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         break;
                     case KalturaLiveStreamBroadcastStatus.offline:
@@ -465,6 +467,8 @@ export class KalturaLivePlugin
                 );
             },
             error => {
+                this._isLive = false;
+                this._isPreview = false;
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
