@@ -18,7 +18,8 @@ import {
     RelativeToTypes,
     ReservedPresetNames,
     ReservedPresetAreas,
-    PresetManager
+    PresetManager,
+    ManagedComponent
 } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
@@ -67,6 +68,8 @@ export class KalturaLivePlugin
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
     private _currentOverlayHttpError = false;
     readonly _ie11Windows7: boolean = false;
+    private _liveTagItem: any;
+    private _isLive = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -86,12 +89,13 @@ export class KalturaLivePlugin
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         // cache ie11Win7 check
         this._ie11Windows7 = this._isIE11Win7();
+        this._testRerender();
     }
 
     onRegisterPresetsComponents(presetManager: PresetManager): void {
         presetManager.add({
             label: "kaltura-live-tag",
-            renderChild: () => <LiveTag />,
+            renderChild: this._renderLiveTag,
             relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
             presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
             isolatedMode: true,
@@ -114,6 +118,27 @@ export class KalturaLivePlugin
             this._handleTimedMetadata
         );
     }
+
+    private _testRerender = () => {
+        setTimeout(() => {
+            this._isLive = !this._isLive;
+            this._liveTagItem.update();
+            this._testRerender();
+        }, 5000);
+    };
+
+    private _renderLiveTag = () => {
+        return (
+            <ManagedComponent
+                label={"live-indicator"}
+                isShown={() => true}
+                renderChildren={() => <LiveTag isDvr isLive={this._isLive} />}
+                ref={node => {
+                    this._liveTagItem = node;
+                }}
+            />
+        );
+    };
 
     public isLiveEntry(): boolean {
         return this._isLiveEntry;
