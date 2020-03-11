@@ -2,6 +2,7 @@ import { h } from "preact";
 import { KalturaClient } from "kaltura-typescript-client";
 import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
 import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
+import { LiveStreamGetDetailsAction } from "kaltura-typescript-client/api/types/LiveStreamGetDetailsAction";
 import {
     ContribPluginConfigs,
     ContribPluginData,
@@ -17,18 +18,19 @@ import {
     OverlayPositions,
     RelativeToTypes,
     ReservedPresetNames,
-    ReservedPresetAreas,
     PresetManager,
+    ReservedPresetAreas,
     ManagedComponent
 } from "@playkit-js-contrib/ui";
+import { OverlayItem, OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import { OverlayItem } from "@playkit-js-contrib/ui";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
 import { LiveTag } from "./components/live-tag";
 import * as liveTagStyles from "./components/live-tag/live-tag.scss";
+import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
@@ -409,37 +411,59 @@ export class KalturaLivePlugin
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
     private updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
-        const protocol = KalturaPlaybackProtocol.hls;
         const { id } = this._player.config.sources;
-        const request = new LiveStreamIsLiveAction({ id, protocol });
-        logger.info(`Calling isLive ${pluginConfig.checkLiveWithKs ? "with" : "without"} KS`, {
-            method: "updateLiveStatus"
-        });
+        const request = new LiveStreamGetDetailsAction({ id });
+
+        logger.info(
+            `Calling LiveStreamGetDetailsAction ${
+                pluginConfig.checkLiveWithKs ? "with" : "without"
+            } KS`,
+            {
+                method: "updateLiveStatus"
+            }
+        );
+
         this._kalturaClient.request(request).then(
             data => {
-                if (data === true) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Live);
-                } else if (data === false) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                if (!data || !data.broadcastStatus) {
+                    // bad response
+                    this._initTimeout();
+                    return;
                 }
-                // re-check isLive on timeout
+                switch (data.broadcastStatus) {
+                    case KalturaLiveStreamBroadcastStatus.live:
+                        this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+                        break;
+                    case KalturaLiveStreamBroadcastStatus.offline:
+                        this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                        break;
+                    case KalturaLiveStreamBroadcastStatus.preview:
+                        if (pluginConfig.checkLiveWithKs) {
+                            this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+                        } else {
+                            this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+                        }
+                        break;
+                }
                 this._initTimeout();
-            },
-            error => {
-                const isOffline = (error as any).code === "client::response_type_error";
-                // remove once client is fixed !
-                if (isOffline) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
-                } else {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Error);
-                    logger.error("Failed to call isLive API", {
+                logger.info(
+                    "LiveStreamGetDetails received. data.broadcastStatus " + data.broadcastStatus,
+                    {
                         method: "updateLiveStatus",
                         data: {
-                            error
+                            data
                         }
-                    });
-                }
-                // re-check isLive on timeout
+                    }
+                );
+            },
+            error => {
+                this.handleLiveStatusReceived(LiveBroadcastStates.Error);
+                logger.error("Failed to call isLive API", {
+                    method: "updateLiveStatus",
+                    data: {
+                        error
+                    }
+                });
                 this._initTimeout();
             }
         );
