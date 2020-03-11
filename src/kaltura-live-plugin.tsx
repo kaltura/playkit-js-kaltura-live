@@ -20,9 +20,9 @@ import {
     ReservedPresetNames,
     PresetManager,
     ReservedPresetAreas,
-    ManagedComponent
+    ManagedComponent,
+    OverlayItem
 } from "@playkit-js-contrib/ui";
-import { OverlayItem, OverlayPositions } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
@@ -70,8 +70,8 @@ export class KalturaLivePlugin
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
     private _currentOverlayHttpError = false;
     readonly _ie11Windows7: boolean = false;
-    private _liveTagItem: any;
-    private _isLive = false;
+    private _componentRef: ManagedComponent | null = null;
+    private _isPreview = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -91,13 +91,12 @@ export class KalturaLivePlugin
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         // cache ie11Win7 check
         this._ie11Windows7 = this._isIE11Win7();
-        this._testRerender();
     }
 
     onRegisterPresetsComponents(presetManager: PresetManager): void {
         presetManager.add({
             label: "kaltura-live-tag",
-            renderChild: this._renderLiveTag,
+            renderChild: () => this._renderLiveTag(),
             relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
             presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
             isolatedMode: true,
@@ -121,22 +120,28 @@ export class KalturaLivePlugin
         );
     }
 
-    private _testRerender = () => {
-        setTimeout(() => {
-            this._isLive = !this._isLive;
-            this._liveTagItem.update();
-            this._testRerender();
-        }, 5000);
-    };
+    private _updateLiveTag() {
+        if (!this._componentRef) {
+            return;
+        }
+        this._componentRef.update();
+    }
 
     private _renderLiveTag = () => {
         return (
             <ManagedComponent
                 label={"live-indicator"}
                 isShown={() => true}
-                renderChildren={() => <LiveTag isDvr isLive={this._isLive} />}
+                renderChildren={() => (
+                    <LiveTag
+                        isDvr={this._player.isDvr()}
+                        isLive={this._player.isLive()}
+                        isPreview={this._isPreview}
+                        isOnLiveEdge={this._player.isOnLiveEdge()}
+                    />
+                )}
                 ref={node => {
-                    this._liveTagItem = node;
+                    this._componentRef = node;
                 }}
             />
         );
@@ -172,6 +177,7 @@ export class KalturaLivePlugin
     };
 
     private _handleTimedMetadata = (e: any) => {
+        this._updateLiveTag();
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;
@@ -423,6 +429,7 @@ export class KalturaLivePlugin
             }
         );
 
+        this._isPreview = false;
         this._kalturaClient.request(request).then(
             data => {
                 if (!data || !data.broadcastStatus) {
@@ -439,6 +446,7 @@ export class KalturaLivePlugin
                         break;
                     case KalturaLiveStreamBroadcastStatus.preview:
                         if (pluginConfig.checkLiveWithKs) {
+                            this._isPreview = true;
                             this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         } else {
                             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
