@@ -5,6 +5,7 @@ export interface props {
     isLive: boolean;
     isPreview: boolean;
     isOnLiveEdge: boolean;
+    onClick: () => void;
 }
 
 export class LiveTag extends Component<props> {
@@ -28,9 +29,28 @@ export class LiveTag extends Component<props> {
         }
         return "offline";
     };
-    render() {
+
+    private _onClick = (): void => {
+        const { isOnLiveEdge, onClick } = this.props;
+        if (!isOnLiveEdge) {
+            onClick();
+        }
+    };
+
+    render(props: props) {
         return (
-            <div className={[styles.liveTag, this._getStyles()].join(" ")}>{this._getLabel()}</div>
+            <div
+                role="button"
+                tab-index={0}
+                className={[
+                    styles.liveTag,
+                    this._getStyles(),
+                    !props.isOnLiveEdge ? styles.clicable : ""
+                ].join(" ")}
+                onClick={this._onClick}
+            >
+                {this._getLabel()}
+            </div>
         );
     }
 }

@@ -128,6 +128,13 @@ export class KalturaLivePlugin
         this._componentRef.update();
     }
 
+    private _seekToLiveEdge = () => {
+        this._player.seekToLiveEdge();
+        if (this._player.paused) {
+            this._player.play();
+        }
+    };
+
     private _renderLiveTag = () => {
         return (
             <ManagedComponent
@@ -138,6 +145,7 @@ export class KalturaLivePlugin
                         isLive={this._isLive}
                         isPreview={this._isPreview}
                         isOnLiveEdge={this._player.duration - this._player.currentTime < 10}
+                        onClick={this._seekToLiveEdge}
                     />
                 )}
                 ref={node => {

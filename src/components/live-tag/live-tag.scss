@@ -8,12 +8,16 @@
     text-transform: uppercase;
     &.preview {
         background-color: #a56a04;
+        color: #000000;
     }
     &.live {
         background-color: #da1f26;
     }
     &.offline {
         background-color: #666666;
+    }
+    &.clicable {
+        cursor: pointer;
     }
 }
 
