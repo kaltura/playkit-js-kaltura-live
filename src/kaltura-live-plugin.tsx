@@ -144,7 +144,7 @@ export class KalturaLivePlugin
                     <LiveTag
                         isLive={this._isLive}
                         isPreview={this._isPreview}
-                        isOnLiveEdge={this._player.duration - this._player.currentTime < 10}
+                        isOnLiveEdge={this._player.isOnLiveEdge()}
                         onClick={this._seekToLiveEdge}
                     />
                 )}
