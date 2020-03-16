@@ -1,0 +1,27 @@
+.live-tag {
+    padding: 3px 4px;
+    opacity: 0.94;
+    border-radius: 4px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 15px;
+    text-transform: uppercase;
+    &.preview {
+        background-color: #a56a04;
+        color: #000000;
+    }
+    &.live {
+        background-color: #da1f26;
+    }
+    &.offline {
+        background-color: #666666;
+    }
+    &.clicable {
+        cursor: pointer;
+    }
+}
+
+.isolated-preset-item {
+    display: inline-block;
+    margin-top: 4px;
+}

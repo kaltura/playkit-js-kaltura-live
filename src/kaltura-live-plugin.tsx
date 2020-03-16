@@ -11,14 +11,25 @@ import {
     CorePlugin,
     OnMediaLoad,
     OnMediaUnload,
-    OnPluginSetup
+    OnPluginSetup,
+    OnRegisterPresetsComponents
 } from "@playkit-js-contrib/plugin";
-import { OverlayItem, OverlayPositions } from "@playkit-js-contrib/ui";
+import {
+    OverlayPositions,
+    RelativeToTypes,
+    ReservedPresetNames,
+    PresetManager,
+    ReservedPresetAreas,
+    ManagedComponent,
+    OverlayItem
+} from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
+import { LiveTag } from "./components/live-tag";
+import * as liveTagStyles from "./components/live-tag/live-tag.scss";
 import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types";
 
 const logger = getContribLogger({
@@ -45,7 +56,8 @@ export enum OverlayItemTypes {
     NoLongerLive = "NoLongerLive"
 }
 
-export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
+export class KalturaLivePlugin
+    implements OnMediaUnload, OnMediaLoad, OnPluginSetup, OnRegisterPresetsComponents {
     private _kalturaClient = new KalturaClient();
     private _isLiveEntry = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
@@ -58,6 +70,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
     private _currentOverlayHttpError = false;
     readonly _ie11Windows7: boolean = false;
+    private _componentRef: ManagedComponent | null = null;
+    private _isPreview = false;
+    private _isLive = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -79,6 +94,19 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
         this._ie11Windows7 = this._isIE11Win7();
     }
 
+    onRegisterPresetsComponents(presetManager: PresetManager): void {
+        presetManager.add({
+            label: "kaltura-live-tag",
+            renderChild: this._renderLiveTag,
+            relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
+            presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
+            isolatedMode: true,
+            isolatedOptions: {
+                className: liveTagStyles.isolatedPresetItem
+            }
+        });
+    }
+
     onPluginSetup(): void {}
 
     onMediaLoad(): void {}
@@ -92,6 +120,40 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
             this._handleTimedMetadata
         );
     }
+
+    private _updateLiveTag() {
+        if (!this._componentRef) {
+            return;
+        }
+        this._componentRef.update();
+    }
+
+    private _seekToLiveEdge = () => {
+        this._player.seekToLiveEdge();
+        if (this._player.paused) {
+            this._player.play();
+        }
+    };
+
+    private _renderLiveTag = () => {
+        return (
+            <ManagedComponent
+                label={"live-indicator"}
+                isShown={() => true}
+                renderChildren={() => (
+                    <LiveTag
+                        isLive={this._isLive}
+                        isPreview={this._isPreview}
+                        isOnLiveEdge={this._player.isOnLiveEdge()}
+                        onClick={this._seekToLiveEdge}
+                    />
+                )}
+                ref={node => {
+                    this._componentRef = node;
+                }}
+            />
+        );
+    };
 
     public isLiveEntry(): boolean {
         return this._isLiveEntry;
@@ -123,6 +185,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     };
 
     private _handleTimedMetadata = (e: any) => {
+        this._updateLiveTag();
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;
@@ -256,6 +319,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
     // this functions is called whenever isLive receives any value.
     // This is where the magic happens
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
+        this._updateLiveTag();
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
@@ -373,9 +437,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 method: "updateLiveStatus"
             }
         );
-
         this._kalturaClient.request(request).then(
             data => {
+                this._isLive = false;
+                this._isPreview = false;
                 if (!data || !data.broadcastStatus) {
                     // bad response
                     this._initTimeout();
@@ -383,6 +448,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 }
                 switch (data.broadcastStatus) {
                     case KalturaLiveStreamBroadcastStatus.live:
+                        this._isLive = true;
                         this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         break;
                     case KalturaLiveStreamBroadcastStatus.offline:
@@ -390,6 +456,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                         break;
                     case KalturaLiveStreamBroadcastStatus.preview:
                         if (pluginConfig.checkLiveWithKs) {
+                            this._isPreview = true;
                             this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         } else {
                             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
@@ -408,6 +475,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad, OnPluginSe
                 );
             },
             error => {
+                this._isLive = false;
+                this._isPreview = false;
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
