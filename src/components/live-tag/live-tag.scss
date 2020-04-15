@@ -21,7 +21,10 @@
     }
 }
 
-.isolated-preset-item {
-    display: inline-block;
-    margin-top: 4px;
+
+:global {
+    .playkit-player .playkit-bottom-bar .playkit-left-controls div[data-contrib-injected="kaltura-live-tag"] {
+        display: inline-block;
+        margin-top: 4px;
+    }
 }

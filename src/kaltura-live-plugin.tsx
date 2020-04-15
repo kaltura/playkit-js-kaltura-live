@@ -99,11 +99,7 @@ export class KalturaLivePlugin
             label: "kaltura-live-tag",
             renderChild: this._renderLiveTag,
             relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
-            presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls },
-            isolatedMode: true,
-            isolatedOptions: {
-                className: liveTagStyles.isolatedPresetItem
-            }
+            presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls }
         });
     }
 
