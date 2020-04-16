@@ -45,7 +45,7 @@ export class LiveTag extends Component<props> {
                 className={[
                     styles.liveTag,
                     this._getStyles(),
-                    !props.isOnLiveEdge ? styles.clicable : ""
+                    !props.isOnLiveEdge ? styles.clickable : ""
                 ].join(" ")}
                 onClick={this._onClick}
             >
