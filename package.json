@@ -1,6 +1,6 @@
 {
   "name": "@playkit-js/kaltura-live-plugin",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/kaltura/playkit-js-kaltura-live/issues"
@@ -60,9 +60,9 @@
     "webpack-merge": "^4.2.2"
   },
   "dependencies": {
-    "@playkit-js-contrib/common": "^3.1.1",
-    "@playkit-js-contrib/plugin": "^3.1.1",
-    "@playkit-js-contrib/ui": "^3.1.1",
+    "@playkit-js-contrib/common": "^3.2.3",
+    "@playkit-js-contrib/plugin": "^3.2.3",
+    "@playkit-js-contrib/ui": "^3.2.3",
     "@types/node": "^8.10.59",
     "deep-diff": "^1.0.2",
     "kaltura-typescript-client": "file:libs/kaltura-typescript-client-7.0.1-v20200311-102105.tgz",

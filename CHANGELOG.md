@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.9](https://github.com/kaltura/playkit-js-kaltura-live/compare/v1.0.8...v1.0.9) (2020-04-16)
+
+
+### Bug Fixes
+
+* FEV-454 missing attribute in analytics ([#66](https://github.com/kaltura/playkit-js-kaltura-live/issues/66)) ([9737b31](https://github.com/kaltura/playkit-js-kaltura-live/commit/9737b311bc4e6b35b98b27e3f173fdd421d43087))
+
 ### [1.0.8](https://github.com/kaltura/playkit-js-kaltura-live/compare/v1.0.7...v1.0.8) (2019-12-09)
 
 
