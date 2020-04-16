@@ -67,7 +67,7 @@
     "deep-diff": "^1.0.2",
     "kaltura-typescript-client": "file:libs/kaltura-typescript-client-7.0.1-v20200311-102105.tgz",
     "preact": "^8.5.3",
-    "serialize-javascript": "^2.1.1",
+    "serialize-javascript": "^3.0.0",
     "svg-url-loader": "^2.3.2"
   },
   "files": [
