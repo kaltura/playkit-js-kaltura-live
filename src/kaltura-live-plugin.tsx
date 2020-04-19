@@ -1,7 +1,5 @@
 import { h } from "preact";
 import { KalturaClient } from "kaltura-typescript-client";
-import { KalturaPlaybackProtocol } from "kaltura-typescript-client/api/types/KalturaPlaybackProtocol";
-import { LiveStreamIsLiveAction } from "kaltura-typescript-client/api/types/LiveStreamIsLiveAction";
 import { LiveStreamGetDetailsAction } from "kaltura-typescript-client/api/types/LiveStreamGetDetailsAction";
 import {
     ContribPluginConfigs,
@@ -29,8 +27,7 @@ import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
 import { LiveTag } from "./components/live-tag";
-import * as liveTagStyles from "./components/live-tag/live-tag.scss";
-import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types";
+import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types/KalturaLiveStreamBroadcastStatus";
 
 const logger = getContribLogger({
     class: "KalturaLivePlugin",
