@@ -1,6 +1,6 @@
 {
   "name": "@playkit-js/kaltura-live-plugin",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/kaltura/playkit-js-kaltura-live/issues"
