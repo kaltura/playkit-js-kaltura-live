@@ -190,7 +190,7 @@ export class KalturaLivePlugin
         } catch (error) {
             this._absolutePosition = null;
             logger.warn("Failed parsing timedmetadata payload cue " + error, {
-                method: "_timedmetadataReceived",
+                method: "_timedmetadataReceived ",
                 data: e.payload
             });
         }
