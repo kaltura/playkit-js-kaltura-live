@@ -20,7 +20,7 @@
     "serve": "kcontrib serve",
     "serve:update-modes": "kcontrib serve --update-modes",
     "serve:update-player": "kcontrib serve --update-player",
-    "analyze": "npm run build && npx source-map-explorer dist/playkit-js-moderation.js",
+    "analyze": "npm run build && npx source-map-explorer dist/playkit-js-kaltura-live.js",
     "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
     "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
     "husky:pre-commit": "lint-staged",
