@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaltura Live plugin for player V7 - Test page</title>
+
+    <script>
+        function loadJSON(path, callback) {
+            const xobj = new XMLHttpRequest();
+            xobj.overrideMimeType("application/json");
+            xobj.open('GET', path, true);
+            xobj.onreadystatechange = function () {
+                if (xobj.readyState === 4 && xobj.status.toString() === "200") {
+                    callback(xobj.responseText);
+                }
+            };
+            xobj.send(null);
+        }
+
+        function loadScript(url, callback) {
+            let script = document.createElement("script")
+            script.type = "text/javascript";
+            if (script.readyState) {
+                script.onreadystatechange = function () {
+                    if (script.readyState === "loaded" || script.readyState === "complete") {
+                        script.onreadystatechange = null;
+                        callback();
+                    }
+                };
+            } else {
+                script.onload = function () {
+                    callback();
+                };
+            }
+
+            script.src = url;
+            document.getElementsByTagName("head")[0].appendChild(script);
+        }
+    </script>
+
+    <script>
+        function fetchConfigs(callback) {
+            loadJSON('./env.json', function(envJson) {
+                return loadJSON('./config.json', function(configJson) {
+                    const options = [envJson, configJson].map(function(conf) { return JSON.parse(conf) });
+                    const envOptions = options[0];
+                    const configOptions = options[1];
+                    const env = envOptions.env[envOptions.modes.bundlerEnv];
+
+                const bundlerUrl = env.bundler + '/p/' + configOptions.data.partnerId + '/embedPlaykitJs/uiconf_id/' + configOptions.data.uiConfId +
+                    (envOptions.modes.bundler === "uiConf"
+                        ? ''
+                        : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
+
+                    let loaderRunner = function() {
+                        return callback(env, configOptions);
+                    }
+                    <% for (var index in htmlWebpackPlugin.files.js) { %>
+                        loaderRunner = (function(prevLoader) {
+                                return function() {
+                                    return loadScript("<%= htmlWebpackPlugin.files.js[index] %>", prevLoader);
+                                }
+                            })(loaderRunner);
+                    <% } %>
+                    loadScript(bundlerUrl, loaderRunner);
+                });
+            });
+        }
+
+        // Configuring relevant plugins
+        const plugins = {
+            'kaltura-live': {
+                checkLiveWithKs: true
+            }
+        };
+
+        // Configuring plugins font style
+        const contrib = {
+            ui: {
+                fonts: {
+                    downloadData: {
+                        url: 'https://fonts.googleapis.com/css?family=Lato&display=swap',
+                        name: 'Lato'
+                    }
+                }
+            }
+        };
+
+    </script>
+
+    <link rel="stylesheet" href="resize.css">
+    <script src="resize.js"></script>
+
+    <style>
+        #player-div {
+            display: inline;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+<h1>Kaltura Live plugin for player V7 - Test page</h1>
+<button onclick="changeMedia()">test change media</button>
+<div style="position:relative;margin-top:10px">
+    <div class='resizable'>
+        <div id="player-div"></div>
+        <div class='resizers'>
+            <div class='resizer top-left'></div>
+            <div class='resizer top-right'></div>
+            <div class='resizer bottom-left'></div>
+            <div class='resizer bottom-right'></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var player;
+    var switchMediaEntryId;
+
+    function changeMedia() {
+        player.loadMedia({
+            entryId: switchMediaEntryId
+        });
+    }
+
+    fetchConfigs(function(env, conf) {
+        const data = conf.data;
+        switchMediaEntryId = data.switchMediaEntryId;
+        let config = {
+            logLevel: "DEBUG",
+            targetId: "player-div",
+            provider: {
+                env: env,
+                partnerId: data.partnerId,
+                uiConfId: data.uiConfId,
+                ks: data.ks
+            },
+            session: {
+                userId: data.userId
+            },
+            contrib: contrib,
+            plugins: plugins,
+            ui: {
+                debug: true
+            }
+        };
+
+        let mediaInfo = {entryId: data.entryId};
+
+        player = KalturaPlayer.setup(config);
+        player.loadMedia(mediaInfo);
+
+        makeResizableDiv('.resizable');
+    })
+</script>
+
+</body>
+
+</html>

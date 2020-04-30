@@ -15,60 +15,47 @@
   "scripts": {
     "clean": "rm -rf dist",
     "reset": "npm run clean && rm -rf node_modules",
-    "build": "webpack --config webpack.prod.js",
-    "build:dev": "webpack --config webpack.dev.js",
-    "serve": "webpack-dev-server --open --config webpack.dev.js",
-    "serve:external": "npm run serve -- --host 0.0.0.0",
+    "build": "kcontrib build",
+    "build:dev": "kcontrib build --dev",
+    "serve": "kcontrib serve",
+    "serve:update-modes": "kcontrib serve --update-modes",
+    "serve:update-player": "kcontrib serve --update-player",
     "analyze": "npm run build && npx source-map-explorer dist/playkit-js-kaltura-live.js",
-    "contrib:latest": "npm i @playkit-js-contrib/{common,ui,plugin}@latest",
-    "contrib:next": "npm i @playkit-js-contrib/{common,ui,plugin}@next",
-    "contrib:local": "npm link @playkit-js-contrib/{common,ui,plugin} --production",
-    "deploy:prepare": "node scripts/deploy-prepare.js",
-    "deploy:publish-to-npm": "node scripts/deploy-publish.js",
-    "deploy:next:publish-to-npm": "node scripts/deploy-publish.js",
-    "deploy:next:prepare": "node scripts/deploy-prepare.js --prerelease next"
+    "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
+    "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
+    "husky:pre-commit": "lint-staged",
+    "husky:commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+    "deploy:prepare": "kcontrib deploy --prepare",
+    "deploy:publish-to-npm": "kcontrib deploy --publish",
+    "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
+    "contrib:latest": "kcontrib infra --type=latest",
+    "infra:latest": "kcontrib infra --type=latest",
+    "infra:next": "kcontrib infra --type=next",
+    "infra:local": "kcontrib infra --type=local",
+    "infra:add": "kcontrib infra --add"
   },
   "keywords": [],
   "author": "",
   "devDependencies": {
-    "awesome-typescript-loader": "^5.2.1",
-    "chalk": "^3.0.0",
-    "clean-webpack-plugin": "^3.0.0",
-    "copy-webpack-plugin": "^5.0.2",
-    "css-loader": "^2.1.1",
-    "fs-extra": "^8.1.0",
-    "html-webpack-plugin": "^3.2.0",
-    "husky": "^4.2.1",
-    "inquirer": "^7.0.0",
-    "lint-staged": "^10.0.2",
-    "node-sass": "^4.5.3",
-    "prettier": "^1.15.3",
-    "sass-loader": "^7.1.0",
-    "source-map-loader": "^0.2.4",
-    "standard-version": "^7.0.0",
-    "style-loader": "^0.23.1",
-    "tslint": "^5.11.0",
-    "tslint-config-prettier": "^1.17.0",
-    "tslint-consistent-codestyle": "^1.14.1",
-    "tslint-eslint-rules": "^5.4.0",
-    "tslint-react": "^4.2.0",
-    "typescript": "^3.2.1",
-    "url-loader": "^3.0.0",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "^3.2.1",
-    "webpack-merge": "^4.2.2"
+    "@commitlint/cli": "8.3.5",
+    "@commitlint/config-conventional": "8.3.4",
+    "@types/classnames": "2.2.9",
+    "@types/node": "13.7.6",
+    "@typescript-eslint/eslint-plugin": "2.21.0",
+    "@typescript-eslint/parser": "2.21.0",
+    "husky": "3.1.0",
+    "preact": "^10.4.1",
+    "tslint": "5.20.1",
+    "typescript": "3.8.2"
   },
   "dependencies": {
+    "@playkit-js-contrib/cli": "1.1.0",
     "@playkit-js-contrib/common": "^3.2.3",
     "@playkit-js-contrib/plugin": "^3.2.3",
     "@playkit-js-contrib/ui": "^3.2.3",
-    "@types/node": "^8.10.59",
-    "deep-diff": "^1.0.2",
+    "classnames": "2.2.6",
     "kaltura-typescript-client": "file:libs/kaltura-typescript-client-7.0.1-v20200311-102105.tgz",
-    "preact": "^8.5.3",
-    "serialize-javascript": "^2.1.1",
-    "svg-url-loader": "^2.3.2"
+    "null": "^2.0.0"
   },
   "files": [
     "dist",
@@ -77,15 +64,16 @@
     "CHANGELOG.md",
     "src"
   ],
-  "lint-staged": {
-    "*.{ts,tsx,json,css,html}": [
-      "prettier --write",
-      "git add"
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   }
 }
