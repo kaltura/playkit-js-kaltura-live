@@ -39,7 +39,7 @@
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
     "@commitlint/config-conventional": "8.3.4",
-    "@types/classnames": "2.2.9",
+    "@types/classnames": "2.2.10",
     "@types/node": "13.7.6",
     "@typescript-eslint/eslint-plugin": "2.21.0",
     "@typescript-eslint/parser": "2.21.0",
