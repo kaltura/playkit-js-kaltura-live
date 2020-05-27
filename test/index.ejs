@@ -49,10 +49,11 @@
                     const configOptions = options[1];
                     const env = envOptions.env[envOptions.modes.bundlerEnv];
 
-                const bundlerUrl = env.bundler + '/p/' + configOptions.data.partnerId + '/embedPlaykitJs/uiconf_id/' + configOptions.data.uiConfId +
-                    (envOptions.modes.bundler === "uiConf"
-                        ? ''
-                        : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
+                const bundlerUrl = "https://qa-apache-php7.dev.kaltura.com/p/6265/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.53.4-vamb.1"
+                // const bundlerUrl = env.bundler + '/p/' + configOptions.data.partnerId + '/embedPlaykitJs/uiconf_id/' + configOptions.data.uiConfId +
+                //     (envOptions.modes.bundler === "uiConf"
+                //         ? ''
+                //         : '/versions/kaltura-ovp-player=' + envOptions.bundler.customPlayerVersion);
 
                     let loaderRunner = function() {
                         return callback(env, configOptions);
@@ -72,7 +73,8 @@
         // Configuring relevant plugins
         const plugins = {
             'kaltura-live': {
-                checkLiveWithKs: true
+                checkLiveWithKs: false,
+                isLiveInterval: 5
             }
         };
 
