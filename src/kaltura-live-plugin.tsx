@@ -279,6 +279,9 @@ export class KalturaLivePlugin
 
     private _initTimeout = () => {
         const { pluginConfig } = this._configs;
+        if (this._isLiveApiCallTimeout) {
+            this._resetTimeout();
+        }
         this._isLiveApiCallTimeout = setTimeout(
             this.updateLiveStatus,
             pluginConfig.isLiveInterval * 1000
@@ -374,6 +377,7 @@ export class KalturaLivePlugin
                 this._currentOverlayHttpError === this._httpError) ||
             this._ie11Win7Block
         ) {
+            this._initTimeout();
             return;
         }
         if (this._currentOverlay) {
@@ -384,6 +388,7 @@ export class KalturaLivePlugin
         this._currentOverlayHttpError = this._httpError;
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
+                this._initTimeout();
                 this._currentOverlay = this._contribServices.overlayManager.add({
                     label: "no-longer-live-overlay",
                     position: OverlayPositions.PlayerArea,
@@ -396,6 +401,7 @@ export class KalturaLivePlugin
                 });
                 break;
             case OverlayItemTypes.Offline:
+                this._initTimeout();
                 this._currentOverlay = this._contribServices.overlayManager.add({
                     label: "offline-overlay",
                     position: OverlayPositions.PlayerArea,
@@ -403,6 +409,7 @@ export class KalturaLivePlugin
                 });
                 break;
             case OverlayItemTypes.HttpError:
+                this._initTimeout();
                 this._currentOverlay = this._contribServices.overlayManager.add({
                     label: "http-problem-overlay",
                     position: OverlayPositions.PlayerArea,
@@ -411,6 +418,9 @@ export class KalturaLivePlugin
                 break;
             case OverlayItemTypes.None:
             default:
+                if (this._configs.pluginConfig.checkLiveWithKs) {
+                    this._initTimeout();
+                }
                 this._currentOverlay = null;
                 break;
         }
@@ -456,7 +466,6 @@ export class KalturaLivePlugin
                         }
                         break;
                 }
-                this._initTimeout();
                 logger.info(
                     "LiveStreamGetDetails received. data.broadcastStatus " + data.broadcastStatus,
                     {
