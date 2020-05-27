@@ -95,6 +95,7 @@ export class KalturaLivePlugin
         presetManager.add({
             label: "kaltura-live-tag",
             renderChild: this._renderLiveTag,
+            isolateComponent: true,
             relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
             presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls }
         });
