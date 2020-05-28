@@ -378,9 +378,10 @@ export class KalturaLivePlugin
                 this._currentOverlayHttpError === this._httpError) ||
             this._ie11Win7Block
         ) {
-            if (this._configs.pluginConfig.checkLiveWithKs) {
-                this._initTimeout();
+            if (type === OverlayItemTypes.None && !this._configs.pluginConfig.checkLiveWithKs) {
+                return;
             }
+            this._initTimeout();
             return;
         }
         if (this._currentOverlay) {
