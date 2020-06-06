@@ -25,6 +25,9 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
+        if (event.type === "ended") {
+            this._plugin.handleOnEnd();
+        }
         if (
             event.type === EVENT_ERROR_TYPE &&
             event.payload &&
