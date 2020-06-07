@@ -2,7 +2,10 @@ import { KalturaLivePlugin } from "../kaltura-live-plugin";
 import { getContribLogger } from "@playkit-js-contrib/common";
 
 const HTTP_ERRORS = [1002, 1003, 3016, 3022];
-const EVENT_ERROR_TYPE = "error";
+enum EventTypes {
+    ERROR = "error",
+    ENDED = "ended"
+};
 
 const logger = getContribLogger({
     class: "KalturaLiveDecorator",
@@ -25,11 +28,11 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
-        if (event.type === "ended") {
-            this._plugin.handleOnEnd();
+        if (event.type === EventTypes.ENDED) {
+            this._plugin.updateLiveStatus();
         }
         if (
-            event.type === EVENT_ERROR_TYPE &&
+            event.type === EventTypes.ERROR &&
             event.payload &&
             event.payload.code &&
             HTTP_ERRORS.indexOf(event.payload.code) > -1
@@ -40,7 +43,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
                     method: "dispatchEvent"
                 }
             );
-            this._plugin.handleHttpError();
+            this._plugin.updateLiveStatus();
             return true;
         }
         return this._dispatcher(event);
