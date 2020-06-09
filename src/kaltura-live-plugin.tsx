@@ -202,8 +202,7 @@ export class KalturaLivePlugin
     };
 
     private _reloadMedia = () => {
-        // TODO: add getPlayer TS type to KalturaPlayer in contrib repo
-        const player: any = (KalturaPlayer as any).getPlayer(this._player.config.targetId);
+        const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
         player?.configure({ playback: { autoplay: true }});
         player?.loadMedia({ entryId });
