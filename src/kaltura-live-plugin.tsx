@@ -58,18 +58,15 @@ export class KalturaLivePlugin
     private _kalturaClient = new KalturaClient();
     private _isLiveEntry = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
-    private _wasPlayed: boolean = false;
-    private _httpError: boolean = false;
-    private _ie11Win7Block = false;
+    private _wasPlayed = false;
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
     private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
-    private _currentOverlayHttpError = false;
-    readonly _ie11Windows7: boolean = false;
     private _componentRef: ManagedComponent | null = null;
     private _isPreview = false;
     private _isLive = false;
+    private _activeRequest = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -87,8 +84,6 @@ export class KalturaLivePlugin
             });
         }
         this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
-        // cache ie11Win7 check
-        this._ie11Windows7 = this._isIE11Win7();
     }
 
     onRegisterPresetsComponents(presetManager: PresetManager): void {
@@ -107,7 +102,6 @@ export class KalturaLivePlugin
 
     onMediaUnload(): void {
         this._resetTimeout();
-        this._player.removeEventListener(this._player.Event.ENDED, this._handleOnEnd);
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(
             this._player.Event.TIMED_METADATA,
@@ -165,7 +159,6 @@ export class KalturaLivePlugin
         this._player.removeEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         if (this._player.isLive()) {
             this._isLiveEntry = true;
-            this._player.addEventListener(this._player.Event.ENDED, this._handleOnEnd);
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
             this._player.addEventListener(
                 this._player.Event.TIMED_METADATA,
@@ -208,109 +201,27 @@ export class KalturaLivePlugin
         this._wasPlayed = true;
     };
 
-    // use this method so that engine-decorator can notify the plugin of an error
-    // this is triggered after player had not got internet back and this is non-recoverable problem
-    // this._httpError never changes back to false
-    public handleHttpError() {
-        this._httpError = true;
-        logger.info("got httpError - adding network-error slate", {
-            method: "handleHttpError"
-        });
-        // TODO - do not remove this line !
-        this._manageOfflineSlate(OverlayItemTypes.HttpError);
-    }
-
-    private _reloadVideo = () => {
-        // TODO - fix once FEC-9523 implemented by core team
-        // IE11-Win7 edge case - cannot reload video engine. Show non-recoverable slate and prevent future changes
-        if (this._ie11Windows7) {
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
-            this._ie11Win7Block = true;
-            logger.warn("IE11 Windows7 cannot reload video ! non-recoverable error", {
-                method: "_reloadVideo"
-            });
-            return;
-        }
-
-        try {
-            // TODO - fix once FEC-9519 implemented by core team
-            if (this.player.env.browser.name === "Safari") {
-                // Safari did not get a valid handle for detach and attach the media sources.
-                const video = this.player.getVideoElement();
-                if (video) {
-                    this.player.getVideoElement().load();
-                }
-                logger.info("Reloading in Safari", {
-                    method: "_reloadVideo"
-                });
-            } else {
-                // TODO - fix once FEC-9488 implemented by core team
-                this._player._detachMediaSource();
-                this._player._attachMediaSource();
-                logger.info("Reloading video with detach/attach media functions", {
-                    method: "_reloadVideo"
-                });
-            }
-            this._player.play();
-        } catch (e) {
-            // failed resetting video engine - apply non-recoverable slate
-            this._httpError = true;
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
-            logger.info("Failed to reload video", {
-                method: "_reloadVideo",
-                data: e
-            });
-        }
-    };
-
-    private _isIE11Win7() {
-        const ua = window.navigator.userAgent;
-        return (
-            this.player.env.os.name === "Windows" &&
-            this.player.env.os.version === "7" &&
-            this.player.env.browser.name === "IE" &&
-            ua.indexOf("Trident/7.0") > -1
-        );
+    private _reloadMedia = () => {
+        const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
+        const entryId = this._player.config.sources.id;
+        player?.configure({ playback: { autoplay: true }});
+        player?.loadMedia({ entryId });
     }
 
     private _resetTimeout = () => {
-        clearTimeout(this._isLiveApiCallTimeout);
-        this._isLiveApiCallTimeout = null;
+        if (this._isLiveApiCallTimeout) {
+            clearTimeout(this._isLiveApiCallTimeout);
+            this._isLiveApiCallTimeout = null;
+        }
     };
 
     private _initTimeout = () => {
         const { pluginConfig } = this._configs;
-        if (this._isLiveApiCallTimeout) {
-            this._resetTimeout();
-        }
+        this._resetTimeout();
         this._isLiveApiCallTimeout = setTimeout(
             this.updateLiveStatus,
             pluginConfig.isLiveInterval * 1000
         );
-    };
-
-    // once reached ended - check status and react accordingly
-    private _handleOnEnd = () => {
-        if (this._httpError) {
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
-            logger.warn("Kaltura player triggered http error ! non-recoverable", {
-                method: "_handleOnEnd"
-            });
-            return;
-        }
-        if (this._broadcastState === LiveBroadcastStates.Live) {
-            // we reached the end of video but stream went back online meanwhile - reset player
-            // this gets the player back to the current position and does not seek to liveEdge
-            logger.info("DVR entry reached end while last isLive is true. Reload the video", {
-                method: "_handleOnEnd"
-            });
-            this._reloadVideo();
-            return;
-        }
-        this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
-        logger.info("No Longer live - show NoLongerLive slate", {
-            method: "_handleOnEnd"
-        });
     };
 
     // this functions is called whenever isLive receives any value.
@@ -328,14 +239,8 @@ export class KalturaLivePlugin
                 ended: ended
             }
         });
-
-        // if we had http error we do not want to change the state!
-        if (this._httpError || (ended && receivedState === LiveBroadcastStates.Error)) {
-            if (receivedState === LiveBroadcastStates.Offline) {
-                this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
-            } else {
-                this._manageOfflineSlate(OverlayItemTypes.HttpError);
-            }
+        if (receivedState === LiveBroadcastStates.Error) {
+            this._manageOfflineSlate(OverlayItemTypes.HttpError);
             return;
         }
 
@@ -348,18 +253,19 @@ export class KalturaLivePlugin
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            // Live. Remove slate
-            this._manageOfflineSlate(OverlayItemTypes.None);
-            if (ended) {
-                // we are online and player is ended - reset player engine
-                // this resumes from latest position - it does not go back to liveEdge !
+            if (ended || this._currentOverlayType === OverlayItemTypes.HttpError) {
+                // if playback ended OR (we should be live && we were in HTTP error state)
                 logger.info("Video ended and isLive is true. Reset player engine", {
                     method: "handleLiveStatusReceived"
                 });
-                this._reloadVideo();
+                this._reloadMedia();
             }
+            // Live. Remove slate
+            this._manageOfflineSlate(OverlayItemTypes.None);
+            return;
         }
-        if (receivedState === LiveBroadcastStates.Offline && ended) {
+
+        if (receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
             logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
@@ -373,23 +279,11 @@ export class KalturaLivePlugin
     };
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
-        if (
-            (type === this._currentOverlayType &&
-                this._currentOverlayHttpError === this._httpError) ||
-            this._ie11Win7Block
-        ) {
-            if (type === OverlayItemTypes.None && !this._configs.pluginConfig.checkLiveWithKs) {
-                return;
-            }
-            this._initTimeout();
-            return;
-        }
         if (this._currentOverlay) {
             this._contribServices.overlayManager.remove(this._currentOverlay);
             this._currentOverlay = null;
         }
         this._currentOverlayType = type;
-        this._currentOverlayHttpError = this._httpError;
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
                 this._initTimeout();
@@ -399,7 +293,7 @@ export class KalturaLivePlugin
                     renderContent: () => (
                         <NoLongerLive
                             onClick={this._handleReplayClick}
-                            showReplay={this._player.isDvr() && !this._httpError}
+                            showReplay={this._player.isDvr()}
                         />
                     )
                 });
@@ -431,7 +325,7 @@ export class KalturaLivePlugin
     }
 
     // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
-    private updateLiveStatus = () => {
+    public updateLiveStatus = () => {
         const { pluginConfig } = this._configs;
         const { id } = this._player.config.sources;
         const request = new LiveStreamGetDetailsAction({ id });
@@ -444,8 +338,14 @@ export class KalturaLivePlugin
                 method: "updateLiveStatus"
             }
         );
+        if (this._activeRequest) {
+            return; // prevent new API call if current is pending
+        }
+        this._resetTimeout();
+        this._activeRequest = true;
         this._kalturaClient.request(request).then(
-            data => {
+            (data) => {
+                this._activeRequest = false;
                 this._isLive = false;
                 this._isPreview = false;
                 if (!data || !data.broadcastStatus) {
@@ -480,7 +380,8 @@ export class KalturaLivePlugin
                     }
                 );
             },
-            error => {
+            (error) => {
+                this._activeRequest = false;
                 this._isLive = false;
                 this._isPreview = false;
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
