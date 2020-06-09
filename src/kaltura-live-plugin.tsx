@@ -61,12 +61,12 @@ export class KalturaLivePlugin
     private _wasPlayed = false;
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
-    private _currentOverlay: OverlayItem | null = null;
-    private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
+    private _currentOverlay: OverlayItem | null = null
     private _componentRef: ManagedComponent | null = null;
     private _isPreview = false;
     private _isLive = false;
     private _activeRequest = false;
+    public abortEventHappend = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -254,11 +254,12 @@ export class KalturaLivePlugin
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            if (ended || this._currentOverlayType === OverlayItemTypes.HttpError) {
-                // if playback ended OR (we should be live && we were in HTTP error state)
+            if (ended || this.abortEventHappend) {
+                // if playback ended OR (we should be live && player got "abort" event and should be restored)
                 logger.info("Video ended and isLive is true. Reset player engine", {
                     method: "handleLiveStatusReceived"
                 });
+                this.abortEventHappend = false;
                 this._reloadMedia();
             }
             // Live. Remove slate
@@ -284,7 +285,6 @@ export class KalturaLivePlugin
             this._contribServices.overlayManager.remove(this._currentOverlay);
             this._currentOverlay = null;
         }
-        this._currentOverlayType = type;
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
                 this._initTimeout();

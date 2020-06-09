@@ -28,6 +28,11 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
+        console.log('event', event)
+        if (event.type === "abort") {
+            console.log(">>>>>> set ABORT");
+            this._plugin.abortEventHappend = true;
+        }
         if (event.type === EventTypes.ENDED) {
             this._plugin.updateLiveStatus();
         }
