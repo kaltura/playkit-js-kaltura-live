@@ -6,7 +6,7 @@ export interface props {
 }
 
 const noInternetTitle = "No Internet Connection";
-const noInternetBody = "Check your network and refresh the page";
+const noInternetBody = "Check your network";
 const offlineTitle = "Currently not broadcasting";
 const offlineBody = "Video will play once broadcasting starts";
 const httpProblemTitle = "Something went wrong";

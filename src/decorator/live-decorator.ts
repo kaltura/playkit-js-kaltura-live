@@ -4,7 +4,9 @@ import { getContribLogger } from "@playkit-js-contrib/common";
 const HTTP_ERRORS = [1002, 1003, 3016, 3022];
 enum EventTypes {
     ERROR = "error",
-    ENDED = "ended"
+    ENDED = "ended",
+    PLAYING = "playing",
+    ABORT = "abort",
 };
 
 const logger = getContribLogger({
@@ -28,6 +30,15 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
+        if (
+            event.type === EventTypes.ENDED ||
+            event.type === EventTypes.ABORT
+        ) {
+            this._plugin.reloadMedia = true;
+        }
+        if (event.type === EventTypes.PLAYING) {
+            this._plugin.updateLiveTag();
+        }
         if (event.type === EventTypes.ENDED) {
             this._plugin.updateLiveStatus();
         }
