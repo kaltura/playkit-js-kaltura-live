@@ -67,6 +67,7 @@ export class KalturaLivePlugin
     private _isPreview = false;
     private _isLive = false;
     private _activeRequest = false;
+    public reloadMedia = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -109,7 +110,7 @@ export class KalturaLivePlugin
         );
     }
 
-    private _updateLiveTag() {
+    public updateLiveTag() {
         if (!this._componentRef) {
             return;
         }
@@ -172,7 +173,7 @@ export class KalturaLivePlugin
     };
 
     private _handleTimedMetadata = (e: any) => {
-        this._updateLiveTag();
+        this.updateLiveTag();
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;
@@ -202,6 +203,7 @@ export class KalturaLivePlugin
     };
 
     private _reloadMedia = () => {
+        this.reloadMedia = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
         player?.configure({ playback: { autoplay: true }});
@@ -227,7 +229,7 @@ export class KalturaLivePlugin
     // this functions is called whenever isLive receives any value.
     // This is where the magic happens
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
-        this._updateLiveTag();
+        this.updateLiveTag();
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
@@ -253,8 +255,8 @@ export class KalturaLivePlugin
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            if (ended || this._currentOverlayType === OverlayItemTypes.HttpError) {
-                // if playback ended OR (we should be live && we were in HTTP error state)
+            if (this.reloadMedia) {
+                // if playback ended OR player got "abort" event
                 logger.info("Video ended and isLive is true. Reset player engine", {
                     method: "handleLiveStatusReceived"
                 });
