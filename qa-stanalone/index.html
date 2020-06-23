@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Kaltura Live - Player V7</title>
 
-        <script src="https://qa-apache-php7.dev.kaltura.com/p/6265/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.53.4-vamb.1"></script>
+        <script src="https://qa-apache-php7.dev.kaltura.com/p/6265/embedPlaykitJs/uiconf_id/15224252/versions/kaltura-ovp-player=0.54.1-canary-3-990a688.0"></script>
         <script src="playkit-js-kaltura-live.js"></script>
         <script src="../latest.js"></script>
         <link rel="stylesheet" style="text/css" href="assets/styles/bootstrap.css" />
@@ -82,7 +82,7 @@
         <script type="text/javascript" src="assets/jsonform.js"></script>
 
         <script type="text/javascript">
-            var version = "2.0.3";
+            var version = "2.0.4";
 
             // schema documentation:
             // https://github.com/jsonform/jsonform/wiki#previous
@@ -279,6 +279,8 @@
             var query = {};
             try {
                 var cleanedString = queryString.slice(1).replace(/%22/g, '"');
+                cleanedString = cleanedString.replace(/%7B/g, '{');
+                cleanedString = cleanedString.replace(/%7D/g, '}');
                 if (cleanedString) {
                     query = JSON.parse(cleanedString);
                 }
