@@ -62,7 +62,6 @@ export class KalturaLivePlugin
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
-    private _currentOverlayType: OverlayItemTypes = OverlayItemTypes.None;
     private _componentRef: ManagedComponent | null = null;
     private _isPreview = false;
     private _isLive = false;
@@ -285,20 +284,23 @@ export class KalturaLivePlugin
             this._contribServices.overlayManager.remove(this._currentOverlay);
             this._currentOverlay = null;
         }
-        this._currentOverlayType = type;
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
-                this._initTimeout();
-                this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: "no-longer-live-overlay",
-                    position: OverlayPositions.PlayerArea,
-                    renderContent: () => (
-                        <NoLongerLive
-                            onClick={this._handleReplayClick}
-                            showReplay={this._player.isDvr()}
-                        />
-                    )
-                });
+                if (!this.player.isOnLiveEdge() && !this.player.ended) {
+                    this._currentOverlay = null;
+                } else {
+                    this._initTimeout();
+                    this._currentOverlay = this._contribServices.overlayManager.add({
+                        label: "no-longer-live-overlay",
+                        position: OverlayPositions.PlayerArea,
+                        renderContent: () => (
+                            <NoLongerLive
+                                onClick={this._handleReplayClick}
+                                showReplay={this._player.isDvr()}
+                            />
+                        )
+                    });
+                }
                 break;
             case OverlayItemTypes.Offline:
                 this._initTimeout();
