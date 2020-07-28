@@ -388,7 +388,9 @@ export class KalturaLivePlugin
                 this._activeRequest = false;
                 this._isLive = false;
                 this._isPreview = false;
-                this.handleLiveStatusReceived(LiveBroadcastStates.Error);
+                if (this._player.paused) {
+                    this.handleLiveStatusReceived(LiveBroadcastStates.Error);
+                }
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
                     data: {
