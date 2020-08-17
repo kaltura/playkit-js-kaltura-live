@@ -38,8 +38,8 @@
   "author": "",
   "devDependencies": {
     "@commitlint/cli": "8.3.5",
-    "@commitlint/config-conventional": "8.3.4",
-    "@types/classnames": "2.2.10",
+    "@commitlint/config-conventional": "9.1.2",
+    "@types/classnames": "2.2.9",
     "@types/node": "13.7.6",
     "@typescript-eslint/eslint-plugin": "2.21.0",
     "@typescript-eslint/parser": "2.34.0",
