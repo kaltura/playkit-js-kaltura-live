@@ -83,7 +83,6 @@ export class KalturaLivePlugin
                 ks: playerConfig.provider.ks
             });
         }
-        this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
     }
 
     onRegisterPresetsComponents(presetManager: PresetManager): void {
@@ -98,7 +97,9 @@ export class KalturaLivePlugin
 
     onPluginSetup(): void {}
 
-    onMediaLoad(): void {}
+    onMediaLoad(): void {
+        this._isEntryLiveType();
+    }
 
     onMediaUnload(): void {
         this._resetTimeout();
@@ -156,7 +157,6 @@ export class KalturaLivePlugin
     }
 
     private _isEntryLiveType = () => {
-        this._player.removeEventListener(this._player.Event.SOURCE_SELECTED, this._isEntryLiveType);
         if (this._player.isLive()) {
             this._isLiveEntry = true;
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
