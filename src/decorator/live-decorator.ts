@@ -34,13 +34,13 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
             event.type === EventTypes.ENDED ||
             event.type === EventTypes.ABORT
         ) {
-            this._plugin.reloadMedia = true;
+            // this._plugin.reloadMedia = true;
         }
         if (event.type === EventTypes.PLAYING) {
-            this._plugin.updateLiveTag();
+            // this._plugin.updateLiveTag();
         }
         if (event.type === EventTypes.ENDED) {
-            this._plugin.updateLiveStatus();
+            // this._plugin.updateLiveStatus();
         }
         if (
             event.type === EventTypes.ERROR &&
@@ -54,7 +54,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
                     method: "dispatchEvent"
                 }
             );
-            this._plugin.updateLiveStatus();
+            // this._plugin.updateLiveStatus();
             return true;
         }
         return this._dispatcher(event);
