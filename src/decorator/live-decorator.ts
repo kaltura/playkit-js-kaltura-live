@@ -54,7 +54,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
                     method: "dispatchEvent"
                 }
             );
-            // this._plugin.updateLiveStatus();
+            this._plugin.handleError();
             return true;
         }
         return this._dispatcher(event);

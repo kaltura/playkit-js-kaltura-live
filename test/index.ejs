@@ -154,7 +154,47 @@
         let mediaInfo = {entryId: data.entryId};
 
         player = KalturaPlayer.setup(config);
-        player.loadMedia(mediaInfo);
+        // player.loadMedia(mediaInfo);
+
+        try {
+
+          player.setMedia({ //use setMedia instead of loadMedia API
+  "session": {
+    "isAnonymous": true, //if ks is for anonymous or login
+    "partnerId": data.partnerId, //you partner id
+    "uiConfId": data.uiConfId, //your uiconf
+    "ks": data.ks // your KS, either for anonymous or login session
+  },
+  "sources": { //you can pass also only hls or only dash and as long as platform support it it will work
+    "hls": [
+      {
+        "url": "https://d16gdga1b4l4j4.cloudfront.net/out/v1/d0029d45d8074d45879170c1301e1d63/index.m3u8",
+        "mimetype": "application/x-mpegURL"
+      }
+    ],
+    "progressive": [],
+    "id": "1_r0tzzzgp", //entry ID
+    "type": "Live", //either vod or live
+    "poster": "", // poster url
+    "dvr": false, //for live, if DVR or not
+    "vr": null, //
+    "metadata": {
+      "name": "Live test for AWS", //entry name
+      "description": "",
+    },
+  },
+  "plugins": {
+  // secondaryUrl
+  }
+})
+} catch (e) {
+  console.error(e.message);
+}
+
+
+
+
+
 
         makeResizableDiv('.resizable');
     })

@@ -22,6 +22,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     // once we understand that we have a positive isLive - we clean and release the middleware
     // if not - try again
     initialPlayHandling() {
+    console.log(">>>>initialPlayHandling",)
         // no need to apply this unless we are in the firstPlay
         if (!this._isFirstPlay) {
             return;
