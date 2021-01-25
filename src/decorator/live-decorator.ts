@@ -7,6 +7,7 @@ enum EventTypes {
     ENDED = "ended",
     PLAYING = "playing",
     ABORT = "abort",
+    PAUSED = "pause",
 };
 
 const logger = getContribLogger({
@@ -36,7 +37,10 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
         ) {
             this._plugin.reloadMedia = true;
         }
-        if (event.type === EventTypes.PLAYING) {
+        if (
+            event.type === EventTypes.PLAYING ||
+            event.type === EventTypes.PAUSED
+        ) {
             this._plugin.updateLiveTag();
         }
         if (event.type === EventTypes.ENDED) {
