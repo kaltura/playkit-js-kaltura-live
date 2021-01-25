@@ -56,7 +56,7 @@ export enum OverlayItemTypes {
 export class KalturaLivePlugin
     implements OnMediaUnload, OnMediaLoad, OnPluginSetup, OnRegisterPresetsComponents {
     private _kalturaClient = new KalturaClient();
-    private _isLiveEntry = false;
+    private _isActive = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed = false;
     private _absolutePosition = null;
@@ -144,8 +144,8 @@ export class KalturaLivePlugin
         );
     };
 
-    public isLiveEntry(): boolean {
-        return this._isLiveEntry;
+    public isActive(): boolean {
+        return this._isActive;
     }
 
     public get player() {
@@ -158,7 +158,7 @@ export class KalturaLivePlugin
 
     private _isEntryLiveType = () => {
         if (this._player.isLive()) {
-            this._isLiveEntry = true;
+            this._isActive = true;
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
             this._player.addEventListener(
                 this._player.Event.TIMED_METADATA,
