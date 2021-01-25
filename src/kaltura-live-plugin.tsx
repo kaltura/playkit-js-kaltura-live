@@ -240,7 +240,7 @@ export class KalturaLivePlugin
                 ended: ended
             }
         });
-        if (receivedState === LiveBroadcastStates.Error) {
+        if (receivedState === LiveBroadcastStates.Error && this._player.paused) {
             this._manageOfflineSlate(OverlayItemTypes.HttpError);
             return;
         }
@@ -286,10 +286,8 @@ export class KalturaLivePlugin
         }
         switch (type) {
             case OverlayItemTypes.NoLongerLive:
-                if (!this.player.isOnLiveEdge() && !this.player.ended) {
-                    this._currentOverlay = null;
-                } else {
-                    this._initTimeout();
+                this._initTimeout();
+                if (this.player.ended) {
                     this._currentOverlay = this._contribServices.overlayManager.add({
                         label: "no-longer-live-overlay",
                         position: OverlayPositions.PlayerArea,
@@ -388,9 +386,7 @@ export class KalturaLivePlugin
                 this._activeRequest = false;
                 this._isLive = false;
                 this._isPreview = false;
-                if (this._player.paused) {
-                    this.handleLiveStatusReceived(LiveBroadcastStates.Error);
-                }
+                this.handleLiveStatusReceived(LiveBroadcastStates.Error);
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
                     data: {
