@@ -1,4 +1,6 @@
 .live-tag {
+    display: inline-block;
+    margin-top: 4px;
     padding: 3px 4px;
     opacity: 0.94;
     border-radius: 4px;
@@ -18,13 +20,5 @@
     }
     &.clickable {
         cursor: pointer;
-    }
-}
-
-
-:global {
-    .playkit-player .playkit-bottom-bar .playkit-left-controls div[data-contrib-injected="kaltura-live-tag"] {
-        display: inline-block;
-        margin-top: 4px;
     }
 }
