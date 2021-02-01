@@ -10,15 +10,10 @@ import {
     OnMediaLoad,
     OnMediaUnload,
     OnPluginSetup,
-    OnRegisterPresetsComponents
 } from "@playkit-js-contrib/plugin";
 import {
     OverlayPositions,
-    RelativeToTypes,
-    ReservedPresetNames,
-    PresetManager,
     ReservedPresetAreas,
-    ManagedComponent,
     OverlayItem
 } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
@@ -26,7 +21,7 @@ import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
 import { Offline } from "./components/offline";
 import { NoLongerLive } from "./components/no-longer-live";
-import { LiveTag } from "./components/live-tag";
+import { LiveTag, LiveTagStates } from "./components/live-tag";
 import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types/KalturaLiveStreamBroadcastStatus";
 
 const logger = getContribLogger({
@@ -54,7 +49,7 @@ export enum OverlayItemTypes {
 }
 
 export class KalturaLivePlugin
-    implements OnMediaUnload, OnMediaLoad, OnPluginSetup, OnRegisterPresetsComponents {
+    implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
     private _isActive = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
@@ -62,16 +57,14 @@ export class KalturaLivePlugin
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
-    private _componentRef: ManagedComponent | null = null;
-    private _isPreview = false;
-    private _isLive = false;
+    private _liveTagState: LiveTagStates = LiveTagStates.Offline;
     private _activeRequest = false;
     public reloadMedia = false;
 
     constructor(
         private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
-        private _player: KalturaPlayerTypes.Player
+        private _player: any
     ) {
         const { playerConfig, pluginConfig } = this._configs;
         this._kalturaClient.setOptions({
@@ -83,16 +76,6 @@ export class KalturaLivePlugin
                 ks: playerConfig.provider.ks
             });
         }
-    }
-
-    onRegisterPresetsComponents(presetManager: PresetManager): void {
-        presetManager.add({
-            label: "kaltura-live-tag",
-            renderChild: this._renderLiveTag,
-            isolateComponent: true,
-            relativeTo: { type: RelativeToTypes.Replace, name: "LiveTag" },
-            presetAreas: { [ReservedPresetNames.Live]: ReservedPresetAreas.BottomBarLeftControls }
-        });
     }
 
     onPluginSetup(): void {}
@@ -111,10 +94,18 @@ export class KalturaLivePlugin
     }
 
     public updateLiveTag() {
-        if (!this._componentRef) {
-            return;
-        }
-        this._componentRef.update();
+        this._player.ui.addComponent({
+            label: 'kaltura-live-tag',
+            presets: ['Live'],
+            replaceComponent: 'LiveTag',
+            container: ReservedPresetAreas.BottomBarLeftControls,
+            props: {
+                state: this._liveTagState,
+                isOnLiveEdge: !this._player.paused && this._player.isOnLiveEdge(),
+                onClick: this._seekToLiveEdge,
+            },
+            get: LiveTag,
+        })
     }
 
     private _seekToLiveEdge = () => {
@@ -122,26 +113,6 @@ export class KalturaLivePlugin
         if (this._player.paused) {
             this._player.play();
         }
-    };
-
-    private _renderLiveTag = () => {
-        return (
-            <ManagedComponent
-                label={"live-indicator"}
-                isShown={() => true}
-                renderChildren={() => (
-                    <LiveTag
-                        isLive={this._isLive}
-                        isPreview={this._isPreview}
-                        isOnLiveEdge={this._player.isOnLiveEdge()}
-                        onClick={this._seekToLiveEdge}
-                    />
-                )}
-                ref={node => {
-                    this._componentRef = node;
-                }}
-            />
-        );
     };
 
     public isActive(): boolean {
@@ -158,6 +129,7 @@ export class KalturaLivePlugin
 
     private _isEntryLiveType = () => {
         if (this._player.isLive()) {
+            this.updateLiveTag();
             this._isActive = true;
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
             this._player.addEventListener(
@@ -348,8 +320,7 @@ export class KalturaLivePlugin
         this._kalturaClient.request(request).then(
             (data) => {
                 this._activeRequest = false;
-                this._isLive = false;
-                this._isPreview = false;
+                this._liveTagState = LiveTagStates.Offline;
                 if (!data || !data.broadcastStatus) {
                     // bad response
                     this._initTimeout();
@@ -357,7 +328,7 @@ export class KalturaLivePlugin
                 }
                 switch (data.broadcastStatus) {
                     case KalturaLiveStreamBroadcastStatus.live:
-                        this._isLive = true;
+                        this._liveTagState = LiveTagStates.Live;
                         this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         break;
                     case KalturaLiveStreamBroadcastStatus.offline:
@@ -365,7 +336,7 @@ export class KalturaLivePlugin
                         break;
                     case KalturaLiveStreamBroadcastStatus.preview:
                         if (pluginConfig.checkLiveWithKs) {
-                            this._isPreview = true;
+                            this._liveTagState = LiveTagStates.Preview;
                             this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         } else {
                             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
@@ -384,8 +355,7 @@ export class KalturaLivePlugin
             },
             (error) => {
                 this._activeRequest = false;
-                this._isLive = false;
-                this._isPreview = false;
+                this._liveTagState = LiveTagStates.Offline;
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
