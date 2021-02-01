@@ -1,6 +1,6 @@
 .live-tag {
     display: inline-block;
-    margin-top: 4px;
+    margin: 4px 12px;
     padding: 3px 4px;
     opacity: 0.94;
     border-radius: 4px;
@@ -8,7 +8,6 @@
     color: #ffffff;
     font-size: 15px;
     text-transform: uppercase;
-    margin: 0 12px;
     &.preview {
         background-color: #f9a71b;;
         color: #000000;
