@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.0...v2.1.1) (2021-02-05)
+
+
+### Bug Fixes
+
+* update live-tag on pause (FEV-788) ([#230](https://github.com/kaltura/playkit-js-kaltura-live/issues/230)) ([66b1ab3](https://github.com/kaltura/playkit-js-kaltura-live/commit/66b1ab36da22639a214ac9970390cdda6315b956))
+* **FEV-654:** set "No longer live" slate only when playback end ([#232](https://github.com/kaltura/playkit-js-kaltura-live/issues/232)) ([283b0b1](https://github.com/kaltura/playkit-js-kaltura-live/commit/283b0b149bc76a4b1dbb1f08d133c3d4e8b12f6b))
+* **FEV-758:** Player v7 | Live 2.0.7| - Entry view - While the stream is in preview an error will be shown in the player ([#231](https://github.com/kaltura/playkit-js-kaltura-live/issues/231)) ([a88cb92](https://github.com/kaltura/playkit-js-kaltura-live/commit/a88cb92ec2f8b4d85b6965f681c738ae0ced60b8))
+* **FEV-777:** use core api to render live-tag, refactored live-tag to avoid re-render ([#234](https://github.com/kaltura/playkit-js-kaltura-live/issues/234)) ([2b512e2](https://github.com/kaltura/playkit-js-kaltura-live/commit/2b512e2d4c16724a20a662fe66bcf5834f30b18e))
+
 ### [2.1.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.0.7...v2.1.0) (2021-01-04)
 
 ### [2.0.7](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.0.6...v2.0.7) (2020-08-31)
