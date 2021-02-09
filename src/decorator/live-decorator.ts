@@ -8,6 +8,7 @@ enum EventTypes {
     PLAYING = "playing",
     ABORT = "abort",
     PAUSED = "pause",
+    METADATA = "timedmetadata",
 };
 
 const logger = getContribLogger({
@@ -31,6 +32,10 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
+        console.log(event)
+        if (event.type === EventTypes.METADATA) {
+            this._plugin.handleTimedMetadata(event);
+        }
         if (
             event.type === EventTypes.ENDED ||
             event.type === EventTypes.ABORT

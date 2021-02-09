@@ -87,10 +87,6 @@ export class KalturaLivePlugin
     onMediaUnload(): void {
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-        this._player.removeEventListener(
-            this._player.Event.TIMED_METADATA,
-            this._handleTimedMetadata
-        );
     }
 
     public updateLiveTag() {
@@ -132,10 +128,6 @@ export class KalturaLivePlugin
             this.updateLiveTag();
             this._isActive = true;
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.addEventListener(
-                this._player.Event.TIMED_METADATA,
-                this._handleTimedMetadata
-            );
             this._player.configure({
                 plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
             });
@@ -143,7 +135,7 @@ export class KalturaLivePlugin
         }
     };
 
-    private _handleTimedMetadata = (e: any) => {
+    public handleTimedMetadata = (e: any) => {
         this.updateLiveTag();
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
