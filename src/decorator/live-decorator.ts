@@ -9,6 +9,7 @@ enum EventTypes {
     ABORT = "abort",
     PAUSED = "pause",
     METADATA = "timedmetadata",
+    SEEKING = "seeking",
 };
 
 const logger = getContribLogger({
@@ -32,9 +33,15 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
-        console.log(event)
         if (event.type === EventTypes.METADATA) {
             this._plugin.handleTimedMetadata(event);
+        }
+        if (event.type === EventTypes.SEEKING) {
+            // player.js should set _isOnLiveEdge property before updateLiveTag executes:
+            // https://github.com/kaltura/playkit-js/blob/master/src/player.js#L1696-L1700
+            setTimeout(() => {
+                this._plugin.updateLiveTag();
+            });
         }
         if (
             event.type === EventTypes.ENDED ||

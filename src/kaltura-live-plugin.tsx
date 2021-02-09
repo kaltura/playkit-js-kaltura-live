@@ -60,6 +60,8 @@ export class KalturaLivePlugin
     private _liveTagState: LiveTagStates = LiveTagStates.Offline;
     private _activeRequest = false;
     public reloadMedia = false;
+    private _currentTagState: LiveTagStates | null = null;
+    private _currentIsOnLiveEdge: boolean = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -90,18 +92,26 @@ export class KalturaLivePlugin
     }
 
     public updateLiveTag() {
-        this._player.ui.addComponent({
-            label: 'kaltura-live-tag',
-            presets: ['Live'],
-            replaceComponent: 'LiveTag',
-            container: ReservedPresetAreas.BottomBarLeftControls,
-            props: {
-                state: this._liveTagState,
-                isOnLiveEdge: !this._player.paused && this._player.isOnLiveEdge(),
-                onClick: this._seekToLiveEdge,
-            },
-            get: LiveTag,
-        })
+        const isOnLiveEdge = !this._player.paused && this._player.isOnLiveEdge();
+        if (
+            this._currentTagState !== this._liveTagState ||
+            this._currentIsOnLiveEdge !== isOnLiveEdge
+        ) {
+            this._currentTagState = this._liveTagState;
+            this._currentIsOnLiveEdge = isOnLiveEdge;
+            this._player.ui.addComponent({
+                label: 'kaltura-live-tag',
+                presets: ['Live'],
+                replaceComponent: 'LiveTag',
+                container: ReservedPresetAreas.BottomBarLeftControls,
+                props: {
+                    state: this._liveTagState,
+                    isOnLiveEdge,
+                    onClick: this._seekToLiveEdge,
+                },
+                get: LiveTag,
+            });
+        }
     }
 
     private _seekToLiveEdge = () => {
@@ -136,7 +146,6 @@ export class KalturaLivePlugin
     };
 
     public handleTimedMetadata = (e: any) => {
-        this.updateLiveTag();
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;
