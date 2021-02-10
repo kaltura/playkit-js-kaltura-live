@@ -60,6 +60,8 @@ export class KalturaLivePlugin
     private _liveTagState: LiveTagStates = LiveTagStates.Offline;
     private _activeRequest = false;
     public reloadMedia = false;
+    private _currentTagState: LiveTagStates | null = null;
+    private _currentIsOnLiveEdge: boolean = false;
 
     constructor(
         private _contribServices: ContribServices,
@@ -87,25 +89,29 @@ export class KalturaLivePlugin
     onMediaUnload(): void {
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-        this._player.removeEventListener(
-            this._player.Event.TIMED_METADATA,
-            this._handleTimedMetadata
-        );
     }
 
     public updateLiveTag() {
-        this._player.ui.addComponent({
-            label: 'kaltura-live-tag',
-            presets: ['Live'],
-            replaceComponent: 'LiveTag',
-            container: ReservedPresetAreas.BottomBarLeftControls,
-            props: {
-                state: this._liveTagState,
-                isOnLiveEdge: !this._player.paused && this._player.isOnLiveEdge(),
-                onClick: this._seekToLiveEdge,
-            },
-            get: LiveTag,
-        })
+        const isOnLiveEdge = !this._player.paused && this._player.isOnLiveEdge();
+        if (
+            this._currentTagState !== this._liveTagState ||
+            this._currentIsOnLiveEdge !== isOnLiveEdge
+        ) {
+            this._currentTagState = this._liveTagState;
+            this._currentIsOnLiveEdge = isOnLiveEdge;
+            this._player.ui.addComponent({
+                label: 'kaltura-live-tag',
+                presets: ['Live'],
+                replaceComponent: 'LiveTag',
+                container: ReservedPresetAreas.BottomBarLeftControls,
+                props: {
+                    state: this._liveTagState,
+                    isOnLiveEdge,
+                    onClick: this._seekToLiveEdge,
+                },
+                get: LiveTag,
+            });
+        }
     }
 
     private _seekToLiveEdge = () => {
@@ -132,10 +138,6 @@ export class KalturaLivePlugin
             this.updateLiveTag();
             this._isActive = true;
             this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.addEventListener(
-                this._player.Event.TIMED_METADATA,
-                this._handleTimedMetadata
-            );
             this._player.configure({
                 plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
             });
@@ -143,8 +145,7 @@ export class KalturaLivePlugin
         }
     };
 
-    private _handleTimedMetadata = (e: any) => {
-        this.updateLiveTag();
+    public handleTimedMetadata = (e: any) => {
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
             this._absolutePosition = null;
             return;

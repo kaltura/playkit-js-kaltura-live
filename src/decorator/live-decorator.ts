@@ -8,6 +8,8 @@ enum EventTypes {
     PLAYING = "playing",
     ABORT = "abort",
     PAUSED = "pause",
+    METADATA = "timedmetadata",
+    SEEKED = "seeked",
 };
 
 const logger = getContribLogger({
@@ -31,6 +33,14 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
     }
 
     dispatchEvent(event: any): any {
+        if (event.type === EventTypes.METADATA) {
+            this._plugin.handleTimedMetadata(event);
+        }
+        if (event.type === EventTypes.SEEKED) {
+            // check _isOnLiveEdge property after 'SEEKING' event happened
+            // https://github.com/kaltura/playkit-js/blob/master/src/player.js#L1696-L1700
+            this._plugin.updateLiveTag();
+        }
         if (
             event.type === EventTypes.ENDED ||
             event.type === EventTypes.ABORT
