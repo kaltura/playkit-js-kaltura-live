@@ -1,5 +1,4 @@
 import { h, Component } from 'preact';
-import { threadId } from 'worker_threads';
 import * as styles from './live-tag.scss';
 
 export enum LiveTagStates {
