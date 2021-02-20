@@ -1,6 +1,10 @@
 @import "../../variables.scss";
 .no-longer-live-wrapper {
-    position: relative;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+
     display: flex;
     flex-direction: column;
     align-items: center;
