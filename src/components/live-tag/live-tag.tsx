@@ -91,12 +91,12 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   private _getStyles = () => {
     const { isOnLiveEdge, liveTagState } = this.state;
     if (isOnLiveEdge && liveTagState === LiveTagStates.Live) {
-      return styles.live;
+      return styles.liveEdge;
     }
     if (isOnLiveEdge && liveTagState === LiveTagStates.Preview) {
-      return styles.preview;
+      return styles.previewEdge;
     }
-    return styles.offline;
+    return styles.nonEdge;
   };
 
   render() {

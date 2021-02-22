@@ -1,1 +1,1 @@
-export * from "./offline-slate";
+export * from './offline-slate';

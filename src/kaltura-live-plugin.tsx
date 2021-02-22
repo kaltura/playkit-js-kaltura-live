@@ -327,6 +327,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
         );
 
         if (data.broadcastStatus === KalturaLiveStreamBroadcastStatus.live) {
+          if (pluginConfig.checkLiveWithKs) {
+            // continue poll broadcast status data to define if live mode changed to preview mode
+            this._initTimeout();
+          }
           this._updateLiveTag(LiveTagStates.Live);
           this.handleLiveStatusReceived(LiveBroadcastStates.Live);
           return;

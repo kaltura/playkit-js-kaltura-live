@@ -34,12 +34,9 @@ export class OfflineSlate extends Component<
   };
 
   render() {
-    if (this.state.type === OfflineTypes.HttpError) {
-      return <Offline httpError={true} />;
-    }
     if (this.state.type === OfflineTypes.NoLongerLive) {
       return <NoLongerLive />;
     }
-    return <Offline />;
+    return <Offline httpError={this.state.type === OfflineTypes.HttpError} />;
   }
 }

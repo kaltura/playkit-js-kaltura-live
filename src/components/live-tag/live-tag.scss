@@ -8,14 +8,14 @@
     color: #ffffff;
     font-size: 15px;
     text-transform: uppercase;
-    &.preview {
+    &.preview-edge {
         background-color: #f9a71b;;
         color: #000000;
     }
-    &.live {
+    &.live-edge {
         background-color: #da1f26;
     }
-    &.offline {
+    &.non-edge {
         background-color: #666666;
     }
     &.clickable {
