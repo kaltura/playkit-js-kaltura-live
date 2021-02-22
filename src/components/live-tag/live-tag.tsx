@@ -13,7 +13,7 @@ interface LiveTagProps {
 
 interface LiveTagState {
   liveTagState: LiveTagStates;
-  isOnLiveEdge: boolean;
+  behindLiveEdge: boolean;
 }
 
 interface Context {
@@ -21,22 +21,22 @@ interface Context {
 }
 
 export class LiveTag extends Component<LiveTagProps, LiveTagState> {
-  constructor(props: LiveTagProps, context: Context) {
+  constructor(props: LiveTagProps, { player }: Context) {
     super();
     this.state = {
       liveTagState: props.liveTagState,
-      isOnLiveEdge: context.player.isOnLiveEdge(),
+      behindLiveEdge: player.isDvr && !player.isOnLiveEdge(),
     };
   }
 
   shouldComponentUpdate(nextProps: LiveTagProps, nextState: LiveTagState) {
     return (
       nextState.liveTagState !== this.state.liveTagState ||
-      nextState.isOnLiveEdge !== this.state.isOnLiveEdge
+      nextState.behindLiveEdge !== this.state.behindLiveEdge
     );
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this.context.player.addEventListener(
       this.context.player.Event.SEEKED,
       this._updateIsOnLiveEdge
@@ -73,9 +73,10 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
 
   private _updateIsOnLiveEdge = () => {
     this.setState({
-      isOnLiveEdge: this.context.player.paused
-        ? false
-        : this.context.player.isOnLiveEdge(),
+      // condition taken from https://github.com/kaltura/playkit-js-ui/blob/master/src/components/live-tag/live-tag.js#L73
+      behindLiveEdge:
+        this.context.player.paused ||
+        (this.context.player.isDvr && !this.context.player.isOnLiveEdge()),
     });
   };
 
@@ -89,18 +90,18 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   };
 
   private _getStyles = () => {
-    const { isOnLiveEdge, liveTagState } = this.state;
-    if (isOnLiveEdge && liveTagState === LiveTagStates.Live) {
+    const { behindLiveEdge, liveTagState } = this.state;
+    if (!behindLiveEdge && liveTagState === LiveTagStates.Live) {
       return styles.liveEdge;
     }
-    if (isOnLiveEdge && liveTagState === LiveTagStates.Preview) {
+    if (!behindLiveEdge && liveTagState === LiveTagStates.Preview) {
       return styles.previewEdge;
     }
     return styles.nonEdge;
   };
 
   render() {
-    const { isOnLiveEdge, liveTagState } = this.state;
+    const { behindLiveEdge, liveTagState } = this.state;
     return (
       <div
         role="button"
@@ -108,7 +109,7 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
         className={[
           styles.liveTag,
           this._getStyles(),
-          !isOnLiveEdge ? styles.clickable : '',
+          behindLiveEdge ? styles.clickable : '',
         ].join(' ')}
         onClick={this._seekToLiveEdge}>
         {liveTagState}
