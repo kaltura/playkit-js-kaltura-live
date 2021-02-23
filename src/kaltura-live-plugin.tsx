@@ -15,6 +15,7 @@ import { KalturaLiveMiddleware } from './middleware/live-middleware';
 import { getContribLogger } from '@playkit-js-contrib/common';
 import { OfflineSlate, OfflineTypes } from './components/offline-slate';
 import { LiveTag, LiveTagStates } from './components/live-tag';
+import { KalturaLiveEngineDecorator } from './decorator/live-decorator';
 import { KalturaLiveStreamBroadcastStatus } from 'kaltura-typescript-client/api/types/KalturaLiveStreamBroadcastStatus';
 
 const logger = getContribLogger({
@@ -36,18 +37,17 @@ export enum LiveBroadcastStates {
 
 export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
   private _kalturaClient = new KalturaClient();
-  private _isActive = false;
   private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
   private _wasPlayed = false;
   private _absolutePosition = null;
   private _isLiveApiCallTimeout: any = null;
   private _activeRequest = false;
-  private _needReloadMedia = false;
   private _liveTagState: LiveTagStates = LiveTagStates.Offline;
-  private _removeNoLongerLiveSlate: Function | null = null;
-
   private _liveTag = createRef<LiveTag>();
   private _offlineSlate = createRef<OfflineSlate>();
+
+  public needReloadMedia = false;
+  public isActive = false;
 
   constructor(
     private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
@@ -64,56 +64,61 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
       });
     }
 
+    _player.addEventListener(
+      _player.Event.SOURCE_SELECTED,
+      this._activatePlugin
+    );
+
     this._addLiveTag();
-    this._addOfflineSlateToErrorOverlay();
+    this._addOfflineSlateToPlayerArea();
   }
 
   onMediaLoad(): void {
-    if (this._player.isLive()) {
-      this._isActive = true;
-      this._player.configure({
+    if (this.isActive) {
+      this.player.configure({
         plugins: {
           kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler },
         },
       });
-      // add listeners
-      this._player.addEventListener(
-        this._player.Event.FIRST_PLAY,
+      this.player.addEventListener(
+        this.player.Event.FIRST_PLAY,
         this._handleFirstPlay
       );
-      this._player.addEventListener(
-        this._player.Event.TIMED_METADATA,
+      this.player.addEventListener(
+        this.player.Event.TIMED_METADATA,
         this.handleTimedMetadata
       );
-      this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
-      this._player.addEventListener(
-        this._player.Event.ABORT,
-        this.updateLiveStatus
-      );
+      this.player.addEventListener(this.player.Event.ENDED, this._handleEnd);
+      this.player.addEventListener(this.player.Event.ABORT, this._handleEnd);
       this.updateLiveStatus();
     }
   }
 
   onMediaUnload(): void {
-    this._isActive = false;
+    this.isActive = false;
     this._resetTimeout();
-    this._player.removeEventListener(
-      this._player.Event.FIRST_PLAY,
+    this.player.removeEventListener(
+      this.player.Event.FIRST_PLAY,
       this._handleFirstPlay
     );
-    this._player.removeEventListener(
-      this._player.Event.TIMED_METADATA,
+    this.player.removeEventListener(
+      this.player.Event.TIMED_METADATA,
       this.handleTimedMetadata
     );
-    this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
-    this._player.removeEventListener(
-      this._player.Event.ABORT,
-      this.updateLiveStatus
+    this.player.removeEventListener(this.player.Event.ENDED, this._handleEnd);
+    this.player.removeEventListener(this.player.Event.ABORT, this._handleEnd);
+    this.player.removeEventListener(
+      this.player.Event.SOURCE_SELECTED,
+      this._activatePlugin
     );
   }
 
+  private _activatePlugin = () => {
+    this.isActive = this.player.isLive();
+  };
+
   private _addLiveTag = () => {
-    this._player.ui.addComponent({
+    this.player.ui.addComponent({
       label: 'kaltura-live-tag',
       presets: ['Live'],
       replaceComponent: 'LiveTag',
@@ -124,43 +129,23 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
     });
   };
 
-  private _addOfflineSlateToErrorOverlay = () => {
-    this._player.ui.addComponent({
-      label: 'offline-overlay',
-      presets: ['Error'],
-      container: 'GuiArea',
-      replaceComponent: 'ErrorOverlay',
+  private _addOfflineSlateToPlayerArea = () => {
+    this.needReloadMedia = true;
+    this.player.ui.addComponent({
+      label: 'no-longer-live-overlay',
+      presets: ['Live'],
+      container: 'PlayerArea',
       get: () => {
-        this._needReloadMedia = true;
-        this.updateLiveStatus();
         return <OfflineSlate ref={this._offlineSlate} />;
       },
     });
   };
 
-  private _addOfflineSlateToPlayerArea = () => {
-    this._needReloadMedia = true;
-    this._removeNoLongerLiveSlate = this._player.ui.addComponent({
-      label: 'no-longer-live-overlay',
-      presets: ['Live'],
-      container: 'PlayerArea',
-      get: () => {
-        return (
-          <OfflineSlate
-            ref={this._offlineSlate}
-            type={OfflineTypes.NoLongerLive}
-          />
-        );
-      },
-    });
-  };
-
   private _handleEnd = () => {
-    if (this._removeNoLongerLiveSlate) {
-      return;
-    }
+    this.needReloadMedia = true;
     this.updateLiveStatus();
     this._addOfflineSlateToPlayerArea();
+    this._updateOfflineSlate(OfflineTypes.NoLongerLive);
   };
 
   private _updateLiveTag = (state: LiveTagStates) => {
@@ -169,13 +154,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
   };
 
   private _updateOfflineSlate = (type: OfflineTypes) => {
-    this._needReloadMedia = true;
     this._offlineSlate?.current?.manageOfflineSlate(type);
     this._initTimeout();
   };
 
-  public isActive(): boolean {
-    return this._isActive;
+  public get player() {
+    return this._player;
   }
 
   public get broadcastState(): LiveBroadcastStates {
@@ -212,14 +196,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
   };
 
   private _reloadMedia = () => {
-    // remove NoLongerLive slate if it exists
-    if (this._removeNoLongerLiveSlate) {
-      this._removeNoLongerLiveSlate();
-      this._removeNoLongerLiveSlate = null;
-    }
-    this._needReloadMedia = false;
-    const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
-    const entryId = this._player.config.sources.id;
+    this._updateOfflineSlate(OfflineTypes.None);
+    this.needReloadMedia = false;
+    const player: any = KalturaPlayer.getPlayer(this.player.config.targetId);
+    const entryId = this.player.config.sources.id;
     player?.configure({ playback: { autoplay: true } });
     player?.loadMedia({ entryId });
   };
@@ -249,16 +229,18 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
       method: 'handleLiveStatusReceived',
       data: {
         wasPlayed: this._wasPlayed,
-        ended: this._player.ended,
+        ended: this.player.ended,
       },
     });
 
     if (receivedState === LiveBroadcastStates.Error) {
+      this.needReloadMedia = true;
       this._updateOfflineSlate(OfflineTypes.HttpError);
       return;
     }
 
     if (!this._wasPlayed && receivedState === LiveBroadcastStates.Offline) {
+      this.needReloadMedia = true;
       this._updateOfflineSlate(OfflineTypes.Offline);
       logger.info('Offline before first play - show offline slate ', {
         method: 'handleLiveStatusReceived',
@@ -267,7 +249,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
     }
 
     if (receivedState === LiveBroadcastStates.Live) {
-      if (this._needReloadMedia) {
+      if (this.needReloadMedia) {
         // if playback ended OR player got "abort" event
         logger.info('Video ended and isLive is true. Reset player engine', {
           method: 'handleLiveStatusReceived',
@@ -278,6 +260,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
     }
 
     if (receivedState === LiveBroadcastStates.Offline) {
+      this.needReloadMedia = true;
       this._updateOfflineSlate(OfflineTypes.NoLongerLive);
       logger.info(
         'Received isLive false after ended - show no longer live slate',
@@ -291,7 +274,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
   public updateLiveStatus = () => {
     const { pluginConfig } = this._configs;
-    const { id } = this._player.config.sources;
+    const { id } = this.player.config.sources;
     const request = new LiveStreamGetDetailsAction({ id });
 
     logger.info(
@@ -369,9 +352,18 @@ export class KalturaLivePlugin implements OnMediaUnload, OnMediaLoad {
   };
 }
 
-export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> {
+export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
+  implements KalturaPlayerTypes.IEngineDecoratorProvider {
   getMiddlewareImpl(): any {
     return new KalturaLiveMiddleware(this._contribPlugin);
+  }
+
+  getEngineDecorator(engine: any, dispatcher: Function): any {
+    return new KalturaLiveEngineDecorator(
+      engine,
+      this._contribPlugin,
+      dispatcher
+    );
   }
 }
 
