@@ -78,18 +78,58 @@ export class KalturaLivePlugin
                 ks: playerConfig.provider.ks
             });
         }
+
+        _player.addEventListener(
+          _player.Event.SOURCE_SELECTED,
+          this._activatePlugin
+        );
     }
 
     onPluginSetup(): void {}
 
     onMediaLoad(): void {
-        this._isEntryLiveType();
+      if (this.isActive()) {
+        this.updateLiveTag();
+        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+
+        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
+        this._player.addEventListener(this._player.Event.ABORT, this._handleEnd);
+
+        this._player.addEventListener(this._player.Event.SEEKED, this.updateLiveTag);
+        this._player.addEventListener(this._player.Event.PLAYING, this.updateLiveTag);
+        this._player.addEventListener(this._player.Event.PAUSE, this.updateLiveTag);
+
+        this._player.configure({
+            plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
+        });
+
+        this.updateLiveStatus();
+      }
     }
 
     onMediaUnload(): void {
         this._resetTimeout();
+        this._isActive = false; // ? should deactivate
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+
+        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
+        this._player.removeEventListener(this._player.Event.ABORT, this._handleEnd);
+
+        this._player.removeEventListener(this._player.Event.SEEKED, this.updateLiveTag);
+        this._player.removeEventListener(this._player.Event.PLAYING, this.updateLiveTag);
+        this._player.removeEventListener(this._player.Event.PAUSE, this.updateLiveTag);
     }
+
+    private _activatePlugin = () => {
+      this._isActive = this.player.isLive();
+    };
+
+    private _handleEnd = () => {
+      this.reloadMedia = true;
+      this.updateLiveStatus();
+    };
 
     public updateLiveTag() {
         const isOnLiveEdge = !this._player.paused && this._player.isOnLiveEdge();
@@ -132,18 +172,6 @@ export class KalturaLivePlugin
     public get broadcastState(): LiveBroadcastStates {
         return this._broadcastState;
     }
-
-    private _isEntryLiveType = () => {
-        if (this._player.isLive()) {
-            this.updateLiveTag();
-            this._isActive = true;
-            this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.configure({
-                plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
-            });
-            this.updateLiveStatus();
-        }
-    };
 
     public handleTimedMetadata = (e: any) => {
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
@@ -370,7 +398,7 @@ export class KalturaLivePlugin
     };
 }
 
-export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
+export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> 
     implements KalturaPlayerTypes.IEngineDecoratorProvider {
     getMiddlewareImpl(): any {
         return new KalturaLiveMiddleware(this._contribPlugin);
