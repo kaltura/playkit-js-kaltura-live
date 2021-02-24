@@ -8,7 +8,7 @@ const logger = getContribLogger({
   module: 'kaltura-live-decorator',
 });
 
-export class KalturaLiveEngineDecorator
+export class KalturaLiveEngineDecorator 
   implements KalturaPlayerTypes.IEngineDecorator {
   _plugin: KalturaLivePlugin;
   _engine: any;
@@ -18,7 +18,7 @@ export class KalturaLiveEngineDecorator
   constructor(engine: any, plugin: KalturaLivePlugin, dispatcher: Function) {
     this._plugin = plugin;
     this._engine = engine;
-    this._isDecoratorActive = false;
+    this._isDecoratorActive = true;
     this._dispatcher = dispatcher;
     
     this._engine.addEventListener(
@@ -31,7 +31,8 @@ export class KalturaLiveEngineDecorator
     );
   }
 
-  private _handleError = () => {
+  private _handleError = (e: any) => {
+    console.log(">>>", e)
     this._plugin.reloadMedia = true;
     this._isDecoratorActive = true;
   };
@@ -41,8 +42,9 @@ export class KalturaLiveEngineDecorator
   };
 
   get active(): boolean {
-    return this._plugin.isActive() && this._isDecoratorActive;
+    return this._plugin.isMediaLive && this._isDecoratorActive;
   }
+  
 
   dispatchEvent(event: any): any {
     if (
@@ -60,6 +62,7 @@ export class KalturaLiveEngineDecorator
       this._plugin.updateLiveStatus();
       return true;
     }
-    return this._dispatcher(event);
+    this._dispatcher(event)
+    return false;
   }
 }
