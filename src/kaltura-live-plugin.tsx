@@ -251,11 +251,6 @@ export class KalturaLivePlugin
             });
         }
     }
-    
-    private _handleReplayClick = () => {
-        this._manageOfflineSlate(OverlayItemTypes.None);
-        this._player.play();
-    };
 
     private _manageOfflineSlate(type: OverlayItemTypes) {
         if (this._currentOverlay) {
@@ -269,12 +264,7 @@ export class KalturaLivePlugin
                     this._currentOverlay = this._contribServices.overlayManager.add({
                         label: "no-longer-live-overlay",
                         position: OverlayPositions.PlayerArea,
-                        renderContent: () => (
-                            <NoLongerLive
-                                onClick={this._handleReplayClick}
-                                showReplay={this._player.isDvr()}
-                            />
-                        )
+                        renderContent: () => <NoLongerLive />
                     });
                 }
                 break;
