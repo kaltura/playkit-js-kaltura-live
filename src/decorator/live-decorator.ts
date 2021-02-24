@@ -32,7 +32,6 @@ export class KalturaLiveEngineDecorator
   }
 
   private _handleError = (e: any) => {
-    console.log(">>>", e)
     this._plugin.reloadMedia = true;
     this._isDecoratorActive = true;
   };
