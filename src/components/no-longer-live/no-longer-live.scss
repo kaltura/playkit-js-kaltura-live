@@ -26,6 +26,39 @@
             background-position: center;
             background-image: url('./assets/no-longer-live-big.svg');
         }
+        .replay-icon-wrapper {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 108px;
+            width: 108px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(0, 0, 0, 0.5);
+            transform: translate(-50%, -50%);
+            border-radius: 54px;
+            padding: 20px;
+            cursor: pointer;
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+            &:active {
+                opacity: 0.7;
+                transform: scale(1) translate(-50%, -50%);
+            }
+            .replay-icon {
+                display: inline-block;
+                font-size: 0;
+                width: 100%;
+                height: 100%;
+                max-width: 64px;
+                max-height: 64px;
+                margin: 0 auto;
+                background-size: cover;
+                background-repeat: no-repeat;
+                background-position: 50% 50%;
+                background-image: url('./assets/replay.svg');
+            }
+        }
     }
     .text-wrapper {
         position: relative;
@@ -39,6 +72,10 @@
             font-size: 18px;
             font-weight: bold;
 
+        }
+        .secondary-text {
+            margin-top: 3px;
+            font-size: 14px;
         }
     }
 }
