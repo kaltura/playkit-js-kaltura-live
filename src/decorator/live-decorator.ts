@@ -13,14 +13,14 @@ export class KalturaLiveEngineDecorator
   _plugin: KalturaLivePlugin;
   _engine: any;
   _dispatcher: Function;
-  _isDecoratorActive: boolean;
+  _hadError: boolean;
 
   constructor(engine: any, plugin: KalturaLivePlugin, dispatcher: Function) {
     this._plugin = plugin;
     this._engine = engine;
-    this._isDecoratorActive = true;
+    this._hadError = false;
     this._dispatcher = dispatcher;
-    
+
     this._engine.addEventListener(
       this._plugin.player.Event.MEDIA_LOADED,
       this._handleMediaLoaded
@@ -33,17 +33,16 @@ export class KalturaLiveEngineDecorator
 
   private _handleError = (e: any) => {
     this._plugin.reloadMedia = true;
-    this._isDecoratorActive = true;
+    this._hadError = true;
   };
 
   private _handleMediaLoaded = () => {
-    this._isDecoratorActive = false;
+    this._hadError = false;
   };
 
   get active(): boolean {
-    return this._plugin.isMediaLive && this._isDecoratorActive;
+    return this._plugin.isMediaLive && this._hadError;
   }
-  
 
   dispatchEvent(event: any): any {
     if (
@@ -61,7 +60,6 @@ export class KalturaLiveEngineDecorator
       this._plugin.updateLiveStatus();
       return true;
     }
-    this._dispatcher(event)
-    return false;
+    return this._dispatcher(event);
   }
 }
