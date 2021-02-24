@@ -1,4 +1,4 @@
-import { h } from "preact";
+import { h, createRef } from "preact";
 import { KalturaClient } from "kaltura-typescript-client";
 import { LiveStreamGetDetailsAction } from "kaltura-typescript-client/api/types/LiveStreamGetDetailsAction";
 import {
@@ -51,7 +51,8 @@ export enum OverlayItemTypes {
 export class KalturaLivePlugin
     implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
-    private _isActive = false;
+    public isMediaLive = false;
+    public isLiveMediaLoaded = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed = false;
     private _absolutePosition = null;
@@ -60,8 +61,7 @@ export class KalturaLivePlugin
     private _liveTagState: LiveTagStates = LiveTagStates.Offline;
     private _activeRequest = false;
     public reloadMedia = false;
-    private _currentTagState: LiveTagStates | null = null;
-    private _currentIsOnLiveEdge: boolean = false;
+    private _liveTag = createRef<LiveTag>();
 
     constructor(
         private _contribServices: ContribServices,
@@ -78,52 +78,70 @@ export class KalturaLivePlugin
                 ks: playerConfig.provider.ks
             });
         }
+
+        _player.addEventListener(
+          _player.Event.SOURCE_SELECTED,
+          this._activatePlugin
+        );
+
+        this._addLiveTag();
     }
 
     onPluginSetup(): void {}
 
     onMediaLoad(): void {
-        this._isEntryLiveType();
+      if (this.isMediaLive) {
+        this.isLiveMediaLoaded = true;
+        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+
+        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
+        this._player.addEventListener(this._player.Event.ABORT, this._handleEnd);
+
+        this._player.configure({
+            plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
+        });
+
+        this.updateLiveStatus();
+      }
     }
 
     onMediaUnload(): void {
+        this.isMediaLive = false;
+        this.isLiveMediaLoaded = false;
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+
+        this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
+        this._player.removeEventListener(this._player.Event.ABORT, this._handleEnd);
     }
 
-    public updateLiveTag() {
-        const isOnLiveEdge = !this._player.paused && this._player.isOnLiveEdge();
-        if (
-            this._currentTagState !== this._liveTagState ||
-            this._currentIsOnLiveEdge !== isOnLiveEdge
-        ) {
-            this._currentTagState = this._liveTagState;
-            this._currentIsOnLiveEdge = isOnLiveEdge;
-            this._player.ui.addComponent({
-                label: 'kaltura-live-tag',
-                presets: ['Live'],
-                replaceComponent: 'LiveTag',
-                container: ReservedPresetAreas.BottomBarLeftControls,
-                props: {
-                    state: this._liveTagState,
-                    isOnLiveEdge,
-                    onClick: this._seekToLiveEdge,
-                },
-                get: LiveTag,
-            });
-        }
-    }
-
-    private _seekToLiveEdge = () => {
-        this._player.seekToLiveEdge();
-        if (this._player.paused) {
-            this._player.play();
-        }
+    private _activatePlugin = () => {
+      this.isMediaLive = this.player.isLive();
     };
 
-    public isActive(): boolean {
-        return this._isActive;
-    }
+    private _addLiveTag = () => {
+      this._player.ui.addComponent({
+        label: 'kaltura-live-tag',
+        presets: ['Live'],
+        replaceComponent: 'LiveTag',
+        container: ReservedPresetAreas.BottomBarLeftControls,
+        get: () => (
+          <LiveTag ref={this._liveTag} liveTagState={this._liveTagState} />
+        ),
+      });
+    };
+
+    private _updateLiveTag = (state: LiveTagStates) => {
+      this._liveTagState = state;
+      this._liveTag?.current?.updateLiveTagState(state);
+    };
+
+    private _handleEnd = () => {
+      this.reloadMedia = true;
+      this.updateLiveStatus();
+    };
 
     public get player() {
         return this._player;
@@ -132,18 +150,6 @@ export class KalturaLivePlugin
     public get broadcastState(): LiveBroadcastStates {
         return this._broadcastState;
     }
-
-    private _isEntryLiveType = () => {
-        if (this._player.isLive()) {
-            this.updateLiveTag();
-            this._isActive = true;
-            this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-            this._player.configure({
-                plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
-            });
-            this.updateLiveStatus();
-        }
-    };
 
     public handleTimedMetadata = (e: any) => {
         if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
@@ -201,7 +207,6 @@ export class KalturaLivePlugin
     // this functions is called whenever isLive receives any value.
     // This is where the magic happens
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
-        this.updateLiveTag();
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
         const ended = this.player.ended;
@@ -246,7 +251,7 @@ export class KalturaLivePlugin
             });
         }
     }
-
+    
     private _handleReplayClick = () => {
         this._manageOfflineSlate(OverlayItemTypes.None);
         this._player.play();
@@ -329,17 +334,19 @@ export class KalturaLivePlugin
                 }
                 switch (data.broadcastStatus) {
                     case KalturaLiveStreamBroadcastStatus.live:
-                        this._liveTagState = LiveTagStates.Live;
+                      this._updateLiveTag(LiveTagStates.Live);
                         this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         break;
                     case KalturaLiveStreamBroadcastStatus.offline:
+                        this._updateLiveTag(LiveTagStates.Offline);
                         this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
                         break;
                     case KalturaLiveStreamBroadcastStatus.preview:
                         if (pluginConfig.checkLiveWithKs) {
-                            this._liveTagState = LiveTagStates.Preview;
+                            this._updateLiveTag(LiveTagStates.Preview);
                             this.handleLiveStatusReceived(LiveBroadcastStates.Live);
                         } else {
+                            this._updateLiveTag(LiveTagStates.Offline);
                             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
                         }
                         break;
@@ -356,7 +363,7 @@ export class KalturaLivePlugin
             },
             (error) => {
                 this._activeRequest = false;
-                this._liveTagState = LiveTagStates.Offline;
+                this._updateLiveTag(LiveTagStates.Offline);
                 this.handleLiveStatusReceived(LiveBroadcastStates.Error);
                 logger.error("Failed to call isLive API", {
                     method: "updateLiveStatus",
@@ -370,7 +377,7 @@ export class KalturaLivePlugin
     };
 }
 
-export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
+export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin> 
     implements KalturaPlayerTypes.IEngineDecoratorProvider {
     getMiddlewareImpl(): any {
         return new KalturaLiveMiddleware(this._contribPlugin);
