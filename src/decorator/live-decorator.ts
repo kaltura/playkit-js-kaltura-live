@@ -32,7 +32,7 @@ export class KalturaLiveEngineDecorator
   }
 
   private _handleError = () => {
-    this._plugin.reloadMedia = true;
+    this._plugin!.reloadMedia = true;
     this._hadError = true;
   };
 
@@ -60,6 +60,6 @@ export class KalturaLiveEngineDecorator
       this._plugin!.updateLiveStatus();
       return true;
     }
-    return this._dispatcher(event);
+    return this._dispatcher!(event);
   }
 }
