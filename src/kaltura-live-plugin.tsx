@@ -10,6 +10,7 @@ import {
     OnMediaLoad,
     OnMediaUnload,
     OnPluginSetup,
+    OnPluginDestroy,
 } from "@playkit-js-contrib/plugin";
 import {
     OverlayPositions,
@@ -49,7 +50,7 @@ export enum OverlayItemTypes {
 }
 
 export class KalturaLivePlugin
-    implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
+    implements OnMediaUnload, OnMediaLoad, OnPluginSetup, OnPluginDestroy {
     private _kalturaClient = new KalturaClient();
     public isMediaLive = false;
     public isLiveMediaLoaded = false;
@@ -92,11 +93,6 @@ export class KalturaLivePlugin
     onMediaLoad(): void {
       if (this.isMediaLive) {
         this.isLiveMediaLoaded = true;
-        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-
-        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
-        this._player.addEventListener(this._player.Event.ABORT, this._handleEnd);
 
         this._player.configure({
             plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
@@ -109,16 +105,24 @@ export class KalturaLivePlugin
     onMediaUnload(): void {
         this.isMediaLive = false;
         this.isLiveMediaLoaded = false;
+    }
+
+    onPluginDestroy(): void {
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
-        this._player.removeEventListener(this._player.Event.ABORT, this._handleEnd);
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
+        this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
     }
 
     private _activatePlugin = () => {
       this.isMediaLive = this.player.isLive();
+      if (this.isMediaLive) {
+        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.addEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
+        this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+      }
     };
 
     private _addLiveTag = () => {
@@ -138,7 +142,7 @@ export class KalturaLivePlugin
       this._liveTag?.current?.updateLiveTagState(state);
     };
 
-    private _handleEnd = () => {
+    private _handleEndOrAbort = () => {
       this.reloadMedia = true;
       this.updateLiveStatus();
     };

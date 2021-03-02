@@ -10,10 +10,10 @@ const logger = getContribLogger({
 
 export class KalturaLiveEngineDecorator 
   implements KalturaPlayerTypes.IEngineDecorator {
-  _plugin: KalturaLivePlugin;
-  _engine: any;
-  _dispatcher: Function;
-  _hadError: boolean;
+  _plugin: KalturaLivePlugin | null = null;
+  _engine: any = null;
+  _dispatcher: Function | null = null;
+  _hadError: boolean = false;
 
   constructor(engine: any, plugin: KalturaLivePlugin, dispatcher: Function) {
     this._plugin = plugin;
@@ -21,8 +21,8 @@ export class KalturaLiveEngineDecorator
     this._hadError = false;
     this._dispatcher = dispatcher;
 
-    this._engine.addEventListener(
-      this._plugin.player.Event.MEDIA_LOADED,
+    this._plugin.player.addEventListener(
+      this._plugin.player.Event.PLAYER_RESET,
       this._handleMediaLoaded
     );
     this._engine.addEventListener(
@@ -31,7 +31,7 @@ export class KalturaLiveEngineDecorator
     );
   }
 
-  private _handleError = (e: any) => {
+  private _handleError = () => {
     this._plugin.reloadMedia = true;
     this._hadError = true;
   };
@@ -41,7 +41,7 @@ export class KalturaLiveEngineDecorator
   };
 
   get active(): boolean {
-    return this._plugin.isMediaLive && this._hadError;
+    return this._plugin!.isMediaLive && this._hadError;
   }
 
   dispatchEvent(event: any): any {
@@ -57,7 +57,7 @@ export class KalturaLiveEngineDecorator
           method: 'dispatchEvent',
         }
       );
-      this._plugin.updateLiveStatus();
+      this._plugin!.updateLiveStatus();
       return true;
     }
     return this._dispatcher(event);
