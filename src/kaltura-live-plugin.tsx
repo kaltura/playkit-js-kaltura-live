@@ -58,7 +58,7 @@ export class KalturaLivePlugin
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
-    private _liveTagState: LiveTagStates = LiveTagStates.Offline;
+    private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
     public reloadMedia = false;
     private _liveTag = createRef<LiveTag>();

@@ -101,7 +101,6 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   };
 
   render() {
-    const { isOnLiveEdge, liveTagState } = this.state;
     const { behindLiveEdge, liveTagState } = this.state;
     return (
       <div
