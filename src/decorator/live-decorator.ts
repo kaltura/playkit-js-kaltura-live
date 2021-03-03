@@ -25,14 +25,17 @@ export class KalturaLiveEngineDecorator
       this._plugin.player.Event.PLAYER_RESET,
       this._handleMediaLoaded
     );
+
     this._engine.addEventListener(
       this._plugin.player.Event.ERROR,
       this._handleError
     );
   }
 
-  private _handleError = () => {
+  private _handleError = (e: any) => {
+    if (e.payload.severity === this._plugin.player.Error.Severity.CRITICAL) {
     this._plugin.reloadMedia = true;
+    }
     this._hadError = true;
   };
 
