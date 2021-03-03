@@ -49,7 +49,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
 
     public load(next: Function): void {
         // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.isLiveMediaLoaded) {
+        if (!this._livePlugin.isMediaLive) { // RAISE PR FOR IT!!!!!!!!!!! FEV-758
             this.callNext(next);
             return;
         }
@@ -66,7 +66,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
 
     public play(next: Function): void {
         // if plugin is not active (E.G. in VOD) the middleware will not work
-        if (!this._livePlugin.isLiveMediaLoaded || this.isPlayerLive()) {
+        if (!this._livePlugin.isMediaLive || this.isPlayerLive()) { // RAISE PR FOR IT!!!!!!!!!!! FEV-758
             this._isFirstPlay = false;
             this.callNext(next);
             return;

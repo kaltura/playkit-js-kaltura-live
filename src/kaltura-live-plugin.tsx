@@ -52,7 +52,6 @@ export class KalturaLivePlugin
     implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
     private _kalturaClient = new KalturaClient();
     public isMediaLive = false;
-    public isLiveMediaLoaded = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed = false;
     private _absolutePosition = null;
@@ -91,7 +90,6 @@ export class KalturaLivePlugin
 
     onMediaLoad(): void {
       if (this.isMediaLive) {
-        this.isLiveMediaLoaded = true;
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
 
         this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
@@ -108,7 +106,6 @@ export class KalturaLivePlugin
 
     onMediaUnload(): void {
         this.isMediaLive = false;
-        this.isLiveMediaLoaded = false;
         this._resetTimeout();
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
 
