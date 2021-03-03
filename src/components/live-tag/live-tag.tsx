@@ -42,10 +42,6 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
       this._updateIsOnLiveEdge
     );
     this.context.player.addEventListener(
-      this.context.player.Event.PLAYING,
-      this._updateIsOnLiveEdge
-    );
-    this.context.player.addEventListener(
       this.context.player.Event.PAUSE,
       this._updateIsOnLiveEdge
     );
@@ -53,10 +49,6 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   componentWillUnmount() {
     this.context.player.removeEventListener(
       this.context.player.Event.SEEKED,
-      this._updateIsOnLiveEdge
-    );
-    this.context.player.removeEventListener(
-      this.context.player.Event.PLAYING,
       this._updateIsOnLiveEdge
     );
     this.context.player.removeEventListener(
