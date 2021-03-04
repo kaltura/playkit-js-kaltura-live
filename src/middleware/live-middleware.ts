@@ -9,7 +9,7 @@ const logger = getContribLogger({
 export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
     // false means that this is not the 1st play ever
-    private _isFirstPlay = true;
+    private _isFirstPlayedLive = true;
     private _nextLoad: Function | null = null;
     private _nextPlay: Function | null = null;
 
@@ -23,12 +23,12 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     // if not - try again
     initialPlayHandling() {
         // no need to apply this unless we are in the firstPlay
-        if (!this._isFirstPlay) {
+        if (!this._isFirstPlayedLive) {
             return;
         }
         if (this._nextPlay && this._nextLoad && this.isPlayerLive()) {
             // clear flag and release 2 methods
-            this._isFirstPlay = false;
+            this._isFirstPlayedLive = false;
             this.callNext(this._nextLoad);
             this.callNext(this._nextPlay);
             this._nextLoad = null;
@@ -59,7 +59,7 @@ export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     }
 
     public play(next: Function): void {
-        if (this._isFirstPlay && this._livePlugin.isMediaLive && !this.isPlayerLive()) {
+        if (this._isFirstPlayedLive && this._livePlugin.isMediaLive && !this.isPlayerLive()) {
             this._nextPlay = next;
             logger.info("interrupt play", { method: "play" });
         } else {
