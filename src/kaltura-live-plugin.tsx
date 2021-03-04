@@ -99,8 +99,6 @@ export class KalturaLivePlugin
         this._player.configure({
             plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
         });
-
-        this.updateLiveStatus();
       }
     }
 
