@@ -8,7 +8,6 @@ const logger = getContribLogger({
 
 export class KalturaLiveMiddleware extends KalturaPlayer.core.BaseMiddleware {
     private _livePlugin: KalturaLivePlugin;
-    // false means that this is not the 1st play ever
     private _isFirstPlayedLive = true;
     private _nextLoad: Function | null = null;
     private _nextPlay: Function | null = null;
