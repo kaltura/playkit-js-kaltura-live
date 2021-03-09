@@ -21,10 +21,11 @@ export class KalturaLiveEngineDecorator
     this._hadError = false;
     this._dispatcher = dispatcher;
 
-    this._engine.addEventListener(
-      this._plugin.player.Event.MEDIA_LOADED,
+    this._plugin.player.addEventListener(
+      this._plugin.player.Event.PLAYER_RESET,
       this._handleMediaLoaded
     );
+
     this._engine.addEventListener(
       this._plugin.player.Event.ERROR,
       this._handleError
@@ -32,7 +33,9 @@ export class KalturaLiveEngineDecorator
   }
 
   private _handleError = (e: any) => {
-    this._plugin.reloadMedia = true;
+    if (e.payload.severity === this._plugin.player.Error.Severity.CRITICAL) {
+      this._plugin.reloadMedia = true;
+    }
     this._hadError = true;
   };
 

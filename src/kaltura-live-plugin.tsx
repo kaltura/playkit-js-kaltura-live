@@ -7,9 +7,8 @@ import {
     ContribPluginManager,
     ContribServices,
     CorePlugin,
-    OnMediaLoad,
     OnMediaUnload,
-    OnPluginSetup,
+    OnPluginDestroy,
 } from "@playkit-js-contrib/plugin";
 import {
     OverlayPositions,
@@ -48,8 +47,7 @@ export enum OverlayItemTypes {
     NoLongerLive = "NoLongerLive"
 }
 
-export class KalturaLivePlugin
-    implements OnMediaUnload, OnMediaLoad, OnPluginSetup {
+export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _kalturaClient = new KalturaClient();
     public isMediaLive = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
@@ -57,7 +55,7 @@ export class KalturaLivePlugin
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
     private _currentOverlay: OverlayItem | null = null;
-    private _liveTagState: LiveTagStates = LiveTagStates.Offline;
+    private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
     public reloadMedia = false;
     private _liveTag = createRef<LiveTag>();
@@ -86,35 +84,40 @@ export class KalturaLivePlugin
         this._addLiveTag();
     }
 
-    onPluginSetup(): void {}
-
-    onMediaLoad(): void {
-      if (this.isMediaLive) {
-        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-
-        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
-        this._player.addEventListener(this._player.Event.ABORT, this._handleEnd);
-
-        this._player.configure({
-            plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
-        });
-      }
+    onPluginDestroy(): void {
+        this._player.removeEventListener(
+            this._player.Event.SOURCE_SELECTED,
+            this._activatePlugin
+        );
     }
 
     onMediaUnload(): void {
-        this.isMediaLive = false;
         this._resetTimeout();
+        this.isMediaLive = false;
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
-        this._player.removeEventListener(this._player.Event.ABORT, this._handleEnd);
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
+        this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
 
     private _activatePlugin = () => {
       this.isMediaLive = this.player.isLive();
+      if (this.isMediaLive) {
+        this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+        this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+        this._player.addEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
+        this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+      }
     };
+
+    private _handleMediaLoaded = () => {
+        this._player.configure({
+            plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
+        });
+        this.updateLiveStatus();
+    }
 
     private _addLiveTag = () => {
       this._player.ui.addComponent({
@@ -133,7 +136,7 @@ export class KalturaLivePlugin
       this._liveTag?.current?.updateLiveTagState(state);
     };
 
-    private _handleEnd = () => {
+    private _handleEndOrAbort = () => {
       this.reloadMedia = true;
       this.updateLiveStatus();
     };
