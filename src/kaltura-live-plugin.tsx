@@ -50,7 +50,6 @@ export enum OverlayItemTypes {
 export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _kalturaClient = new KalturaClient();
     public isMediaLive = false;
-    public isLiveMediaLoaded = false;
     private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
     private _wasPlayed = false;
     private _absolutePosition = null;
@@ -95,7 +94,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     onMediaUnload(): void {
         this._resetTimeout();
         this.isMediaLive = false;
-        this.isLiveMediaLoaded = false;
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
         this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
@@ -115,7 +113,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     };
 
     private _handleMediaLoaded = () => {
-        this.isLiveMediaLoaded = true;
         this._player.configure({
             plugins: { kava: { tamperAnalyticsHandler: this._tamperAnalyticsHandler } }
         });
