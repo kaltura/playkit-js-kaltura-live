@@ -85,7 +85,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
         this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        // this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
         this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
 
@@ -95,7 +95,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
         this._player.addEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        // this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
         this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
       }
     };
@@ -145,9 +145,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
 
     private _handleEndOrAbort = () => {
       this.reloadMedia = true;
-      console.log("_detachMediaSource")
-      this.player._detachMediaSource();
-    //   this.attachMedia = true;
       this.updateLiveStatus();
     };
 
@@ -192,8 +189,20 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this.reloadMedia = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
-        player?.configure({ playback: { autoplay: true }});
-        player?.loadMedia({ entryId });
+        // player?.configure({ playback: { autoplay: true }});
+        // player?.loadMedia({ entryId });
+        console.log("_reloadMedia")
+        this._player._attachMediaSource().then(() => {
+            console.log("attach-promise")
+            this._player.play();
+            this._player.seekToLiveEdge();
+        })
+        // this._player.play();
+        // console.log(">> play");
+        // setTimeout(() => {
+        //     console.log(">> seekToLiveEdge");
+        //     this._player.seekToLiveEdge();
+        // }, 1000)
     }
 
     private _resetTimeout = () => {
