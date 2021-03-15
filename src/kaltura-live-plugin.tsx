@@ -10,16 +10,11 @@ import {
     OnMediaUnload,
     OnPluginDestroy,
 } from "@playkit-js-contrib/plugin";
-import {
-    OverlayPositions,
-    ReservedPresetAreas,
-    OverlayItem
-} from "@playkit-js-contrib/ui";
+import { ReservedPresetAreas } from "@playkit-js-contrib/ui";
 import { KalturaLiveMiddleware } from "./middleware/live-middleware";
 import { getContribLogger } from "@playkit-js-contrib/common";
 import { KalturaLiveEngineDecorator } from "./decorator/live-decorator";
-import { Offline } from "./components/offline";
-import { NoLongerLive } from "./components/no-longer-live";
+import { OfflineSlate, OfflineTypes } from './components/offline-slate';
 import { LiveTag, LiveTagStates } from "./components/live-tag";
 import { KalturaLiveStreamBroadcastStatus } from "kaltura-typescript-client/api/types/KalturaLiveStreamBroadcastStatus";
 
@@ -40,13 +35,6 @@ export enum LiveBroadcastStates {
     Offline = "Offline"
 }
 
-export enum OverlayItemTypes {
-    None = "None",
-    Offline = "Offline",
-    HttpError = "HttpError",
-    NoLongerLive = "NoLongerLive"
-}
-
 export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _kalturaClient = new KalturaClient();
     public isMediaLive = false;
@@ -54,14 +42,13 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _wasPlayed = false;
     private _absolutePosition = null;
     private _isLiveApiCallTimeout: any = null;
-    private _currentOverlay: OverlayItem | null = null;
     private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
     public reloadMedia = false;
     private _liveTag = createRef<LiveTag>();
+    private _offlineSlate = createRef<OfflineSlate>();
 
     constructor(
-        private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
         private _player: any
     ) {
@@ -82,6 +69,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         );
 
         this._addLiveTag();
+        this._addOfflineSlateToPlayerArea();
     }
 
     onPluginDestroy(): void {
@@ -129,6 +117,25 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
           <LiveTag ref={this._liveTag} liveTagState={this._liveTagState} />
         ),
       });
+    };
+
+    private _addOfflineSlateToPlayerArea = () => {
+        this._player.ui.addComponent({
+            label: 'no-longer-live-overlay',
+            presets: ['Live', 'Playback'],
+            container: 'PlayerArea',
+            get: () => {
+                return (
+                    <OfflineSlate
+                        ref={this._offlineSlate}
+                    />
+                );
+            },
+        })
+    };
+
+    private _updateOfflineSlate = (type: OfflineTypes) => {
+        this._offlineSlate?.current?.manageOfflineSlate(type);
     };
 
     private _updateLiveTag = (state: LiveTagStates) => {
@@ -217,12 +224,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
             }
         });
         if (receivedState === LiveBroadcastStates.Error && this._player.paused) {
-            this._manageOfflineSlate(OverlayItemTypes.HttpError);
+            this._manageOfflineSlate(OfflineTypes.HttpError);
             return;
         }
 
         if (!this._wasPlayed && receivedState === LiveBroadcastStates.Offline) {
-            this._manageOfflineSlate(OverlayItemTypes.Offline);
+            this._manageOfflineSlate(OfflineTypes.Offline);
             logger.info("Offline before first play - show offline slate ", {
                 method: "handleLiveStatusReceived"
             });
@@ -238,56 +245,39 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
                 this._reloadMedia();
             }
             // Live. Remove slate
-            this._manageOfflineSlate(OverlayItemTypes.None);
+            this._manageOfflineSlate(OfflineTypes.None);
             return;
         }
 
         if (receivedState === LiveBroadcastStates.Offline) {
-            this._manageOfflineSlate(OverlayItemTypes.NoLongerLive);
+            this._manageOfflineSlate(OfflineTypes.NoLongerLive);
             logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
             });
         }
     }
 
-    private _manageOfflineSlate(type: OverlayItemTypes) {
-        if (this._currentOverlay) {
-            this._contribServices.overlayManager.remove(this._currentOverlay);
-            this._currentOverlay = null;
+    private _manageOfflineSlate(type: OfflineTypes) {
+        if (type === OfflineTypes.None) {
+            this._updateOfflineSlate(OfflineTypes.None);
+            if (this._configs.pluginConfig.checkLiveWithKs) {
+                // keep poll data for admins
+                this._initTimeout();
+            }
+            return;
         }
+        this._initTimeout();
         switch (type) {
-            case OverlayItemTypes.NoLongerLive:
-                this._initTimeout();
+            case OfflineTypes.NoLongerLive:
                 if (this.player.ended) {
-                    this._currentOverlay = this._contribServices.overlayManager.add({
-                        label: "no-longer-live-overlay",
-                        position: OverlayPositions.PlayerArea,
-                        renderContent: () => <NoLongerLive />
-                    });
+                    this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;
-            case OverlayItemTypes.Offline:
-                this._initTimeout();
-                this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: "offline-overlay",
-                    position: OverlayPositions.PlayerArea,
-                    renderContent: () => <Offline />
-                });
+            case OfflineTypes.Offline:
+                this._updateOfflineSlate(OfflineTypes.Offline);
                 break;
-            case OverlayItemTypes.HttpError:
-                this._initTimeout();
-                this._currentOverlay = this._contribServices.overlayManager.add({
-                    label: "http-problem-overlay",
-                    position: OverlayPositions.PlayerArea,
-                    renderContent: () => <Offline httpError={true} />
-                });
-                break;
-            case OverlayItemTypes.None:
-            default:
-                if (this._configs.pluginConfig.checkLiveWithKs) {
-                    this._initTimeout();
-                }
-                this._currentOverlay = null;
+            case OfflineTypes.HttpError:
+                this._updateOfflineSlate(OfflineTypes.HttpError);
                 break;
         }
     }
@@ -379,7 +369,7 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
 ContribPluginManager.registerPlugin(
     "kaltura-live",
     (data: ContribPluginData<KalturaLivePluginConfig>) => {
-        return new KalturaLivePlugin(data.contribServices, data.configs, data.player);
+        return new KalturaLivePlugin(data.configs, data.player);
     },
     {
         defaultConfig: {
