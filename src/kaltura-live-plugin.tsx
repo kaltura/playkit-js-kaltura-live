@@ -189,20 +189,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this.reloadMedia = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
-        // player?.configure({ playback: { autoplay: true }});
-        // player?.loadMedia({ entryId });
-        console.log("_reloadMedia")
-        this._player._attachMediaSource().then(() => {
-            console.log("attach-promise")
-            this._player.play();
-            this._player.seekToLiveEdge();
-        })
-        // this._player.play();
-        // console.log(">> play");
-        // setTimeout(() => {
-        //     console.log(">> seekToLiveEdge");
-        //     this._player.seekToLiveEdge();
-        // }, 1000)
+        player?.configure({ playback: { autoplay: true }});
+        player?.loadMedia({ entryId });
     }
 
     private _resetTimeout = () => {
