@@ -49,7 +49,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _offlineSlate = createRef<OfflineSlate>();
 
     constructor(
-        private _contribServices: ContribServices,
         private _configs: ContribPluginConfigs<KalturaLivePluginConfig>,
         private _player: any
     ) {
@@ -373,7 +372,7 @@ export class KalturaLiveCorePlugin extends CorePlugin<KalturaLivePlugin>
 ContribPluginManager.registerPlugin(
     "kaltura-live",
     (data: ContribPluginData<KalturaLivePluginConfig>) => {
-        return new KalturaLivePlugin(data.contribServices, data.configs, data.player);
+        return new KalturaLivePlugin(data.configs, data.player);
     },
     {
         defaultConfig: {
