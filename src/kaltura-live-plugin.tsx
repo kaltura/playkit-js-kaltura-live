@@ -85,7 +85,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
         this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        // this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
         this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
 
@@ -95,7 +95,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
         this._player.addEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        // this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
         this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
       }
     };
