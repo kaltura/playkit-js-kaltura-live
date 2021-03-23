@@ -45,6 +45,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
     public reloadMedia = false;
+    private _attachMedia = false;
     private _liveTag = createRef<LiveTag>();
     private _offlineSlate = createRef<OfflineSlate>();
 
@@ -84,8 +85,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this.isMediaLive = false;
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.removeEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        this._player.removeEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
         this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
 
@@ -94,8 +94,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
       if (this.isMediaLive) {
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.addEventListener(this._player.Event.ENDED, this._handleEndOrAbort);
-        this._player.addEventListener(this._player.Event.ABORT, this._handleEndOrAbort);
+        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
         this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
       }
     };
@@ -143,9 +142,10 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
       this._liveTag?.current?.updateLiveTagState(state);
     };
 
-    private _handleEndOrAbort = () => {
-      this.reloadMedia = true;
-      this.updateLiveStatus();
+    private _handleEnd = () => {
+        this._attachMedia = true;
+        this._player.detachMediaSource();
+        this._manageOfflineSlate(OfflineTypes.NoLongerLive);
     };
 
     public get player() {
@@ -185,12 +185,24 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._wasPlayed = true;
     };
 
-    private _reloadMedia = () => {
+    private _loadMedia = () => {
         this.reloadMedia = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
         player?.configure({ playback: { autoplay: true }});
         player?.loadMedia({ entryId });
+    }
+
+    private _attachMediaSource = () => {
+        this._attachMedia = false;
+        this._player.addEventListener(this._player.Event.PLAYING, this._restoreLiveEdge);
+        this._player.attachMediaSource();
+        this._player.play();
+    }
+
+    private _restoreLiveEdge = () => {
+        this._player.seekToLiveEdge();
+        this._player.removeEventListener(this._player.Event.PLAYING, this._restoreLiveEdge);
     }
 
     private _resetTimeout = () => {
@@ -236,24 +248,29 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
             return;
         }
 
-        if (receivedState === LiveBroadcastStates.Live) {
-            if (this.reloadMedia) {
-                // if playback ended OR player got "abort" event
-                logger.info("Video ended and isLive is true. Reset player engine", {
-                    method: "handleLiveStatusReceived"
-                });
-                this._reloadMedia();
-            }
-            // Live. Remove slate
-            this._manageOfflineSlate(OfflineTypes.None);
-            return;
-        }
-
         if (receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OfflineTypes.NoLongerLive);
             logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
             });
+            return;
+        }
+
+        if (receivedState === LiveBroadcastStates.Live) {
+            if (this.reloadMedia) {
+                logger.info("Player got error but stream is Live now. Reload media", {
+                    method: "handleLiveStatusReceived"
+                });
+                this._loadMedia();
+            }
+            if (this._attachMedia) {
+                logger.info("Media ended but stream is Live now. Attach media", {
+                    method: "handleLiveStatusReceived"
+                });
+                this._attachMediaSource();
+            }
+            // Live. Remove slate
+            this._manageOfflineSlate(OfflineTypes.None);
         }
     }
 
@@ -269,7 +286,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._initTimeout();
         switch (type) {
             case OfflineTypes.NoLongerLive:
-                if (this.player.ended) {
+                if (this._attachMedia) {
                     this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;
