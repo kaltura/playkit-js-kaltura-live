@@ -195,14 +195,14 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
 
     private _attachMediaSource = () => {
         this._attachMedia = false;
-        this._player.addEventListener(this._player.Event.PLAYING, this._restoreLiveEdge);
+        this._player.addEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
         this._player.attachMediaSource();
         this._player.play();
     }
 
     private _restoreLiveEdge = () => {
         this._player.seekToLiveEdge();
-        this._player.removeEventListener(this._player.Event.PLAYING, this._restoreLiveEdge);
+        this._player.removeEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
     }
 
     private _resetTimeout = () => {
