@@ -38,7 +38,7 @@
   "keywords": [],
   "author": "",
   "devDependencies": {
-    "@commitlint/cli": "9.1.2",
+    "@commitlint/cli": "12.1.3",
     "@commitlint/config-conventional": "9.1.2",
     "@types/classnames": "2.2.10",
     "@types/node": "14.6.2",
