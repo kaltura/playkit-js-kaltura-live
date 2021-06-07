@@ -2,13 +2,13 @@
 # https://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 set -ev
 yarn install
-if [ "${TRAVIS_MODE}" = "lint" ]; then
-  yarn run eslint
-elif [ "${TRAVIS_MODE}" = "flow" ]; then
-  yarn run flow
-elif [ "${TRAVIS_MODE}" = "unitTests" ]; then
-	yarn run test
-elif [ "${TRAVIS_MODE}" = "release" ] || [ "${TRAVIS_MODE}" = "releaseCanary" ]; then
+#if [ "${TRAVIS_MODE}" = "lint" ]; then
+#  yarn run eslint
+#elif [ "${TRAVIS_MODE}" = "flow" ]; then
+#  yarn run flow
+#elif [ "${TRAVIS_MODE}" = "unitTests" ]; then
+#	yarn run test
+if [ "${TRAVIS_MODE}" = "release" ] || [ "${TRAVIS_MODE}" = "releaseCanary" ]; then
   if [ "${TRAVIS_MODE}" = "releaseCanary" ]; then
     echo "Run standard-version"
     yarn run release --prerelease canary --skip.commit=true --skip.tag=true

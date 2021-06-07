@@ -23,7 +23,7 @@ before_install:
 script: ./scripts/travis.sh
 
 stages:
-  - Tests
+#  - Tests
   - Release canary
   - Release
   - Deploy

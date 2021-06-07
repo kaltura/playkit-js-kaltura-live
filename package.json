@@ -1,5 +1,5 @@
 {
-  "name": "@playkit-js/kaltura-live-plugin",
+  "name": "@playkit-js/kaltura-live",
   "version": "2.1.4",
   "license": "AGPL-3.0",
   "bugs": {
@@ -11,7 +11,7 @@
     "url": "git+https://github.com/kaltura/playkit-js-kaltura-live.git"
   },
   "description": "",
-  "main": "dist/playkit-js-kaltura-live.js",
+  "main": "dist/playkit-kaltura-live.js",
   "scripts": {
     "clean": "rm -rf dist",
     "reset": "npm run clean && rm -rf node_modules",
@@ -26,8 +26,6 @@
     "husky:pre-commit": "lint-staged",
     "husky:commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
     "deploy:prepare": "kcontrib deploy --prepare",
-    "deploy:publish-to-npm": "kcontrib deploy --publish",
-    "deploy:next:prepare": "kcontrib deploy --prepare --prerelease next",
     "contrib:latest": "kcontrib infra --type=latest",
     "infra:latest": "kcontrib infra --type=latest",
     "infra:next": "kcontrib infra --type=next",
