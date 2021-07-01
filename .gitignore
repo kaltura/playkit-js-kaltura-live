@@ -23,11 +23,11 @@ yarn-debug.log*
 yarn-error.log*
 test.ejs
 
-build
+build/
 /.idea
 /.vscode
 .rpt2_cache
-dist
+dist/
 
 .rpt2_cache
 .rpt2*
