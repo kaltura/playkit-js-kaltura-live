@@ -1,17 +1,11 @@
 #!/bin/sh
 # https://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 set -ev
-yarn install
-#if [ "${TRAVIS_MODE}" = "lint" ]; then
-#  yarn run eslint
-#elif [ "${TRAVIS_MODE}" = "flow" ]; then
-#  yarn run flow
-#elif [ "${TRAVIS_MODE}" = "unitTests" ]; then
-#	yarn run test
+npm install
 if [ "${TRAVIS_MODE}" = "release" ] || [ "${TRAVIS_MODE}" = "releaseCanary" ]; then
   if [ "${TRAVIS_MODE}" = "releaseCanary" ]; then
     echo "Run standard-version"
-    yarn run release --prerelease canary --skip.commit=true --skip.tag=true
+    npm run bump-canary
     sha=$(git rev-parse --verify --short HEAD)
     echo "Current sha ${sha}"
     commitNumberAfterTag=$(git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count)
@@ -20,8 +14,10 @@ if [ "${TRAVIS_MODE}" = "release" ] || [ "${TRAVIS_MODE}" = "releaseCanary" ]; t
     echo "Current version ${currentVersion}"
     newVersion=$(echo $currentVersion | sed -e "s/canary\.[[:digit:]]/canary.${commitNumberAfterTag}-${sha}/g")
     echo "New version ${newVersion}"
+    sed -iE "s/$currentVersion/$newVersion/g" package-lock.json
     sed -iE "s/$currentVersion/$newVersion/g" package.json
     sed -iE "s/$currentVersion/$newVersion/g" CHANGELOG.md
+    rm package-lock.jsonE
     rm package.jsonE
     rm CHANGELOG.mdE
   else
@@ -30,7 +26,7 @@ if [ "${TRAVIS_MODE}" = "release" ] || [ "${TRAVIS_MODE}" = "releaseCanary" ]; t
     conventional-github-releaser -p angular -t $GH_TOKEN || true
   fi
   echo "Building..."
-  npm run build
+  CI=false npm run build
   echo "Finish building"
 elif [ "${TRAVIS_MODE}" = "deploy" ]; then
   echo "Deploy..."
