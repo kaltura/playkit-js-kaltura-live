@@ -85,7 +85,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this.isMediaLive = false;
         this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.removeEventListener(this._player.Event.ENDED, this._handleEnd);
         this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
 
@@ -94,7 +93,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
       if (this.isMediaLive) {
         this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
         this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-        this._player.addEventListener(this._player.Event.ENDED, this._handleEnd);
         this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
       }
     };
@@ -142,12 +140,6 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
       this._liveTag?.current?.updateLiveTagState(state);
     };
 
-    private _handleEnd = () => {
-        this._attachMedia = true;
-        this._player.detachMediaSource();
-        this._manageOfflineSlate(OfflineTypes.NoLongerLive);
-    };
-
     public get player() {
         return this._player;
     }
@@ -193,6 +185,11 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         player?.loadMedia({ entryId });
     }
 
+    public detachMediaSource = () => {
+        this._attachMedia = true;
+        this._player.detachMediaSource();
+    }
+
     private _attachMediaSource = () => {
         this._attachMedia = false;
         this._player.addEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
@@ -226,13 +223,11 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
         this._broadcastState = receivedState;
         const hasDVR = this._player.isDvr();
-        const ended = this.player.ended;
         logger.info("Received isLive with value: " + receivedState, {
             method: "handleLiveStatusReceived",
             data: {
                 hasDVR: hasDVR,
-                wasPlayed: this._wasPlayed,
-                ended: ended
+                wasPlayed: this._wasPlayed
             }
         });
         if (receivedState === LiveBroadcastStates.Error && this._player.paused) {
@@ -250,6 +245,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
 
         if (receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OfflineTypes.NoLongerLive);
+            this._player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this._player.Event.ENDED, { manualEvent: true }));
             logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
             });
