@@ -1,7 +1,14 @@
 import { KalturaLivePlugin } from '../kaltura-live-plugin';
 import { getContribLogger } from '@playkit-js-contrib/common';
 
-const HTTP_ERRORS = [1002, 1003, 1008, 3016, 3022];
+const { Error } = KalturaPlayer.core as any;
+const HANDLED_ERRORS = [
+  Error.Code.HTTP_ERROR,
+  Error.Code.TIMEOUT,
+  Error.Code.LIVE_MANIFEST_REFRESH_ERROR,
+  Error.Code.VIDEO_ERROR,
+  Error.Code.NATIVE_ADAPTER_LOAD_FAILED,
+];
 
 const logger = getContribLogger({
   class: 'KalturaLiveDecorator',
@@ -70,7 +77,7 @@ export class KalturaLiveEngineDecorator
       event.type === 'error' &&
       event.payload &&
       event.payload.code &&
-      HTTP_ERRORS.indexOf(event.payload.code) > -1
+      HANDLED_ERRORS.indexOf(event.payload.code) > -1
     ) {
       logger.info(
         `Kaltura live-decorator prevented interrupted error ${event.payload.code}`,
