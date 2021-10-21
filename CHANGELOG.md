@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.5](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.4...v2.1.5) (2021-10-21)
+
+
+### Bug Fixes
+
+* **FEV-1081:** handle 'end' event on switches from primary\secondary ([#334](https://github.com/kaltura/playkit-js-kaltura-live/issues/334)) ([1de4154](https://github.com/kaltura/playkit-js-kaltura-live/commit/1de4154033cbc341c995d8a5ac56c1f51f2f8241))
+
 ### [2.1.4](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.3...v2.1.4) (2021-03-24)
 
 ### [2.1.3](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.2...v2.1.3) (2021-03-10)
