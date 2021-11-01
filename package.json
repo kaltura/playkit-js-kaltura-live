@@ -11,6 +11,7 @@
     "url": "git+https://github.com/kaltura/playkit-js-kaltura-live.git"
   },
   "description": "",
+  "main": "dist/playkit-kaltura-live.js",
   "scripts": {
     "clean": "rm -rf dist",
     "reset": "npm run clean && rm -rf node_modules",
