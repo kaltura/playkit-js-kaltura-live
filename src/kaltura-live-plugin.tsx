@@ -245,7 +245,9 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
 
         if (receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OfflineTypes.NoLongerLive);
-            this._player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this._player.Event.ENDED));
+            if (this._attachMedia) {
+                this._player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this._player.Event.ENDED));
+            }
             logger.info("Received isLive false after ended - show no longer live slate", {
                 method: "handleLiveStatusReceived"
             });
@@ -282,7 +284,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._initTimeout();
         switch (type) {
             case OfflineTypes.NoLongerLive:
-                if (this._attachMedia) {
+                if (!this._player.isDvr() || this._attachMedia) {
                     this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;
