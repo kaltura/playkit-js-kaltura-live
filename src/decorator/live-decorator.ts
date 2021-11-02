@@ -54,9 +54,11 @@ export class KalturaLiveEngineDecorator
   };
 
   private _handleEnd = () => {
-    this._plugin.detachMediaSource();
-    this._plugin.updateLiveStatus();
-    this._ended = true;
+    if (this._plugin.isMediaLive) {
+      this._plugin.detachMediaSource();
+      this._plugin.updateLiveStatus();
+      this._ended = true;
+    }
   };
 
   private _handleMediaLoaded = () => {
