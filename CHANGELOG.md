@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.8](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.7...v2.1.8) (2021-11-02)
+
+
+### Bug Fixes
+
+* **FEV-1126:** for live entries without DVR display slate without END event ([#335](https://github.com/kaltura/playkit-js-kaltura-live/issues/335)) ([3b98450](https://github.com/kaltura/playkit-js-kaltura-live/commit/3b984509787e184c85602b6ad7aedcff263b91cc))
+* **FEV-1128:** prevent get details call for non-live entry ([#336](https://github.com/kaltura/playkit-js-kaltura-live/issues/336)) ([93db24c](https://github.com/kaltura/playkit-js-kaltura-live/commit/93db24c181dd434af7a105c75f05ee284e5b3a13))
+
 ### [2.1.7](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.6...v2.1.7) (2021-11-01)
 
 ### [2.1.6](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.5...v2.1.6) (2021-10-25)
