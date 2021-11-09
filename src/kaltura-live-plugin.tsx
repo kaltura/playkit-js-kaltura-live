@@ -284,7 +284,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._initTimeout();
         switch (type) {
             case OfflineTypes.NoLongerLive:
-                if (!this._player.isDvr() || this._attachMedia) {
+                if (!this._player.isDvr() || this._attachMedia || this.reloadMedia) {
                     this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;
