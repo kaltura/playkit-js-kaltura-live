@@ -44,7 +44,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _isLiveApiCallTimeout: any = null;
     private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
-    public reloadMedia = false;
+    public playerHasError = false;
     private _mediaDetached = false;
     private _liveTag = createRef<LiveTag>();
     private _offlineSlate = createRef<OfflineSlate>();
@@ -178,7 +178,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     };
 
     private _loadMedia = () => {
-        this.reloadMedia = false;
+        this.playerHasError = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
         player?.configure({ playback: { autoplay: true }});
@@ -255,7 +255,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            if (this.reloadMedia) {
+            if (this.playerHasError) {
                 logger.info("Player got error but stream is Live now. Reload media", {
                     method: "handleLiveStatusReceived"
                 });
@@ -284,7 +284,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._initTimeout();
         switch (type) {
             case OfflineTypes.NoLongerLive:
-                if (!this._player.isDvr() || this._mediaDetached || this.reloadMedia) {
+                if (!this._player.isDvr() || this._mediaDetached || this.playerHasError) {
                     this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;

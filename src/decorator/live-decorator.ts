@@ -48,7 +48,7 @@ export class KalturaLiveEngineDecorator
 
   private _handleError = (e: any) => {
     if (e.payload.severity === this._plugin.player.Error.Severity.CRITICAL) {
-      this._plugin.reloadMedia = true;
+      this._plugin.playerHasError = true;
     }
     this._hadError = true;
   };
