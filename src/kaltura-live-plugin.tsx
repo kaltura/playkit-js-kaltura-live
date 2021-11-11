@@ -44,8 +44,8 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     private _isLiveApiCallTimeout: any = null;
     private _liveTagState: LiveTagStates = LiveTagStates.Live;
     private _activeRequest = false;
-    public reloadMedia = false;
-    private _attachMedia = false;
+    public playerHasError = false;
+    private _mediaDetached = false;
     private _liveTag = createRef<LiveTag>();
     private _offlineSlate = createRef<OfflineSlate>();
 
@@ -178,7 +178,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     };
 
     private _loadMedia = () => {
-        this.reloadMedia = false;
+        this.playerHasError = false;
         const player: any = KalturaPlayer.getPlayer(this._player.config.targetId);
         const entryId = this._player.config.sources.id;
         player?.configure({ playback: { autoplay: true }});
@@ -186,12 +186,12 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
     }
 
     public detachMediaSource = () => {
-        this._attachMedia = true;
+        this._mediaDetached = true;
         this._player.detachMediaSource();
     }
 
     private _attachMediaSource = () => {
-        this._attachMedia = false;
+        this._mediaDetached = false;
         this._player.addEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
         this._player.attachMediaSource();
         this._player.play();
@@ -245,7 +245,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
 
         if (receivedState === LiveBroadcastStates.Offline) {
             this._manageOfflineSlate(OfflineTypes.NoLongerLive);
-            if (this._attachMedia) {
+            if (this._mediaDetached) {
                 this._player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this._player.Event.ENDED));
             }
             logger.info("Received isLive false after ended - show no longer live slate", {
@@ -255,13 +255,13 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         }
 
         if (receivedState === LiveBroadcastStates.Live) {
-            if (this.reloadMedia) {
+            if (this.playerHasError) {
                 logger.info("Player got error but stream is Live now. Reload media", {
                     method: "handleLiveStatusReceived"
                 });
                 this._loadMedia();
             }
-            if (this._attachMedia) {
+            if (this._mediaDetached) {
                 logger.info("Media ended but stream is Live now. Attach media", {
                     method: "handleLiveStatusReceived"
                 });
@@ -284,7 +284,7 @@ export class KalturaLivePlugin implements OnMediaUnload, OnPluginDestroy {
         this._initTimeout();
         switch (type) {
             case OfflineTypes.NoLongerLive:
-                if (!this._player.isDvr() || this._attachMedia) {
+                if (!this._player.isDvr() || this._mediaDetached || this.playerHasError) {
                     this._updateOfflineSlate(OfflineTypes.NoLongerLive);
                 }
                 break;
