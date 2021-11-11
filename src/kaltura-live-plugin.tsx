@@ -19,7 +19,7 @@ export enum LiveBroadcastStates {
 
 // @ts-ignore
 export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements IMiddlewareProvider, IEngineDecoratorProvider {
-  private _player: KalturaPlayerTypes.Player;
+  public player: KalturaPlayerTypes.Player;
   public isMediaLive = false;
   private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
   private _wasPlayed = false;
@@ -39,8 +39,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
-    this._player = player;
-    this.eventManager.listen(this._player, this._player.Event.SOURCE_SELECTED, this._activatePlugin);
+    this.player = player;
+    this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
 
     this._addLiveTag();
     this._addOfflineSlateToPlayerArea();
@@ -57,21 +57,21 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _activatePlugin = () => {
     this.isMediaLive = this.player.isLive();
     if (this.isMediaLive) {
-      this.eventManager.listen(this._player, this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-      this.eventManager.listen(this._player, this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-      this.eventManager.listen(this._player, this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+      this.eventManager.listen(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
+      this.eventManager.listen(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
+      this.eventManager.listen(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
   };
 
   private _handleMediaLoaded = () => {
-    this._player.configure({
+    this.player.configure({
       plugins: {kava: {tamperAnalyticsHandler: this._tamperAnalyticsHandler}}
     });
     this.updateLiveStatus();
   };
 
   private _addLiveTag = () => {
-    this._player.ui.addComponent({
+    this.player.ui.addComponent({
       label: 'kaltura-live-tag',
       presets: ['Live'],
       replaceComponent: 'LiveTag',
@@ -81,7 +81,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   };
 
   private _addOfflineSlateToPlayerArea = () => {
-    this._player.ui.addComponent({
+    this.player.ui.addComponent({
       label: 'no-longer-live-overlay',
       presets: ['Live', 'Playback'],
       container: 'PlayerArea',
@@ -130,25 +130,25 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   private _loadMedia = () => {
     this.playerHasError = false;
-    this._player.configure({playback: {autoplay: true}});
-    this._player.loadMedia({entryId: this._player.config.sources.id});
+    this.player.configure({playback: {autoplay: true}});
+    this.player.loadMedia({entryId: this.player.config.sources.id});
   };
 
   public detachMediaSource = () => {
     this._mediaDetached = true;
-    this._player.detachMediaSource();
+    this.player.detachMediaSource();
   };
 
   private _attachMediaSource = () => {
     this._mediaDetached = false;
-    this._player.addEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
-    this._player.attachMediaSource();
-    this._player.play();
+    this.player.addEventListener(this.player.Event.CAN_PLAY, this._restoreLiveEdge);
+    this.player.attachMediaSource();
+    this.player.play();
   };
 
   private _restoreLiveEdge = () => {
-    this._player.seekToLiveEdge();
-    this._player.removeEventListener(this._player.Event.CAN_PLAY, this._restoreLiveEdge);
+    this.player.seekToLiveEdge();
+    this.player.removeEventListener(this.player.Event.CAN_PLAY, this._restoreLiveEdge);
   };
 
   private _resetTimeout = () => {
@@ -169,7 +169,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
     this._broadcastState = receivedState;
     this.logger.info('Received isLive with value: ' + receivedState);
-    if (receivedState === LiveBroadcastStates.Error && this._player.paused) {
+    if (receivedState === LiveBroadcastStates.Error && this.player.paused) {
       this._manageOfflineSlate(OfflineTypes.HttpError);
       return;
     }
@@ -183,7 +183,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     if (receivedState === LiveBroadcastStates.Offline) {
       this._manageOfflineSlate(OfflineTypes.NoLongerLive);
       if (this._mediaDetached) {
-        this._player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this._player.Event.ENDED));
+        this.player.dispatchEvent(new (KalturaPlayer.core as any).FakeEvent(this.player.Event.ENDED));
       }
       this.logger.info('Received isLive false after ended - show no longer live slate');
       return;
@@ -215,7 +215,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._initTimeout();
     switch (type) {
       case OfflineTypes.NoLongerLive:
-        if (!this._player.isDvr() || this._mediaDetached || this.playerHasError) {
+        if (!this.player.isDvr() || this._mediaDetached || this.playerHasError) {
           this._updateOfflineSlate(OfflineTypes.NoLongerLive);
         }
         break;
@@ -231,14 +231,14 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
   public updateLiveStatus = () => {
     this.logger.info(`Calling LiveStreamGetDetailsAction ${this.config.checkLiveWithKs ? 'with' : 'without'} KS`);
-    const {id} = this._player.config.sources;
-    const ks = this.config.checkLiveWithKs ? this._player.config.session?.ks : null;
+    const {id} = this.player.config.sources;
+    const ks = this.config.checkLiveWithKs ? this.player.config.session?.ks : null;
     if (this._activeRequest) {
       return; // prevent new API call if current is pending
     }
     this._resetTimeout();
     this._activeRequest = true;
-    this._player.provider
+    this.player.provider
       .doRequest([{loader: GetStreamDetailsLoader, params: {ks, id}}])
       .then((data: Map<string, any>) => {
         if (data && data.has(GetStreamDetailsLoader.id)) {
@@ -295,9 +295,9 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   reset(): void {
     this._resetTimeout();
     this.isMediaLive = false;
-    this.eventManager.unlisten(this._player, this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-    this.eventManager.unlisten(this._player, this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-    this.eventManager.unlisten(this._player, this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+    this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
+    this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
+    this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
   }
 
   destroy(): void {

@@ -5077,7 +5077,7 @@ just-extend@^4.0.2:
 
 "kaltura-player-js@https://github.com/kaltura/kaltura-player-js.git#master":
   version "1.16.1"
-  resolved "https://github.com/kaltura/kaltura-player-js.git#62082db935bc082abf499bea98a1ad9f9a76e071"
+  resolved "https://github.com/kaltura/kaltura-player-js.git#7cf3d1ab23898d8b8b2788fd4ae5937e2b4245db"
   dependencies:
     "@babel/polyfill" "^7.0.0"
     "@playkit-js/playkit-js" "0.75.0"
@@ -5086,7 +5086,7 @@ just-extend@^4.0.2:
     "@playkit-js/playkit-js-ui" "0.69.3"
     hls.js "^1.0.7"
     intersection-observer "^0.12.0"
-    playkit-js-providers "https://github.com/kaltura/playkit-js-providers#v2.31.0"
+    playkit-js-providers "https://github.com/kaltura/playkit-js-providers.git#v2.31.0"
     proxy-polyfill "^0.3.0"
     shaka-player "3.0.13"
 
@@ -6978,9 +6978,9 @@ pkg-dir@^5.0.0:
   dependencies:
     find-up "^5.0.0"
 
-"playkit-js-providers@https://github.com/kaltura/playkit-js-providers#v2.31.0":
+"playkit-js-providers@https://github.com/kaltura/playkit-js-providers.git#v2.31.0":
   version "2.31.0"
-  resolved "https://github.com/kaltura/playkit-js-providers#4ae3214262d2da305056639392d00bffce6a72f9"
+  resolved "https://github.com/kaltura/playkit-js-providers.git#4ae3214262d2da305056639392d00bffce6a72f9"
 
 please-upgrade-node@^3.2.0:
   version "3.2.0"
