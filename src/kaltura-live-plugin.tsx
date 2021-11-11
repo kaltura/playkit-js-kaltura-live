@@ -3,7 +3,7 @@ import {KalturaLiveMiddleware} from './middleware/live-middleware';
 import {KalturaLiveEngineDecorator} from './decorator/live-decorator';
 import {OfflineSlate, OfflineTypes} from './components/offline-slate';
 import {LiveTag, LiveTagStates} from './components/live-tag';
-import {GetStreamDetailsLoader} from './providers/get-stream-details-loader';
+import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './providers/get-stream-details-loader';
 // @ts-ignore
 import {core} from 'kaltura-player-js';
 
@@ -21,7 +21,7 @@ export enum LiveBroadcastStates {
 
 // @ts-ignore
 export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements IMiddlewareProvider, IEngineDecoratorProvider {
-  public _player: KalturaPlayerTypes.Player;
+  private _player: KalturaPlayerTypes.Player;
   public isMediaLive = false;
   private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
   private _wasPlayed = false;
@@ -47,13 +47,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
     this._player = player;
-
-    // if (this.config.checkLiveWithKs) {
-    //     this._kalturaClient.setDefaultRequestOptions({
-    //         ks: this._player.config.provider.ks
-    //     });
-    // }
-
     this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._activatePlugin);
 
     this._addLiveTag();
@@ -121,10 +114,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._liveTagState = state;
     this._liveTag?.current?.updateLiveTagState(state);
   };
-
-  public get player() {
-    return this._player;
-  }
 
   public get broadcastState(): LiveBroadcastStates {
     return this._broadcastState;
@@ -259,47 +248,46 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   public updateLiveStatus = () => {
     this.logger.info(`Calling LiveStreamGetDetailsAction ${this.config.checkLiveWithKs ? 'with' : 'without'} KS`);
     const {id} = this._player.config.sources;
+    const ks = this.config.checkLiveWithKs ? this._player.config.session?.ks : null;
     if (this._activeRequest) {
       return; // prevent new API call if current is pending
     }
     this._resetTimeout();
     this._activeRequest = true;
     this._player.provider
-      .doRequest([{loader: GetStreamDetailsLoader, params: {checkLiveWithKs: this.config.checkLiveWithKs, id}}])
+      .doRequest([{loader: GetStreamDetailsLoader, params: {ks, id}}])
       .then((data: Map<string, any>) => {
         if (data && data.has(GetStreamDetailsLoader.id)) {
-          const secondaryMediaLoader = data.get(GetStreamDetailsLoader.id);
-          console.log('>>>', secondaryMediaLoader);
+          const streamDetailsLoader = data.get(GetStreamDetailsLoader.id);
+          const streamDetails = streamDetailsLoader?.response;
 
-          // this._activeRequest = false;
-          // this._liveTagState = LiveTagStates.Offline;
-          // if (!data || !data.broadcastStatus) {
-          //     // bad response
-          //     this._initTimeout();
-          //     return;
-          // }
-          // switch (data.broadcastStatus) {
-          //     case KalturaLiveStreamBroadcastStatus.live:
-          //       this._updateLiveTag(LiveTagStates.Live);
-          //         this.handleLiveStatusReceived(LiveBroadcastStates.Live);
-          //         break;
-          //     case KalturaLiveStreamBroadcastStatus.offline:
-          //         this._updateLiveTag(LiveTagStates.Offline);
-          //         this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
-          //         break;
-          //     case KalturaLiveStreamBroadcastStatus.preview:
-          //         if (pluginConfig.checkLiveWithKs) {
-          //             this._updateLiveTag(LiveTagStates.Preview);
-          //             this.handleLiveStatusReceived(LiveBroadcastStates.Live);
-          //         } else {
-          //             this._updateLiveTag(LiveTagStates.Offline);
-          //             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
-          //         }
-          //         break;
-          // }
-          // this.logger.info(
-          //     "LiveStreamGetDetails received. data.broadcastStatus " + data.broadcastStatus
-          // );
+          this._activeRequest = false;
+          this._liveTagState = LiveTagStates.Offline;
+          if (!streamDetails.broadcastStatus) {
+            // bad response
+            this._initTimeout();
+            return;
+          }
+          switch (streamDetails.broadcastStatus) {
+            case KalturaLiveStreamBroadcastStatus.live:
+              this._updateLiveTag(LiveTagStates.Live);
+              this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+              break;
+            case KalturaLiveStreamBroadcastStatus.offline:
+              this._updateLiveTag(LiveTagStates.Offline);
+              this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+              break;
+            case KalturaLiveStreamBroadcastStatus.preview:
+              if (this.config.checkLiveWithKs) {
+                this._updateLiveTag(LiveTagStates.Preview);
+                this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+              } else {
+                this._updateLiveTag(LiveTagStates.Offline);
+                this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+              }
+              break;
+          }
+          this.logger.info('LiveStreamGetDetails received. data.broadcastStatus ' + streamDetails.broadcastStatus);
         }
       })
       .catch((e: any) => {

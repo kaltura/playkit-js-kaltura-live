@@ -34,7 +34,7 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
 
   private _handleError = (e: any) => {
     // @ts-ignore
-    if (e.payload.severity === this._plugin.player.Error.Severity.CRITICAL) {
+    if (e.payload.severity === this._plugin._player.Error.Severity.CRITICAL) {
       this._plugin.playerHasError = true;
     }
     this._hadError = true;

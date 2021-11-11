@@ -1,6 +1,17 @@
 import ILoader = KalturaPlayerTypes.ILoader;
 
-const {RequestBuilder, ResponseTypes} = KalturaPlayer.providers;
+const {RequestBuilder} = KalturaPlayer.providers;
+
+interface GetStreamDetailsLoaderParams {
+  ks: string | null;
+  id: string;
+}
+
+export enum KalturaLiveStreamBroadcastStatus {
+  live = 3,
+  offline = 1,
+  preview = 2
+}
 
 export class GetStreamDetailsLoader implements ILoader {
   _requests: any[] = [];
@@ -14,13 +25,17 @@ export class GetStreamDetailsLoader implements ILoader {
    * @constructor
    * @param {Object} params loader params
    */
-  constructor(private _checkLiveWithKs: boolean, private _id: boolean) {
-    console.log('_checkLiveWithKs, _id', _checkLiveWithKs, _id);
+  constructor({ks, id}: GetStreamDetailsLoaderParams) {
     const headers: Map<string, string> = new Map();
     const request = new RequestBuilder(headers);
     request.service = 'livestream';
     request.action = 'getDetails';
-    request.params = {};
+    request.params = {
+      id
+    };
+    if (ks) {
+      request.params.ks = ks;
+    }
     this.requests.push(request);
   }
 
@@ -33,7 +48,7 @@ export class GetStreamDetailsLoader implements ILoader {
   }
 
   set response(response: any) {
-    this._response = response;
+    this._response = response[0]?.data || {};
   }
 
   get response(): any {
