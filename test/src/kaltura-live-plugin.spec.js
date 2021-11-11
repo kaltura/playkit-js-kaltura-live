@@ -1,6 +1,5 @@
 import {setup, core} from 'kaltura-player-js';
 import * as TestUtils from './utils/test-utils';
-import {KalturaLivePlugin} from '../../src';
 
 describe('Kaltura Live plugin', function () {
   let player, sandbox;
