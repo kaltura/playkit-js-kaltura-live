@@ -4,8 +4,6 @@ import {KalturaLiveEngineDecorator} from './decorator/live-decorator';
 import {OfflineSlate, OfflineTypes} from './components/offline-slate';
 import {LiveTag, LiveTagStates} from './components/live-tag';
 import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './providers/get-stream-details-loader';
-// @ts-ignore
-import {core} from 'kaltura-player-js';
 
 interface LivePluginConfig {
   checkLiveWithKs: boolean;
@@ -34,11 +32,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _liveTag = createRef<LiveTag>();
   private _offlineSlate = createRef<OfflineSlate>();
 
-  /**
-   * The default configuration of the plugin.
-   * @type {VisibilityConfigObject}
-   * @static
-   */
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
     isLiveInterval: 10
@@ -47,7 +40,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
     this._player = player;
-    this._player.addEventListener(this._player.Event.SOURCE_SELECTED, this._activatePlugin);
+    this.eventManager.listen(this._player, this._player.Event.SOURCE_SELECTED, this._activatePlugin);
 
     this._addLiveTag();
     this._addOfflineSlateToPlayerArea();
@@ -61,20 +54,12 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     return new KalturaLiveEngineDecorator(engine, this, dispatcher, this.logger);
   }
 
-  onMediaUnload(): void {
-    this._resetTimeout();
-    this.isMediaLive = false;
-    this._player.removeEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-    this._player.removeEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-    this._player.removeEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
-  }
-
   private _activatePlugin = () => {
     this.isMediaLive = this.player.isLive();
     if (this.isMediaLive) {
-      this._player.addEventListener(this._player.Event.FIRST_PLAY, this._handleFirstPlay);
-      this._player.addEventListener(this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
-      this._player.addEventListener(this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+      this.eventManager.listen(this._player, this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+      this.eventManager.listen(this._player, this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+      this.eventManager.listen(this._player, this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     }
   };
 
@@ -183,7 +168,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   // This is where the magic happens
   private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
     this._broadcastState = receivedState;
-    const hasDVR = this._player.isDvr();
     this.logger.info('Received isLive with value: ' + receivedState);
     if (receivedState === LiveBroadcastStates.Error && this._player.paused) {
       this._manageOfflineSlate(OfflineTypes.HttpError);
@@ -308,7 +292,16 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     return true;
   }
 
+  reset(): void {
+    this._resetTimeout();
+    this.isMediaLive = false;
+    this.eventManager.unlisten(this._player, this._player.Event.FIRST_PLAY, this._handleFirstPlay);
+    this.eventManager.unlisten(this._player, this._player.Event.TIMED_METADATA, this.handleTimedMetadata);
+    this.eventManager.unlisten(this._player, this._player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+  }
+
   destroy(): void {
-    this._player.removeEventListener(this._player.Event.SOURCE_SELECTED, this._activatePlugin);
+    this.reset();
+    this.eventManager.destroy();
   }
 }
