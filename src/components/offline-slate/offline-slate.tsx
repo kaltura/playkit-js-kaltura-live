@@ -1,12 +1,12 @@
-import { h, Component } from 'preact';
-import { Offline } from '../offline';
-import { NoLongerLive } from '../no-longer-live';
+import {h, Component} from 'preact';
+import {Offline} from '../offline';
+import {NoLongerLive} from '../no-longer-live';
 
 export enum OfflineTypes {
   None = 'None',
   Offline = 'Offline',
   HttpError = 'HttpError',
-  NoLongerLive = 'NoLongerLive',
+  NoLongerLive = 'NoLongerLive'
 }
 
 interface OfflineSlateState {
@@ -15,17 +15,14 @@ interface OfflineSlateState {
 
 interface OfflineSlateProps {}
 
-export class OfflineSlate extends Component<
-  OfflineSlateProps,
-  OfflineSlateState
-> {
+export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState> {
   state = {
-    type: OfflineTypes.None,
+    type: OfflineTypes.None
   };
 
   public manageOfflineSlate = (type: OfflineTypes) => {
     if (type !== this.state.type) {
-      this.setState({ type });
+      this.setState({type});
     }
   };
 

@@ -1,10 +1,10 @@
-import { h, Component } from 'preact';
+import {h, Component} from 'preact';
 import * as styles from './live-tag.scss';
 
 export enum LiveTagStates {
   Offline = 'Offline',
   Live = 'Live',
-  Preview = 'Preview',
+  Preview = 'Preview'
 }
 
 interface LiveTagProps {
@@ -21,54 +21,37 @@ interface Context {
 }
 
 export class LiveTag extends Component<LiveTagProps, LiveTagState> {
-  constructor(props: LiveTagProps, { player }: Context) {
+  constructor(props: LiveTagProps, {player}: Context) {
     super();
     this.state = {
       liveTagState: props.liveTagState,
-      behindLiveEdge: false,
+      behindLiveEdge: false
     };
   }
 
   shouldComponentUpdate(nextProps: LiveTagProps, nextState: LiveTagState) {
-    return (
-      nextState.liveTagState !== this.state.liveTagState ||
-      nextState.behindLiveEdge !== this.state.behindLiveEdge
-    );
+    return nextState.liveTagState !== this.state.liveTagState || nextState.behindLiveEdge !== this.state.behindLiveEdge;
   }
 
   componentDidMount() {
-    this.context.player.addEventListener(
-      this.context.player.Event.SEEKED,
-      this._updateIsOnLiveEdge
-    );
-    this.context.player.addEventListener(
-      this.context.player.Event.PAUSE,
-      this._updateIsOnLiveEdge
-    );
+    this.context.player.addEventListener(this.context.player.Event.SEEKED, this._updateIsOnLiveEdge);
+    this.context.player.addEventListener(this.context.player.Event.PAUSE, this._updateIsOnLiveEdge);
   }
   componentWillUnmount() {
-    this.context.player.removeEventListener(
-      this.context.player.Event.SEEKED,
-      this._updateIsOnLiveEdge
-    );
-    this.context.player.removeEventListener(
-      this.context.player.Event.PAUSE,
-      this._updateIsOnLiveEdge
-    );
+    this.context.player.removeEventListener(this.context.player.Event.SEEKED, this._updateIsOnLiveEdge);
+    this.context.player.removeEventListener(this.context.player.Event.PAUSE, this._updateIsOnLiveEdge);
   }
 
   public updateLiveTagState = (state: LiveTagStates) => {
     this.setState({
-      liveTagState: state,
+      liveTagState: state
     });
   };
 
   private _updateIsOnLiveEdge = () => {
     this.setState({
       // condition taken from https://github.com/kaltura/playkit-js-ui/blob/master/src/components/live-tag/live-tag.js#L73
-      behindLiveEdge:
-        this.context.player.paused ||
-        (this.context.player.isDvr && !this.context.player.isOnLiveEdge()),
+      behindLiveEdge: this.context.player.paused || (this.context.player.isDvr && !this.context.player.isOnLiveEdge())
     });
   };
 
@@ -82,7 +65,7 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   };
 
   private _getStyles = () => {
-    const { behindLiveEdge, liveTagState } = this.state;
+    const {behindLiveEdge, liveTagState} = this.state;
     if (!behindLiveEdge && liveTagState === LiveTagStates.Live) {
       return styles.liveEdge;
     }
@@ -93,17 +76,14 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   };
 
   render() {
-    const { behindLiveEdge, liveTagState } = this.state;
+    const {behindLiveEdge, liveTagState} = this.state;
     return (
       <div
         role="button"
         tab-index={0}
-        className={[
-          styles.liveTag,
-          this._getStyles(),
-          behindLiveEdge ? styles.clickable : '',
-        ].join(' ')}
-        onClick={this._seekToLiveEdge}>
+        className={[styles.liveTag, this._getStyles(), behindLiveEdge ? styles.clickable : ''].join(' ')}
+        onClick={this._seekToLiveEdge}
+      >
         {liveTagState}
       </div>
     );

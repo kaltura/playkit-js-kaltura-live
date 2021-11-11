@@ -13,71 +13,78 @@
   "description": "",
   "main": "dist/playkit-kaltura-live.js",
   "scripts": {
-    "clean": "rm -rf dist",
-    "reset": "npm run clean && rm -rf node_modules",
-    "build": "kcontrib build",
-    "build:dev": "kcontrib build --dev",
-    "bump-canary": "standard-version --prerelease canary --skip.commit=true --skip.tag=true",
-    "serve": "kcontrib serve",
-    "serve:update-modes": "kcontrib serve --update-modes",
-    "serve:update-player": "kcontrib serve --update-player",
-    "analyze": "npm run build && npx source-map-explorer dist/playkit-kaltura-live.js",
-    "lint": "tsc --noEmit && eslint ./src --ext .ts,.tsx",
-    "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx --fix",
-    "husky:pre-commit": "lint-staged",
-    "husky:commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-    "deploy:prepare": "kcontrib deploy --prepare",
-    "contrib:latest": "kcontrib infra --type=latest",
-    "infra:latest": "kcontrib infra --type=latest",
-    "infra:next": "kcontrib infra --type=next",
-    "infra:local": "kcontrib infra --type=local",
-    "infra:add": "kcontrib infra --add",
-    "copy-resources": "echo '2'"
+    "clean": "rm -rf ./dist",
+    "prebuild": "npm run clean",
+    "build": "webpack --mode production",
+    "dev": "webpack-dev-server --mode development",
+    "watch": "webpack --progress --colors --watch --mode development",
+    "test": "NODE_ENV=test karma start --color --mode development",
+    "release": "standard-version",
+    "pushTaggedRelease": "git push --follow-tags --no-verify origin master",
+    "eslint": "eslint . --color",
+    "commit:dist": "git add --force --all dist && (git commit -m 'chore: update dist' || exit 0)",
+    "docs:generate": "documentation build flow-typed/** src/** -f md -o docs/configuration.md",
+    "docs:serve": "documentation serve flow-typed/** src/** --watch",
+    "precommit": "lint-staged",
+    "prettier:fix": "prettier --write ."
   },
   "keywords": [],
   "author": "",
   "devDependencies": {
-    "@commitlint/cli": "9.1.2",
-    "@commitlint/config-conventional": "9.1.2",
-    "@types/classnames": "2.2.10",
-    "@types/node": "14.6.2",
+    "@types/node": "^15.0.1",
     "@typescript-eslint/eslint-plugin": "2.34.0",
     "@typescript-eslint/parser": "2.34.0",
-    "conventional-github-releaser": "^3.1.3",
-    "husky": "4.2.5",
-    "preact": "^10.4.7",
+    "chai": "^4.2.0",
+    "conventional-github-releaser": "3.1.3",
+    "cross-env": "^7.0.2",
+    "css-loader": "^4.0.0",
+    "documentation": "latest",
+    "husky": "^4.2.5",
+    "istanbul": "^0.4.5",
+    "kaltura-player-js": "https://github.com/kaltura/kaltura-player-js.git#master",
+    "karma": "^5.1.0",
+    "karma-chai": "^0.1.0",
+    "karma-chrome-launcher": "^3.1.0",
+    "karma-cli": "^2.0.0",
+    "karma-coverage": "^2.0.2",
+    "karma-firefox-launcher": "^1.3.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^2.0.1",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^4.0.2",
+    "lint-staged": "^10.2.11",
+    "mocha": "^8.0.1",
+    "mocha-cli": "^1.0.1",
+    "node-sass": "^4.14.1",
+    "prettier": "^2.0.5",
+    "sass-loader": "^10",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0",
+    "standard-version": "^6.0.1",
+    "style-loader": "^1.2.1",
+    "svg-url-loader": "^3.0.3",
+    "ts-loader": "^6.0.4",
     "tslint": "5.20.1",
-    "typescript": "3.9.7"
+    "typescript": "3.9.7",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   },
-  "dependencies": {
-    "@playkit-js-contrib/cli": "^1.1.4",
-    "@playkit-js-contrib/common": "^4.1.5",
-    "@playkit-js-contrib/plugin": "^4.1.5",
-    "@playkit-js-contrib/ui": "^4.1.5",
-    "classnames": "2.2.6",
-    "kaltura-typescript-client": "file:libs/kaltura-typescript-client-7.0.1-v20200311-102105.tgz",
-    "null": "^2.0.0"
+  "peerDependencies": {
+    "kaltura-player-js": "https://github.com/kaltura/kaltura-player-js.git#master"
   },
   "publishConfig": {
     "access": "public"
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md",
-    "CHANGELOG.md",
-    "src"
-  ],
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "keywords": [
+    "kaltura live",
+    "kaltura",
+    "player",
+    "playkit-js",
+    "playkit-kaltura-live.js",
+    "html5 player"
+  ]
 }
