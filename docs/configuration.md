@@ -2,10 +2,10 @@
 
 ### Table of Contents
 
-- [KalturaLIveConfigObject][1]
+- [KalturaLiveConfigObject][1]
   - [Parameters][2]
 
-## KalturaLIveConfigObject
+## KalturaLiveConfigObject
 
 Defines the configuration of the Kaltura-live pluign.
 
