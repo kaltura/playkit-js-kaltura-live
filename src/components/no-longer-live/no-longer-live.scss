@@ -1,80 +1,80 @@
-@import "../../variables.scss";
+@import '../../variables.scss';
 .no-longer-live-wrapper {
-    z-index: 5;  // overlap spinner and replay button
-    position: absolute;
-    top: 0;
-    right: 0;
+  z-index: 5; // overlap spinner and replay button
+  position: absolute;
+  top: 0;
+  right: 0;
 
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 280px;
+  height: 100%;
+  border-radius: 4px;
+  background-color: $layout-color;
+  font-family: $font-family;
+  .icon-wrapper {
+    position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
     width: 100%;
-    min-width: 280px;
     height: 100%;
-    border-radius: 4px;
-    background-color: $layout-color;
-    .icon-wrapper {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        max-width: 250px;
-        max-height: 359px;
-        .no-longer-live-icon {
-            width: 100%;
-            height: 100%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-image: url('./assets/no-longer-live-big.svg');
-        }
+    max-width: 250px;
+    max-height: 359px;
+    .no-longer-live-icon {
+      width: 100%;
+      height: 100%;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-image: url('./assets/no-longer-live-big.svg');
     }
-    .text-wrapper {
-        position: relative;
-        bottom: 58px;
-        & > p {
-            margin: 0;
-            text-align: center;
-            color: $text-color;
-        }
-        .primary-text {
-            font-size: 18px;
-            font-weight: bold;
-
-        }
+  }
+  .text-wrapper {
+    position: relative;
+    bottom: 58px;
+    & > p {
+      margin: 0;
+      text-align: center;
+      color: $text-color;
     }
+    .primary-text {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
 }
 
 :global {
-    .playkit-player.playkit-size-sm,
-    .playkit-player.playkit-size-xs {
-        .kaltura-live__icon-wrapper {
-            max-width: 195px;
-            max-height: 280px;
-            .kaltura-live__no-longer-live-icon {
-                background-image: url('./assets/no-longer-live-small.svg');
-            }
-        }
-        .kaltura-live__text-wrapper {
-            bottom: 52px;
-        }
+  .playkit-player.playkit-size-sm,
+  .playkit-player.playkit-size-xs {
+    .kaltura-live__icon-wrapper {
+      max-width: 195px;
+      max-height: 280px;
+      .kaltura-live__no-longer-live-icon {
+        background-image: url('./assets/no-longer-live-small.svg');
+      }
     }
-    .playkit-player.playkit-size-xs {
-        .kaltura-live__no-longer-live-icon {
-            display: none;
-        }
-        .kaltura-live__text-wrapper {
-            bottom: 72px;
-        }
+    .kaltura-live__text-wrapper {
+      bottom: 52px;
     }
-    .playkit-player.playkit-size-ty {
-        .kaltura-live__no-longer-live-icon {
-            display: none;
-        }
-        .kaltura-live__text-wrapper {
-            display: none;
-        }
+  }
+  .playkit-player.playkit-size-xs {
+    .kaltura-live__no-longer-live-icon {
+      display: none;
     }
+    .kaltura-live__text-wrapper {
+      bottom: 72px;
+    }
+  }
+  .playkit-player.playkit-size-ty {
+    .kaltura-live__no-longer-live-icon {
+      display: none;
+    }
+    .kaltura-live__text-wrapper {
+      display: none;
+    }
+  }
 }

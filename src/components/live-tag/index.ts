@@ -1,1 +1,1 @@
-export * from "./live-tag";
+export * from './live-tag';
