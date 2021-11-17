@@ -104,16 +104,19 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     return this._broadcastState;
   }
 
-  public handleTimedMetadata = (e: any) => {
-    if (!e || !e.payload || !e.payload.cues || !e.payload.cues.length) {
+  public handleTimedMetadata = ({ payload }: any) => {
+    if (!payload || !payload.cues) {
       this._absolutePosition = null;
       return;
     }
-    try {
-      this._absolutePosition = JSON.parse(e.payload.cues[e.payload.cues.length - 1].value.data).timestamp;
-    } catch (error) {
-      this._absolutePosition = null;
-      this.logger.warn('Failed parsing timedmetadata payload cue ', error);
+    const id3TagCues = payload.cues.filter((cue: any) => cue.value && cue.value.key === 'TEXT');
+    if (id3TagCues.length) {
+      try {
+        this._absolutePosition = JSON.parse(id3TagCues[id3TagCues.length - 1].value.data).timestamp;
+      } catch (error) {
+        this._absolutePosition = null;
+        this.logger.warn('Failed parsing timedmetadata payload cue ', error);
+      }
     }
   };
 
