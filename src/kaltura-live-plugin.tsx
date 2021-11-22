@@ -39,6 +39,20 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
+    player.configure({
+      network: {
+        maxStaleLevelReloads: 12,
+        playback: {
+          options: {
+            html5: {
+              hls: {
+                levelLoadingMaxRetryTimeout: 750
+              }
+            }
+          }
+        }
+      }
+    });
     this.player = player;
     this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
 
