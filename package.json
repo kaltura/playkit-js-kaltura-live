@@ -1,6 +1,6 @@
 {
   "name": "@playkit-js/kaltura-live",
-  "version": "2.1.8",
+  "version": "2.2.0",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/kaltura/playkit-js-kaltura-live/issues"
@@ -28,7 +28,14 @@
     "precommit": "lint-staged",
     "prettier:fix": "prettier --write ."
   },
-  "keywords": [],
+  "keywords": [
+    "kaltura live",
+    "kaltura",
+    "player",
+    "playkit-js",
+    "playkit-kaltura-live.js",
+    "html5 player"
+  ],
   "author": "",
   "devDependencies": {
     "@types/node": "^15.0.1",
@@ -78,13 +85,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "keywords": [
-    "kaltura live",
-    "kaltura",
-    "player",
-    "playkit-js",
-    "playkit-kaltura-live.js",
-    "html5 player"
-  ]
+  }
 }

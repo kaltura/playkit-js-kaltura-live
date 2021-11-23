@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.8...v2.2.0) (2021-11-23)
+
+
+### Features
+
+* **FEV-1140:** remove contrib dependency ([#338](https://github.com/kaltura/playkit-js-kaltura-live/issues/338)) ([6641e14](https://github.com/kaltura/playkit-js-kaltura-live/commit/6641e14eb5e889800a97ce945878b3242e122824))
+
+
+### Bug Fixes
+
+* **FEV-1103:** live indicator updates; upd dependencies ([#340](https://github.com/kaltura/playkit-js-kaltura-live/issues/340)) ([d18b8a9](https://github.com/kaltura/playkit-js-kaltura-live/commit/d18b8a963d3b2961c43a44a1d5948d00c727337d))
+* **FEV-1135:** configure player in plugin to reduce fallback time ([#341](https://github.com/kaltura/playkit-js-kaltura-live/issues/341)) ([846ae31](https://github.com/kaltura/playkit-js-kaltura-live/commit/846ae318d3acadd7e64f5237070ba9361c0ec06d))
+* **FEV-1135:** offline slate doesn't appears for live media with DVR ([#337](https://github.com/kaltura/playkit-js-kaltura-live/issues/337)) ([73707dd](https://github.com/kaltura/playkit-js-kaltura-live/commit/73707ddad59bdcb463cdfc26b0b4ecd86de41ffc))
+* **FEV-1144:** fix parse of ID3 tag ([#339](https://github.com/kaltura/playkit-js-kaltura-live/issues/339)) ([403550e](https://github.com/kaltura/playkit-js-kaltura-live/commit/403550e9ea0a6c62809ea3001e1bc14ea14666f9))
+
 ### [2.1.8](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.1.7...v2.1.8) (2021-11-02)
 
 
