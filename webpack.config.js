@@ -14,7 +14,7 @@ const plugins = [
 module.exports = {
   context: __dirname + '/src',
   entry: {
-    'kaltura-live-plugin': 'index.ts'
+    'playkit-kaltura-live': 'index.ts'
   },
   output: {
     path: __dirname + '/dist',
