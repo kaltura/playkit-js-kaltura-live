@@ -41,13 +41,16 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     super(name, player, config);
     player.configure({
       network: {
-        maxStaleLevelReloads: 12,
-        playback: {
-          options: {
-            html5: {
-              hls: {
-                levelLoadingMaxRetryTimeout: 750
-              }
+        maxStaleLevelReloads: 8
+      },
+      playback: {
+        options: {
+          html5: {
+            hls: {
+              levelLoadingMaxRetryTimeout: 750
+            },
+            native: {
+              heartbeatTimeout: 10000
             }
           }
         }
