@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ### [2.2.2](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.1...v2.2.2) (2022-02-06)
+### Features
+
+* **LIV-758:** I as Admin want to scheduled a live broadcast to start after the simulive content ends ([#344](https://github.com/kaltura/playkit-js-kaltura-live/issues/344)) ([d487e30](https://github.com/kaltura/playkit-js-kaltura-live/pull/344/commits/924352a7dace1f617d7de6e5a579e84cb2d8294d))
 
 ### [2.2.1](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.0...v2.2.1) (2021-11-28)
 
