@@ -51,6 +51,11 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             },
             native: {
               heartbeatTimeout: 10000
+            },
+            dash: {
+              streaming: {
+                jumpLargeGaps: true
+              }
             }
           }
         }
