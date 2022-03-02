@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.3](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.2...v2.2.3) (2022-03-02)
+
+
+### Bug Fixes
+
+* **LIV-905:** fix mpeg-dash restart issues ([#350](https://github.com/kaltura/playkit-js-kaltura-live/issues/350)) ([d32a747](https://github.com/kaltura/playkit-js-kaltura-live/commit/d32a747a81adddf2f2ae154360109a5509eeda81)), closes [/github.com/google/shaka-player/issues/555#issuecomment-294552711](https://github.com/kaltura//github.com/google/shaka-player/issues/555/issues/issuecomment-294552711)
+
 ### [2.2.2](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.1...v2.2.2) (2022-02-06)
 ### Features
 
