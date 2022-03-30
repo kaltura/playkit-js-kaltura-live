@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.4](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.3...v2.2.4) (2022-03-30)
+
+
+### Bug Fixes
+
+* **FEV-1199:** set player configuration only once player got ready ([#353](https://github.com/kaltura/playkit-js-kaltura-live/issues/353)) ([efa5f53](https://github.com/kaltura/playkit-js-kaltura-live/commit/efa5f53ca3a1a3fb95b8d2a2f09e4f0ba2d483b0))
+
 ### [2.2.3](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.2...v2.2.3) (2022-03-02)
 
 
