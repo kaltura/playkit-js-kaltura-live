@@ -39,27 +39,29 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
-    player.configure({
-      network: {
-        maxStaleLevelReloads: 8
-      },
-      playback: {
-        options: {
-          html5: {
-            hls: {
-              levelLoadingMaxRetryTimeout: 750
-            },
-            native: {
-              heartbeatTimeout: 10000
-            },
-            dash: {
-              streaming: {
-                jumpLargeGaps: true
+    player.ready().then(() => {
+      player.configure({
+        network: {
+          maxStaleLevelReloads: 8
+        },
+        playback: {
+          options: {
+            html5: {
+              hls: {
+                levelLoadingMaxRetryTimeout: 750
+              },
+              native: {
+                heartbeatTimeout: 10000
+              },
+              dash: {
+                streaming: {
+                  jumpLargeGaps: true
+                }
               }
             }
           }
         }
-      }
+      });
     });
     this.player = player;
     this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
@@ -126,7 +128,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     return this._broadcastState;
   }
 
-  public handleTimedMetadata = ({ payload }: any) => {
+  public handleTimedMetadata = ({payload}: any) => {
     if (!payload || !payload.cues) {
       this._absolutePosition = null;
       return;
