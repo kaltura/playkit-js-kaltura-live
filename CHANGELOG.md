@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.2.5](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.4...v2.2.5) (2022-04-11)
+
+
+### Bug Fixes
+
+* **FEV-1199:** set player configuration in loadMedia hook ([#355](https://github.com/kaltura/playkit-js-kaltura-live/issues/355)) ([f21cc97](https://github.com/kaltura/playkit-js-kaltura-live/commit/f21cc97d2a8c80237ed3ed4a6ad43d2d6a8c1f31))
+
 ### [2.2.4](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.3...v2.2.4) (2022-03-30)
 
 
