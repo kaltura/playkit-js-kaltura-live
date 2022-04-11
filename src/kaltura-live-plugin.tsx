@@ -39,30 +39,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
     super(name, player, config);
-    player.ready().then(() => {
-      player.configure({
-        network: {
-          maxStaleLevelReloads: 8
-        },
-        playback: {
-          options: {
-            html5: {
-              hls: {
-                levelLoadingMaxRetryTimeout: 750
-              },
-              native: {
-                heartbeatTimeout: 10000
-              },
-              dash: {
-                streaming: {
-                  jumpLargeGaps: true
-                }
-              }
-            }
-          }
-        }
-      });
-    });
     this.player = player;
     this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
 
@@ -76,6 +52,31 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   getEngineDecorator(engine: any, dispatcher: Function) {
     return new KalturaLiveEngineDecorator(engine, this, dispatcher, this.logger);
+  }
+
+  loadMedia(): void {
+    this.player.configure({
+      network: {
+        maxStaleLevelReloads: 8
+      },
+      playback: {
+        options: {
+          html5: {
+            hls: {
+              levelLoadingMaxRetryTimeout: 750
+            },
+            native: {
+              heartbeatTimeout: 10000
+            },
+            dash: {
+              streaming: {
+                jumpLargeGaps: true
+              }
+            }
+          }
+        }
+      }
+    });
   }
 
   private _activatePlugin = () => {
