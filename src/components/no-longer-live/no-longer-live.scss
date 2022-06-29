@@ -29,7 +29,10 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      background-image: url('./assets/no-longer-live-big.svg');
+      .no-longer-live-small-icon {
+        display: none;
+        margin: 0 auto;
+      }
     }
   }
   .text-wrapper {
@@ -47,34 +50,28 @@
   }
 }
 
-:global {
-  .playkit-player.playkit-size-sm,
-  .playkit-player.playkit-size-xs {
-    .kaltura-live__icon-wrapper {
-      max-width: 195px;
-      max-height: 280px;
-      .kaltura-live__no-longer-live-icon {
-        background-image: url('./assets/no-longer-live-small.svg');
-      }
+:global(.playkit-player.playkit-size-sm),
+:global(.playkit-player.playkit-size-xs) {
+  .icon-wrapper {
+    max-width: 195px;
+    max-height: 280px;
+    .no-longer-live-big-icon {
+      display: none;
     }
-    .kaltura-live__text-wrapper {
-      bottom: 52px;
+    .no-longer-live-small-icon {
+      display: block;
     }
   }
-  .playkit-player.playkit-size-xs {
-    .kaltura-live__no-longer-live-icon {
-      display: none;
-    }
-    .kaltura-live__text-wrapper {
-      bottom: 72px;
-    }
+  .text-wrapper {
+    bottom: 52px;
   }
-  .playkit-player.playkit-size-ty {
-    .kaltura-live__no-longer-live-icon {
-      display: none;
-    }
-    .kaltura-live__text-wrapper {
-      display: none;
-    }
+}
+
+:global(.playkit-player.playkit-size-ty) {
+  .icon-wrapper {
+    display: none;
+  }
+  .text-wrapper {
+    bottom: auto;
   }
 }

@@ -55,16 +55,13 @@ module.exports = {
         ]
       },
       {
-        test: /\.svg/,
-        use: {
-          loader: require.resolve('svg-url-loader'),
-          options: {}
-        }
+        test: /\.svg$/,
+        use: ['preact-svg-loader']
       }
     ]
   },
   devServer: {
-    contentBase: __dirname + '/src'
+    static: __dirname + '/src'
     // host: '192.168.68.107'
   },
   resolve: {

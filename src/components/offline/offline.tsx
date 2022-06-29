@@ -1,5 +1,7 @@
 import {h, Component} from 'preact';
 import * as styles from './offline.scss';
+import OfflineLogo from './assets/offline.svg';
+import NetworkIssueLogo from './assets/network-issue.svg';
 
 export interface props {
   httpError?: boolean;
@@ -20,7 +22,7 @@ export class Offline extends Component<props> {
   render(props: props) {
     return (
       <div className={styles.offlineWrapper}>
-        <div className={`${styles.offlineIcon} kaltura-live__offline-icon`} />
+        <div className={styles.offlineIcon}>{navigator.onLine ? <OfflineLogo /> : <NetworkIssueLogo />}</div>
         <div>
           <p className={styles.primaryText}>{props.httpError ? (navigator.onLine ? httpProblemTitle : noInternetTitle) : offlineTitle}</p>
           <p className={styles.secondaryText}>{props.httpError ? (navigator.onLine ? httpProblemBody : noInternetBody) : offlineBody}</p>

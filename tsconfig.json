@@ -15,7 +15,8 @@
     "paths": {
       "*": ["../node_modules/*"]
     },
-    "types": ["node"]
+    "types": ["node"],
+    "lib": ["es2015", "dom"]
   },
   "include": ["src/**/*.tsx", "src/**/*.ts", "custom.d.ts", "node_modules/kaltura-player-js/ts-typed"]
 }
