@@ -1,0 +1,14 @@
+:global(.playkit-player.has-live-plugin-overlay) {
+  :global(.playkit-side-panel) {
+    z-index: 1;
+  }
+  :global(.playkit-player-gui) {
+    :global(.playkit-top-bar) {
+      visibility: visible;
+      margin-top: 0;
+    }
+    :global(.playkit-control-play-pause) {
+      display: none;
+    }
+  }
+}
