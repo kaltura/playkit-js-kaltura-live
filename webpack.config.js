@@ -27,10 +27,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.svg$/,
-        use: ['preact-svg-loader']
-      },
-      {
         test: /\.tsx?$/,
         loader: 'ts-loader',
         options: {

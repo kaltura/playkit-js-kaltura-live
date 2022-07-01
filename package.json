@@ -48,7 +48,6 @@
     "jest": "^28.1.0",
     "kaltura-player-js": "https://github.com/kaltura/kaltura-player-js.git#master",
     "lint-staged": "^12.4.1",
-    "preact-svg-loader": "^0.2.1",
     "prettier": "^2.6.2",
     "sass": "^1.52.3",
     "sass-loader": "^12.6.0",

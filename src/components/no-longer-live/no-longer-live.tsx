@@ -1,6 +1,6 @@
 import {h, Component} from 'preact';
-import NoLongerLiveBLogo from './assets/no-longer-live-big.svg';
-import NoLongerLiveSLogo from './assets/no-longer-live-small.svg';
+import {NoLongerLiveBigIcon} from './no-lonter-live-big-icon';
+import {NoLongerLiveSmallIcon} from './no-lonter-live-small-icon';
 import * as styles from './no-longer-live.scss';
 
 export class NoLongerLive extends Component {
@@ -9,8 +9,8 @@ export class NoLongerLive extends Component {
       <div className={styles.noLongerLiveWrapper}>
         <div className={styles.iconWrapper}>
           <div className={styles.noLongerLiveIcon}>
-            <NoLongerLiveBLogo className={styles.noLongerLiveBigIcon} />
-            <NoLongerLiveSLogo className={styles.noLongerLiveSmallIcon} />
+            <NoLongerLiveBigIcon className={styles.noLongerLiveBigIcon} />
+            <NoLongerLiveSmallIcon className={styles.noLongerLiveSmallIcon} />
           </div>
         </div>
         <div className={styles.textWrapper}>
