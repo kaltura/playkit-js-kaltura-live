@@ -109,7 +109,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player.ui.addComponent({
       label: 'no-longer-live-overlay',
       presets: ['Live', 'Playback'],
-      container: 'PlayerArea',
+      container: 'VideoArea',
       get: () => {
         return <OfflineSlate ref={this._offlineSlate} />;
       }
@@ -321,6 +321,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   reset(): void {
+    this.player.attachMediaSource();
     this._resetTimeout();
     this.isMediaLive = false;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
