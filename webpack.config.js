@@ -27,6 +27,10 @@ module.exports = {
   module: {
     rules: [
       {
+        test: /\.svg$/,
+        use: ['preact-svg-loader']
+      },
+      {
         test: /\.tsx?$/,
         loader: 'ts-loader',
         options: {
@@ -53,10 +57,6 @@ module.exports = {
             loader: 'sass-loader'
           }
         ]
-      },
-      {
-        test: /\.svg$/,
-        use: ['preact-svg-loader']
       }
     ]
   },
