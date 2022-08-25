@@ -340,6 +340,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player.attachMediaSource();
     this._resetTimeout();
     this.isMediaLive = false;
+    this.allStreamsStopped = false;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
