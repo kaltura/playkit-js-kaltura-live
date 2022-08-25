@@ -17,6 +17,20 @@ export enum LiveBroadcastStates {
   Offline = 'Offline'
 }
 
+export enum KalturaEntryServerNodeStatus {
+  authenticated = 3,
+  broadcasting = 2,
+  error = -1,
+  markedForDeletion = 4,
+  playable = 1,
+  stopped = 0,
+  taskFinished = 9,
+  taskPending = 5,
+  taskProcessing = 7,
+  taskQueued = 6,
+  taskUploading = 8,
+}
+
 // @ts-ignore
 export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements IMiddlewareProvider, IEngineDecoratorProvider {
   public player: KalturaPlayerTypes.Player;
@@ -29,6 +43,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _activeRequest = false;
   public playerHasError = false;
   private _mediaDetached = false;
+  public allStreamsStopped = false;
   private _liveTag = createRef<LiveTag>();
   private _offlineSlate = createRef<OfflineSlate>();
 
@@ -280,6 +295,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             this._initTimeout();
             return;
           }
+          this.allStreamsStopped = streamDetails.primaryStreamStatus === KalturaEntryServerNodeStatus.stopped && streamDetails.secondaryStreamStatus === KalturaEntryServerNodeStatus.stopped;
           switch (streamDetails.broadcastStatus) {
             case KalturaLiveStreamBroadcastStatus.live:
               this._updateLiveTag(LiveTagStates.Live);
@@ -324,6 +340,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player.attachMediaSource();
     this._resetTimeout();
     this.isMediaLive = false;
+    this.allStreamsStopped = false;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
