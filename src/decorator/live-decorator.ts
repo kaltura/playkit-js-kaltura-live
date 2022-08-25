@@ -58,8 +58,14 @@ export class KalturaLiveEngineDecorator implements KalturaPlayerTypes.IEngineDec
 
   dispatchEvent(event: any): any {
     if (event.type === this._plugin.player.Event.ENDED) {
-      this._ended = false;
-      return true;
+      if (this._plugin.allStreamsStopped){
+        // primary and secondary streams are stopped - live has ended and the player should dispatch the playbackended event
+        this._ended = true;
+      } else {
+        // at least one stream is still broadcasting (maybe switch between primary / secondary streams) - keep alive
+        this._ended = false;
+        return true; // this prevents the ended event propagation to the player thus preventing the playbackended event from being dispatched
+      }
     }
     if (event.type === 'error' && event.payload && event.payload.code && HANDLED_ERRORS.indexOf(event.payload.code) > -1) {
       this._logger.info(`Kaltura live-decorator prevented interrupted error ${event.payload.code}`);
