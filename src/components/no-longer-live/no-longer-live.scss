@@ -3,7 +3,7 @@
   position: absolute;
   top: 0;
   right: 0;
-
+  z-index: 5; // overlap spinner and replay button
   display: flex;
   flex-direction: column;
   align-items: center;
