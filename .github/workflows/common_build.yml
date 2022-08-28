@@ -1,0 +1,13 @@
+name: deploy to QA
+
+on:
+  create:
+  push:
+  workflow_dispatch:
+  
+jobs:
+  test_build_with_params:
+     uses: kaltura/playkit-js-common/.github/workflows/build.yml@master
+     with:
+      pluginPath: playkit-kaltura-live
+     secrets: inherit
