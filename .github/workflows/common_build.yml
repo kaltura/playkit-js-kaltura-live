@@ -1,13 +1,25 @@
 name: deploy to QA
 
 on:
-  create:
+  pull_request:
+    types:
+      - closed
   push:
-  workflow_dispatch:
+    tags:
+      - '*'
   
 jobs:
-  test_build_with_params:
-     uses: kaltura/playkit-js-common/.github/workflows/build.yml@master
-     with:
+   dev_build:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    uses: kaltura/playkit-js-common/.github/workflows/build.yml@master
+    with:
+      pluginPath: playkit-info
+      prefix: dev
+    secrets: inherit
+   canary_build:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+    uses: kaltura/playkit-js-common/.github/workflows/build.yml@master
+    with:
       pluginPath: playkit-kaltura-live
-     secrets: inherit
+      prefix: canary
+    secrets: inherit
