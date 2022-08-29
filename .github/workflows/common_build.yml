@@ -13,7 +13,7 @@ jobs:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     uses: kaltura/playkit-js-common/.github/workflows/build.yml@master
     with:
-      pluginPath: playkit-info
+      pluginPath: playkit-kaltura-live
       prefix: dev
     secrets: inherit
    canary_build:
