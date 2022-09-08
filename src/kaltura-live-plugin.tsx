@@ -246,6 +246,10 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     }
   }
 
+  get sidePanelsManager() {
+    return this.player.getService('sidePanelsManager') as any;
+  }
+
   private _manageOfflineSlate(type: OfflineTypes) {
     if (type === OfflineTypes.None) {
       this._updateOfflineSlate(OfflineTypes.None);
@@ -269,6 +273,11 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
         this._updateOfflineSlate(OfflineTypes.HttpError);
         break;
     }
+    this.sidePanelsManager?.componentsRegistry?.forEach((plugin: any, key: number) => {
+      if (plugin.isActive) {
+        this.sidePanelsManager.deactivateItem(key);
+      }
+    });
   }
 
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
