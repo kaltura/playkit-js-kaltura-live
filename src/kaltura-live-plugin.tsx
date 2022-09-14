@@ -28,7 +28,7 @@ export enum KalturaEntryServerNodeStatus {
   taskPending = 5,
   taskProcessing = 7,
   taskQueued = 6,
-  taskUploading = 8,
+  taskUploading = 8
 }
 
 // @ts-ignore
@@ -43,7 +43,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _activeRequest = false;
   public playerHasError = false;
   private _mediaDetached = false;
-  public allStreamsStopped = false;
   private _liveTag = createRef<LiveTag>();
   private _offlineSlate = createRef<OfflineSlate>();
 
@@ -304,15 +303,32 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             this._initTimeout();
             return;
           }
-          this.allStreamsStopped = streamDetails.primaryStreamStatus === KalturaEntryServerNodeStatus.stopped && streamDetails.secondaryStreamStatus === KalturaEntryServerNodeStatus.stopped;
-          switch (streamDetails.broadcastStatus) {
+          const {primaryStreamStatus, secondaryStreamStatus, broadcastStatus} = streamDetails;
+          this.logger.info(
+            `LiveStreamGetDetails received:
+              Primary stream: ${primaryStreamStatus};
+              Secondary stream: ${secondaryStreamStatus};
+              Broadcast Status: ${broadcastStatus};
+            `
+          );
+
+          const streamPlayable = [primaryStreamStatus, secondaryStreamStatus].some(
+            streamStatus => streamStatus === KalturaEntryServerNodeStatus.playable
+          );
+
+          const isSimulive = !streamPlayable && broadcastStatus === KalturaLiveStreamBroadcastStatus.live;
+          const isSimuliveEnded = isSimulive && this._mediaDetached;
+
+          if (isSimuliveEnded || broadcastStatus === KalturaLiveStreamBroadcastStatus.offline) {
+            this._updateLiveTag(LiveTagStates.Offline);
+            this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
+            return;
+          }
+
+          switch (broadcastStatus) {
             case KalturaLiveStreamBroadcastStatus.live:
               this._updateLiveTag(LiveTagStates.Live);
               this.handleLiveStatusReceived(LiveBroadcastStates.Live);
-              break;
-            case KalturaLiveStreamBroadcastStatus.offline:
-              this._updateLiveTag(LiveTagStates.Offline);
-              this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
               break;
             case KalturaLiveStreamBroadcastStatus.preview:
               if (this.config.checkLiveWithKs) {
@@ -324,7 +340,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
               }
               break;
           }
-          this.logger.info('LiveStreamGetDetails received. data.broadcastStatus ' + streamDetails.broadcastStatus);
         }
       })
       .catch((e: any) => {
@@ -349,7 +364,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player.attachMediaSource();
     this._resetTimeout();
     this.isMediaLive = false;
-    this.allStreamsStopped = false;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
