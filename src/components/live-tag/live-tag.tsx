@@ -82,7 +82,8 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
         role="button"
         tab-index={0}
         className={[styles.liveTag, this._getStyles(), behindLiveEdge ? styles.clickable : ''].join(' ')}
-        onClick={this._seekToLiveEdge}>
+        onClick={this._seekToLiveEdge}
+        aria-label={liveTagState}>
         {liveTagState}
       </div>
     );
