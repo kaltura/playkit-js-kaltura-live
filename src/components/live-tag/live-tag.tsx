@@ -1,5 +1,6 @@
 import {h, Component} from 'preact';
 import * as styles from './live-tag.scss';
+import {A11yWrapper} from '@playkit-js/common';
 const {
   redux: {connect}
 } = KalturaPlayer.ui;
@@ -78,14 +79,15 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
   render() {
     const {behindLiveEdge, liveTagState} = this.state;
     return (
-      <div
-        role="button"
-        tab-index={0}
-        className={[styles.liveTag, this._getStyles(), behindLiveEdge ? styles.clickable : ''].join(' ')}
-        onClick={this._seekToLiveEdge}
-        aria-label={liveTagState}>
-        {liveTagState}
-      </div>
+      <A11yWrapper onClick={this._seekToLiveEdge}>
+        <div
+          role="button"
+          tabIndex={0}
+          className={[styles.liveTag, this._getStyles(), behindLiveEdge ? styles.clickable : ''].join(' ')}
+          aria-label={liveTagState}>
+          {liveTagState}
+        </div>
+      </A11yWrapper>
     );
   }
 }
