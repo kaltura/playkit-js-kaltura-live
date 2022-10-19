@@ -64,9 +64,6 @@
   "peerDependencies": {
     "kaltura-player-js": "https://github.com/kaltura/kaltura-player-js.git#master"
   },
-  "dependencies": {
-    "@playkit-js/common": "^1.0.7"
-  },
   "publishConfig": {
     "access": "public"
   }
