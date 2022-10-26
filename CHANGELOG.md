@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.1.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.5...v3.1.0) (2022-10-26)
+
+
+### Features
+
+* **FEV-1450:** added A11yWrapper for live-tag button for keyboard events ([4c7bfa1](https://github.com/kaltura/playkit-js-kaltura-live/commit/4c7bfa1d7919ca01e94aff3034eff60d6f2083c2))
+* **FEV-1450:** aria label added for button ([7692be7](https://github.com/kaltura/playkit-js-kaltura-live/commit/7692be747d8c48f400312351a81ab25931316d6f))
+
+
+### Bug Fixes
+
+* **FEC-12493:** verify ended event is propagated to the player only in case when both primary and secondary streams are stopped ([#360](https://github.com/kaltura/playkit-js-kaltura-live/issues/360)) ([abaa98e](https://github.com/kaltura/playkit-js-kaltura-live/commit/abaa98e11ccf64d6178e48b54ebb20a3c82e74a8))
+* **Fev 1278 :** If the playlist contains a live entry that is not broadcasting the currently not broadcasting tile will overlap the entire player ([#357](https://github.com/kaltura/playkit-js-kaltura-live/issues/357)) ([99a4047](https://github.com/kaltura/playkit-js-kaltura-live/commit/99a4047d3abdf2069d5747156b6b9f7fd7850712))
+* **FEV-1325:** revert main changes for FEV-1278 ([#359](https://github.com/kaltura/playkit-js-kaltura-live/issues/359)) ([13d2427](https://github.com/kaltura/playkit-js-kaltura-live/commit/13d24277b9f97cfc379acd6700d7392be15973c5))
+* **FEV-1325:** revert style changes for FEV-1278 ([#363](https://github.com/kaltura/playkit-js-kaltura-live/issues/363)) ([f9720a8](https://github.com/kaltura/playkit-js-kaltura-live/commit/f9720a80e9c234975b9175524abca4a2984eae86))
+* **FEV-1403:** proper handle end event for simulive entry ([#366](https://github.com/kaltura/playkit-js-kaltura-live/issues/366)) ([987f080](https://github.com/kaltura/playkit-js-kaltura-live/commit/987f0800cdc115ae4637c61085cbbfbf55224ec7))
+* **FEV-1419:** deactivate all plugins when offline slate is shown ([#365](https://github.com/kaltura/playkit-js-kaltura-live/issues/365)) ([caafb98](https://github.com/kaltura/playkit-js-kaltura-live/commit/caafb982e3292786205cd2dea03af38cf14b69bc))
+
 ### [2.2.5](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.4...v2.2.5) (2022-04-11)
 
 
