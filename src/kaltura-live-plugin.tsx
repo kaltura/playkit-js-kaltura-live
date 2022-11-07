@@ -71,7 +71,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   loadMedia(): void {
     this.player.configure({
       network: {
-        maxStaleLevelReloads: 8
+        maxStaleLevelReloads: 19 // more details in https://kaltura.atlassian.net/browse/FEV-1205
       },
       playback: {
         options: {
