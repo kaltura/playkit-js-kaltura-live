@@ -1,6 +1,6 @@
 import {h, Component} from 'preact';
 import * as styles from './live-tag.scss';
-import {A11yWrapper} from '@playkit-js/common';
+import {LiveTagView} from './live-tag-view'
 const {
   redux: {connect}
 } = KalturaPlayer.ui;
@@ -11,9 +11,9 @@ const mapStateToProps = (state: Record<string, any>) => ({
 });
 
 export enum LiveTagStates {
-  Offline = 'Offline',
-  Live = 'Live',
-  Preview = 'Preview'
+  Offline = 'offline',
+  Live = 'live',
+  Preview = 'preview'
 }
 
 interface LiveTagProps {
@@ -78,16 +78,6 @@ export class LiveTag extends Component<LiveTagProps, LiveTagState> {
 
   render() {
     const {behindLiveEdge, liveTagState} = this.state;
-    return (
-      <A11yWrapper onClick={this._seekToLiveEdge}>
-        <div
-          role="button"
-          tabIndex={0}
-          className={[styles.liveTag, this._getStyles(), behindLiveEdge ? styles.clickable : ''].join(' ')}
-          aria-label={liveTagState}>
-          {liveTagState}
-        </div>
-      </A11yWrapper>
-    );
+    return <LiveTagView behindLiveEdge={behindLiveEdge} liveTagState={liveTagState} seekToLiveEdge={this._seekToLiveEdge} getStyles={this._getStyles}/>
   }
 }
