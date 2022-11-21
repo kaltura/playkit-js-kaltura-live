@@ -5,18 +5,17 @@
   opacity: 0.94;
   border-radius: 4px;
   text-align: center;
-  color: #ffffff;
+  color: var(--primary-text-contrast-color);
   font-size: 15px;
   text-transform: uppercase;
   &.preview-edge {
-    background-color: #f9a71b;
-    color: #000000;
+    background-color: var(--secondary-color);
   }
   &.live-edge {
-    background-color: #da1f26;
+    background-color: var(--live-color);
   }
   &.non-edge {
-    background-color: #666666;
+    background-color: var(--tone-5-color);
   }
   &.clickable {
     cursor: pointer;
