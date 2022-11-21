@@ -319,7 +319,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
           const isSimulive = !streamPlayable && broadcastStatus === KalturaLiveStreamBroadcastStatus.live;
           const isSimuliveEnded = isSimulive && this._mediaDetached;
 
-          if (isSimuliveEnded || broadcastStatus === KalturaLiveStreamBroadcastStatus.offline) {
+          if (isSimuliveEnded && broadcastStatus === KalturaLiveStreamBroadcastStatus.offline) {
             this._updateLiveTag(LiveTagStates.Offline);
             this.handleLiveStatusReceived(LiveBroadcastStates.Offline);
             return;
