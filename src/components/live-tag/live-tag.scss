@@ -1,21 +1,25 @@
+@import '../../variables.scss';
+
 .live-tag {
   display: inline-block;
   margin: 4px 12px;
   padding: 3px 4px;
   opacity: 0.94;
-  border-radius: 4px;
+  border-radius: $roundness-1;
   text-align: center;
-  color: var(--primary-text-contrast-color);
+  color: $primary-text-contrast-color;
   font-size: 15px;
+  font-weight: 400;
+  line-height: 18px;
   text-transform: uppercase;
   &.preview-edge {
-    background-color: var(--secondary-color);
+    background-color: $secondary-color;
   }
   &.live-edge {
-    background-color: var(--live-color);
+    background-color: $live-color;
   }
   &.non-edge {
-    background-color: var(--tone-5-color);
+    background-color: $tone-5-color;
   }
   &.clickable {
     cursor: pointer;
