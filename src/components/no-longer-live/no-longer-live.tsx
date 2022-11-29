@@ -2,9 +2,19 @@ import {h, Component} from 'preact';
 import {NoLongerLiveBigIcon} from './no-lonter-live-big-icon';
 import {NoLongerLiveSmallIcon} from './no-lonter-live-small-icon';
 import * as styles from './no-longer-live.scss';
+const {withText, Text} = KalturaPlayer.ui.preacti18n;
 
-export class NoLongerLive extends Component {
-  render() {
+export interface props {
+    noLongerLive?: string;
+}
+
+const translates = {
+    noLongerLive: <Text id="kalturaLive.no_longer_live">Broadcast is no longer live</Text>
+};
+
+@withText(translates)
+export class NoLongerLive extends Component<props> {
+  render(props: props) {
     return (
       <div className={styles.noLongerLiveWrapper}>
         <div className={styles.iconWrapper}>
@@ -14,7 +24,7 @@ export class NoLongerLive extends Component {
           </div>
         </div>
         <div className={styles.textWrapper}>
-          <p className={styles.primaryText}>Broadcast is no longer live</p>
+          <p className={styles.primaryText}>{props.noLongerLive}</p>
         </div>
       </div>
     );
