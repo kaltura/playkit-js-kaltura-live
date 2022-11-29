@@ -7,7 +7,6 @@
       "offline_body": "Video wird abgespielt, sobald die Übertragung beginnt",
       "http_problem_title": "Etwas ist schief gelaufen",
       "http_problem_body" : "Versuchen Sie, die Seite zu aktualisieren",
-      "no_longer_live": "Broadcast is no longer live",
       "live": "Live",
       "offline": "Offline",
       "preview": "Preview"
