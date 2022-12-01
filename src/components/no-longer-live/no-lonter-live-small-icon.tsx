@@ -8,6 +8,7 @@ export const NoLongerLiveSmallIcon = ({className}: {className: string}) => (
     height="260px"
     viewBox="0 0 181 260"
     version="1.1"
+    aria-hidden="true"
     className={className}>
     <defs>
       <path

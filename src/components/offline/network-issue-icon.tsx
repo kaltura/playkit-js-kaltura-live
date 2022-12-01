@@ -1,7 +1,14 @@
 import {h} from 'preact';
 
 export const NetworkIssueIcon = () => (
-  <svg width="184px" height="184px" viewBox="0 0 184 184" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+  <svg
+    aria-hidden="true"
+    width="184px"
+    height="184px"
+    viewBox="0 0 184 184"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink">
     <g id="IL/-Error" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
       <circle id="Oval" fill="#333333" cx="92" cy="92" r="92"></circle>
       <path

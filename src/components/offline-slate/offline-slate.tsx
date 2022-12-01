@@ -1,7 +1,7 @@
 import {h, Component} from 'preact';
 import {Offline} from '../offline';
 import {NoLongerLive} from '../no-longer-live';
-import './offline-slate.scss';
+import * as styles from './offline-slate.scss';
 
 export enum OfflineTypes {
   None = 'None',
@@ -15,6 +15,7 @@ interface OfflineSlateState {
 }
 
 interface OfflineSlateProps {
+  getGuiAreaNode: () => Element | null;
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
@@ -37,12 +38,14 @@ const mapDispatchToProps = (dispatch: any) => {
 
 @connect(null, mapDispatchToProps, null, {forwardRef: true})
 export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState> {
+  private _offlineWrapperRef: HTMLDivElement | null = null;
   state = {
     type: OfflineTypes.None
   };
 
   componentWillUnmount() {
     this.props.removePlayerClass!();
+    document.removeEventListener('focusin', this._handleFocusChange, true);
   }
 
   componentDidUpdate(prevProps: OfflineSlateProps, prevState: OfflineSlateState) {
@@ -50,8 +53,11 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
       if (this.state.type !== OfflineTypes.None) {
         this.props.addPlayerClass!();
         this.props.removeSpinner!();
+        this._offlineWrapperRef?.focus();
+        document.addEventListener('focusin', this._handleFocusChange, true);
       } else {
         this.props.removePlayerClass!();
+        document.removeEventListener('focusin', this._handleFocusChange, true);
       }
     }
   }
@@ -62,7 +68,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     }
   };
 
-  render() {
+  private _renderSlate = () => {
     if (this.state.type === OfflineTypes.None) {
       return null;
     }
@@ -70,5 +76,27 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
       return <NoLongerLive />;
     }
     return <Offline httpError={this.state.type === OfflineTypes.HttpError} />;
+  };
+
+  private _handleFocusChange = (e: FocusEvent) => {
+    const playerGuiWrapper = this.props.getGuiAreaNode();
+    if (playerGuiWrapper?.contains(e.target as Node | null)) {
+      // prevent focus on playe gui area
+      this._offlineWrapperRef?.focus();
+    }
+  };
+
+  render() {
+    return (
+      <div
+        aria-live="polite"
+        tabIndex={-1}
+        ref={node => {
+          this._offlineWrapperRef = node;
+        }}
+        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
+        {this._renderSlate()}
+      </div>
+    );
   }
 }
