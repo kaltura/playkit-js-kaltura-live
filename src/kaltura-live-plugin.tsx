@@ -277,7 +277,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   private _getGuiAreaNode = () => {
-    return this.player.getView().parentNode?.parentNode?.querySelector('.playkit-gui-area') || null;
+    const targetId = document.getElementById(this.player.config.targetId!) || document;
+    return targetId.querySelector('.playkit-gui-area') || null;
   };
 
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
