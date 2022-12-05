@@ -122,7 +122,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       presets: ['Live', 'Playback'],
       container: 'VideoArea',
       get: () => {
-        return <OfflineSlate ref={this._offlineSlate} />;
+        return <OfflineSlate ref={this._offlineSlate} getGuiAreaNode={this._getGuiAreaNode} />;
       }
     });
   };
@@ -275,6 +275,11 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       }
     });
   }
+
+  private _getGuiAreaNode = () => {
+    const targetId = document.getElementById(this.player.config.targetId!) || document;
+    return targetId.querySelector('.playkit-gui-area') || null;
+  };
 
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
   public updateLiveStatus = () => {
