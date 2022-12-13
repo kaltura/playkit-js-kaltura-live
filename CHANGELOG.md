@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.1.1](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.1.0...v3.1.1) (2022-12-13)
+
+
+### Bug Fixes
+
+* **FEV-1205:** change Kaltura-player network configuration (endlist, manifest) ([#370](https://github.com/kaltura/playkit-js-kaltura-live/issues/370)) ([260b260](https://github.com/kaltura/playkit-js-kaltura-live/commit/260b2606e41613f95c939630992bf8a834c96b87))
+* **FEV-1546:** Translation in live plugin ([#369](https://github.com/kaltura/playkit-js-kaltura-live/issues/369)) ([1dd5d8b](https://github.com/kaltura/playkit-js-kaltura-live/commit/1dd5d8ba5093bdeac739a3050e55bc1f70db1eb8))
+* **FEV-1546:** Translation in live plugin ([#376](https://github.com/kaltura/playkit-js-kaltura-live/issues/376)) ([d06e20a](https://github.com/kaltura/playkit-js-kaltura-live/commit/d06e20aa78cc682580610c894b489cacaf311944))
+* **FEV-1593:** live screens content is not being read by screen readers ([#375](https://github.com/kaltura/playkit-js-kaltura-live/issues/375)) ([772acce](https://github.com/kaltura/playkit-js-kaltura-live/commit/772acce9eb1ad45484174f15b19b5671757f2f89))
+* **FEV-1601:** When a live stream with DVR OFF is stopped there is a spinner on top of the slate ([#377](https://github.com/kaltura/playkit-js-kaltura-live/issues/377)) ([bba1176](https://github.com/kaltura/playkit-js-kaltura-live/commit/bba117613fd72f85f55ce93e7106f7eda689dba8))
+
 ## [3.1.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v2.2.5...v3.1.0) (2022-10-26)
 
 
