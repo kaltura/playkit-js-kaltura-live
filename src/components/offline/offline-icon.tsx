@@ -1,7 +1,14 @@
 import {h} from 'preact';
 
 export const OfflineIcon = () => (
-  <svg width="184px" height="184px" viewBox="0 0 184 184" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
+  <svg
+    aria-hidden="true"
+    width="184px"
+    height="184px"
+    viewBox="0 0 184 184"
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlnsXlink="http://www.w3.org/1999/xlink">
     <defs>
       <rect id="path-1" x="0" y="0" width="90.964193" height="77.2579884" rx="11"></rect>
       <path

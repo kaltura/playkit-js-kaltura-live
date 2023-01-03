@@ -2,6 +2,8 @@ $text-color: #999999;
 $layout-color: #000000;
 $font-family: sans-serif;
 
+$slate-zindex: 6; // overlap spinner and replay button
+
 // colors
 $primary-text-contrast-color: var(--playkit-primary-text-contrast-color);
 $tone-5-color: var(--playkit-tone-5-color);
