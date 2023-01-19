@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.2.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.1.1...v3.2.0) (2023-01-19)
+
+
+### Features
+
+* **fix-1574:** migrate style of plugin live ([#374](https://github.com/kaltura/playkit-js-kaltura-live/issues/374)) ([b89d22a](https://github.com/kaltura/playkit-js-kaltura-live/commit/b89d22a4836e6f9db365b6056edf8c1199234e15))
+
 ### [3.1.1](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.1.0...v3.1.1) (2022-12-13)
 
 
