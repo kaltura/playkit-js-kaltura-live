@@ -1,0 +1,16 @@
+{
+  "es": {
+    "kalturaLive": {
+      "no_internet_title": "No hay conexión de Internet.",
+      "no_internet_body": "Compruebe su red",
+      "offline_title": "No se está retransmitiendo actualmente",
+      "offline_body": "El vídeo se reproducirá una vez que se inicie la retransmisión",
+      "http_problem_title": "Algo salió mal.",
+      "http_problem_body" : "Pruebe a actualizar la página",
+      "no_longer_live": "La retransmisión ya no está en directo",
+      "live": "En directo",
+      "offline": "Sin conexión",
+      "preview": "Previsualización"
+    }
+  }
+}

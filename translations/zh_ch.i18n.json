@@ -1,0 +1,16 @@
+{
+  "zh_ch": {
+    "kalturaLive": {
+      "no_internet_title": "没有网络连接",
+      "no_internet_body": "检查您的网络",
+      "offline_title": "目前未进行广播",
+      "offline_body": "广播开始后，将马上播放视频",
+      "http_problem_title": "出现错误",
+      "http_problem_body" : "尝试刷新页面",
+      "no_longer_live": "广播不再是现场直播",
+      "live": "直播",
+      "offline": "离线",
+      "preview": "预览"
+    }
+  }
+}

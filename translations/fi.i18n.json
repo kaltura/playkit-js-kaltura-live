@@ -1,0 +1,16 @@
+{
+  "fi": {
+    "kalturaLive": {
+      "no_internet_title": "Ei internetyhteyttä",
+      "no_internet_body": "Tarkista yhteytesi",
+      "offline_title": "Ei lähetystä tällä hetkellä",
+      "offline_body": "Video toistetaan, kun lähetys alkaa",
+      "http_problem_title": "Jokin meni pieleen",
+      "http_problem_body" : "Yritä päivittää sivu",
+      "no_longer_live": "Lähetys ei ole enää käynnissä",
+      "live": "Live",
+      "offline": "Offline-tila",
+      "preview": "Esikatselu"
+    }
+  }
+}

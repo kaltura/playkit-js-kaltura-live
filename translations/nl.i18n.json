@@ -1,0 +1,16 @@
+{
+  "nl": {
+    "kalturaLive": {
+      "no_internet_title": "Geen internetverbinding",
+      "no_internet_body": "Controleer uw netwerk",
+      "offline_title": "Momenteel niet bezig met uitzenden",
+      "offline_body": "Video wordt afgespeeld zodra uitzending start",
+      "http_problem_title": "Er is iets fout gegaan",
+      "http_problem_body" : "Probeer de pagina te vernieuwen",
+      "no_longer_live": "Uitzending is niet meer live",
+      "live": "Live",
+      "offline": "Offline",
+      "preview": "Voorbeeld"
+    }
+  }
+}
