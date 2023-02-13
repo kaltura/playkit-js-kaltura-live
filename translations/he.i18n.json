@@ -1,0 +1,16 @@
+{
+  "he": {
+    "kalturaLive": {
+      "no_internet_title": "אין חיבור אינטרנט",
+      "no_internet_body": "בדוק את חיבור האינטרנט",
+      "offline_title": "כרגע לא בשידור",
+      "offline_body": "הניגון יתחיל עם תחילת השידור",
+      "http_problem_title": "משהו השתבש",
+      "http_problem_body" : "רענן את הדף",
+      "no_longer_live": "השידור הסתיים",
+      "live": "חי",
+      "offline": "במצב לא מקוון",
+      "preview": "תצוגה מוקדמת"
+    }
+  }
+}
