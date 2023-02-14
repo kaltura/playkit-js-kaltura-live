@@ -1,0 +1,16 @@
+{
+  "ko": {
+    "kalturaLive": {
+      "no_internet_title": "인터넷 연결 없음",
+      "no_internet_body": "네트워크 확인하기",
+      "offline_title": "현재는 방송 중이 아닙니다.",
+      "offline_body": "방송이 시작되면 동영상이 재생됩니다.",
+      "http_problem_title": "오류가 발생했습니다.",
+      "http_problem_body" : "페이지를 새로고침하세요.",
+      "no_longer_live": "방송이 더 이상 생중계되지 않습니다.",
+      "live": "라이브",
+      "offline": "오프라인",
+      "preview": "미리 보기"
+    }
+  }
+}

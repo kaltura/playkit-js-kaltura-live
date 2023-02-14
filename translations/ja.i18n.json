@@ -1,0 +1,16 @@
+{
+  "ja": {
+    "kalturaLive": {
+      "no_internet_title": "インターネット接続がありません",
+      "no_internet_body": "ネットワークを調べてください",
+      "offline_title": "現在は放送していません",
+      "offline_body": "放送が開始次第動画を再生します",
+      "http_problem_title": "問題が発生しました",
+      "http_problem_body" : "ページを更新してみてください",
+      "no_longer_live": "放送はライブではなくなりました",
+      "live": "ライブ",
+      "offline": "オフライン",
+      "preview": "プレビュー"
+    }
+  }
+}

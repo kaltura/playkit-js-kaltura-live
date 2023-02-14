@@ -1,0 +1,16 @@
+{
+  "pt_br": {
+    "kalturaLive": {
+      "no_internet_title": "Sem conexão com a Internet",
+      "no_internet_body": "Verifique sua rede",
+      "offline_title": "Sem transmissão no momento",
+      "offline_body": "O vídeo começará assim que a transmissão for iniciada",
+      "http_problem_title": "Ocorreu um erro",
+      "http_problem_body" : "Tente atualizar a página",
+      "no_longer_live": "A transmissão não está mais ao vivo",
+      "live": "Ao vivo",
+      "offline": "Off-line",
+      "preview": "Pré-visualizar"
+    }
+  }
+}
