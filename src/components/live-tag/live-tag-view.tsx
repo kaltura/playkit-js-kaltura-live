@@ -26,7 +26,6 @@ export class LiveTagView extends Component<props> {
     return (
       <A11yWrapper onClick={() => props.seekToLiveEdge()}>
         <div
-          role="button"
           aria-live="polite"
           tabIndex={0}
           className={[styles.liveTag, props.getStyles(), props.behindLiveEdge ? styles.clickable : ''].join(' ')}

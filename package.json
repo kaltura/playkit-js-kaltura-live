@@ -65,7 +65,7 @@
     "kaltura-player-js": "https://github.com/kaltura/kaltura-player-js.git#master"
   },
   "dependencies": {
-    "@playkit-js/common": "^1.0.7",
+    "@playkit-js/common": "^1.1.1",
     "@playkit-js/playkit-js-ui": "^0.73.0"
   },
   "publishConfig": {
