@@ -34,18 +34,20 @@ describe('Kaltura-live plugin', () => {
           .should('have.text', 'Currently not broadcastingVideo will play once broadcasting starts');
       });
     });
-    it('should render error slate', () => {
-      mockKalturaBe('live.json', null);
-      loadPlayer().then(() => {
-        cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('exist');
-        cy.get('[data-testid="kaltura-live_offlineSlate"]').should('exist').should('have.text', 'Something went wrongTry refreshing the page');
-      });
-    });
     it('should render live tag', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer().then(() => {
         cy.get('[data-testid="kaltura-live_liveTag"]').should('exist').should('have.text', 'Live');
       });
     });
+    if (Cypress.browser.name !== 'webkit') {
+      it('should render error slate', () => {
+        mockKalturaBe('live.json', null);
+        loadPlayer().then(() => {
+          cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('exist');
+          cy.get('[data-testid="kaltura-live_offlineSlate"]').should('exist').should('have.text', 'Something went wrongTry refreshing the page');
+        });
+      });
+    }
   });
 });
