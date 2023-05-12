@@ -16,7 +16,7 @@ const translates = {
 export class NoLongerLive extends Component<props> {
   render(props: props) {
     return (
-      <div className={styles.noLongerLiveWrapper} role="banner">
+      <div className={styles.noLongerLiveWrapper} role="banner" data-testid="kaltura-live_noLongerLiveSlate">
         <div className={styles.iconWrapper} aria-hidden="true">
           <div className={styles.noLongerLiveIcon}>
             <NoLongerLiveBigIcon className={styles.noLongerLiveBigIcon} />

@@ -30,7 +30,7 @@ export class Offline extends Component<props> {
 
   render(props: props) {
     return (
-      <div className={styles.offlineWrapper} role="banner">
+      <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
         <div className={styles.offlineIcon} aria-hidden="true">
           {navigator.onLine ? <OfflineIcon /> : <NetworkIssueIcon />}
         </div>

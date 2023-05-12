@@ -94,6 +94,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
         ref={node => {
           this._offlineWrapperRef = node;
         }}
+        data-testid="kaltura-live_offlineWrapper"
         className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
         {this._renderSlate()}
       </div>
