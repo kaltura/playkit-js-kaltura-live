@@ -27,6 +27,7 @@ export class LiveTagView extends Component<props> {
       <A11yWrapper onClick={() => props.seekToLiveEdge()}>
         <div
           aria-live="polite"
+          data-testid="kaltura-live_liveTag"
           tabIndex={0}
           className={[styles.liveTag, props.getStyles(), props.behindLiveEdge ? styles.clickable : ''].join(' ')}
           aria-label={props.liveTagState}>

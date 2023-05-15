@@ -1,0 +1,120 @@
+[
+  {
+    "partnerId": 1091,
+    "ks": "",
+    "userId": 0,
+    "objectType": "KalturaStartWidgetSessionResponse"
+  },
+  {
+    "objects": [
+      {
+        "dvrStatus": 1,
+        "mediaType": 201,
+        "flavorParamsIds": "32,33,34,35",
+        "duration": 0,
+        "msDuration": 0,
+        "id": "0_wifqaipd",
+        "name": "Info live media",
+        "description": "",
+        "tags": "",
+        "status": 2,
+        "type": 7,
+        "thumbnailUrl": "https://cfvod.kaltura.com/p/27017/sp/2701700/thumbnail/entry_id/0_wifqaipd/version/100001",
+        "objectType": "KalturaLiveStreamEntry"
+      }
+    ],
+    "totalCount": 1,
+    "objectType": "KalturaBaseEntryListResponse"
+  },
+  {
+    "sources": [
+      {
+        "deliveryProfileId": 16392,
+        "format": "applehttp",
+        "protocols": "http,https",
+        "flavorIds": "1_pdtp5oyr,1_gfh4uwrn,1_ubknmr33,1_gjzyo60z",
+        "url": "https://cdnapisec.kaltura.com/p/27017/sp/27017/playManifest/entryId/0_wifqaipd/flavorIds/1_pdtp5oyr,1_gfh4uwrn,1_ubknmr33,1_gjzyo60z/deliveryProfileId/16392/protocol/https/format/applehttp/a.m3u8",
+        "drm": [],
+        "objectType": "KalturaPlaybackSource"
+      }
+    ],
+    "playbackCaptions": [],
+    "flavorAssets": [
+      {
+        "flavorParamsId": 33,
+        "width": 480,
+        "height": 0,
+        "bitrate": 464,
+        "frameRate": 0,
+        "isOriginal": false,
+        "isWeb": true,
+        "containerFormat": "mp4",
+        "videoCodecId": "h264b",
+        "status": 2,
+        "isDefault": false,
+        "id": "1_pdtp5oyr",
+        "entryId": "0_wifqaipd",
+        "partnerId": 27017,
+        "size": 0,
+        "tags": "mbr,ipadnew,iphonenew,web,mobile,optional_flavor",
+        "createdAt": 1670590081,
+        "updatedAt": 1670590082,
+        "description": "",
+        "sizeInBytes": 0,
+        "objectType": "KalturaLiveAsset"
+      }
+    ],
+    "actions": [],
+    "messages": [],
+    "bumperData": [],
+    "objectType": "KalturaPlaybackContext"
+  },
+  {
+    "objects": [
+      {
+        "id": 1973865702,
+        "partnerId": 27017,
+        "metadataProfileId": 8508741,
+        "metadataProfileVersion": 1,
+        "metadataObjectType": 1,
+        "objectId": "0_wifqaipd",
+        "version": 1,
+        "createdAt": 1670590083,
+        "updatedAt": 1670590083,
+        "status": 1,
+        "xml": "<?xml version=\"1.0\"?>\n<metadata><SlidesDocEntryId></SlidesDocEntryId><IsKwebcastEntry>1</IsKwebcastEntry></metadata>\n",
+        "objectType": "KalturaMetadata"
+      },
+      {
+        "id": 1973865762,
+        "partnerId": 27017,
+        "metadataProfileId": 7680121,
+        "metadataProfileVersion": 1,
+        "metadataObjectType": 1,
+        "objectId": "0_wifqaipd",
+        "version": 1,
+        "createdAt": 1670590084,
+        "updatedAt": 1670590084,
+        "status": 1,
+        "xml": "<?xml version=\"1.0\"?>\n<metadata><Key/><Value/><Detail><Key>calenderReminder</Key><Value>\"30minutes\"</Value></Detail></metadata>\n",
+        "objectType": "KalturaMetadata"
+      },
+      {
+        "id": 1973865822,
+        "partnerId": 27017,
+        "metadataProfileId": 8508671,
+        "metadataProfileVersion": 1,
+        "metadataObjectType": 1,
+        "objectId": "0_wifqaipd",
+        "version": 1,
+        "createdAt": 1670590084,
+        "updatedAt": 1670590084,
+        "status": 1,
+        "xml": "<?xml version=\"1.0\"?>\n<metadata><StartTime>1670590800</StartTime><EndTime>1670594400</EndTime><Timezone>Europe/Helsinki</Timezone></metadata>\n",
+        "objectType": "KalturaMetadata"
+      }
+    ],
+    "totalCount": 3,
+    "objectType": "KalturaMetadataListResponse"
+  }
+]
