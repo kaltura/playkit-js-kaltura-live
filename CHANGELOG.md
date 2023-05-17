@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [3.2.2](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.2.1...v3.2.2) (2023-05-17)
+
+
+### Bug Fixes
+
+* **FEC-13145:** upgrade dependancies for common and ui-managers etc ([#384](https://github.com/kaltura/playkit-js-kaltura-live/issues/384)) ([917ed67](https://github.com/kaltura/playkit-js-kaltura-live/commit/917ed67a35c0487137fe006f54fccfefc2a5d4fd))
+
 ### [3.2.1](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.2.0...v3.2.1) (2023-02-23)
 
 ## [3.2.0](https://github.com/kaltura/playkit-js-kaltura-live/compare/v3.1.1...v3.2.0) (2023-01-19)
