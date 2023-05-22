@@ -11,11 +11,13 @@ jobs:
   test:
     uses: kaltura/playkit-js-common/.github/workflows/cypress.yml@master
     secrets: inherit 
+
   running-tests:
     uses: kaltura/ovp-pipelines-pub/.github/workflows/player_tests.yaml@v1.0.0
     with:
       yarn-run-to-execute: 'build'
       node-version: "18.x"
+      
   notification:
     if: always()
     uses: kaltura/ovp-pipelines-pub/.github/workflows/notification.yaml@v1.0.0
