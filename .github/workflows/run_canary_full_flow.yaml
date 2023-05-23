@@ -1,0 +1,34 @@
+## Canary CI/CD
+name: Canary Full Flow
+run-name: Canary Full Flow
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    uses: kaltura/playkit-js-common/.github/workflows/cypress.yml@master
+    secrets: inherit    
+
+  canary-full-flow:
+    if: ${{ github.actor != 'PlaykitJs-Bot' }}
+    uses: kaltura/ovp-pipelines-pub/.github/workflows/player_cicd.yaml@master
+    secrets:
+      PLAYER_CENTRAL_ACCOUNT_ID: ${{ secrets.PLAYER_CENTRAL_ACCOUNT_ID }}
+      PLAYER_SERVICES_ACCOUNT_ID: ${{ secrets.PLAYER_SERVICES_ACCOUNT_ID }}
+      PLAYER_S3_BUCKET_DEPLOYMENT: ${{ secrets.PLAYER_S3_BUCKET_DEPLOYMENT }}
+      PLAYER_S3_BUCKET_APPS: ${{ secrets.PLAYER_S3_BUCKET_APPS }}
+      PLAYER_NPM_TOKEN: ${{ secrets.PLAYER_NPM_TOKEN }}
+      PLAYER_LAMBDA_NAME: ${{ secrets.PLAYER_LAMBDA_NAME }}
+      PLAYER_MSTEAMS_WEBHOOK: ${{ secrets.PLAYER_MSTEAMS_WEBHOOK }}
+      PLAYER_GITHUB_BOT_TOKEN: ${{ secrets.PLAYER_GITHUB_BOT_TOKEN }}
+    with:
+      type: "plugin"
+      stage: "canary"
+      schema-type: "playerV3OvpVersions"
+      node-version: "18.x"
+      tests-yarn-run-to-execute: 'build'
+      
+
