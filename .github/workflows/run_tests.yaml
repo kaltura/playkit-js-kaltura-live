@@ -10,13 +10,7 @@ on:
 jobs:
   test:
     uses: kaltura/playkit-js-common/.github/workflows/cypress.yml@master
-    secrets: inherit 
-
-  running-tests:
-    uses: kaltura/ovp-pipelines-pub/.github/workflows/player_tests.yaml@master
-    with:
-      yarn-run-to-execute: 'build'
-      node-version: "18.x"
+    secrets: inherit
 
   notification:
     if: always()
