@@ -8,14 +8,14 @@ on:
       - "*"
 
 jobs:
-  test:
+  tests:
     uses: kaltura/playkit-js-common/.github/workflows/cypress.yml@master
     secrets: inherit
 
   notification:
     if: always()
     uses: kaltura/ovp-pipelines-pub/.github/workflows/notification.yaml@master
-    needs: running-tests
+    needs: tests
     secrets:
       PLAYER_MSTEAMS_WEBHOOK: ${{ secrets.PLAYER_MSTEAMS_WEBHOOK }}
     with:
