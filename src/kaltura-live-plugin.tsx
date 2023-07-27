@@ -8,6 +8,7 @@ import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './provid
 interface LivePluginConfig {
   checkLiveWithKs: boolean;
   isLiveInterval: number;
+  offlineSlateUrl?: string;
 }
 
 export enum LiveBroadcastStates {
@@ -106,6 +107,10 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.updateLiveStatus();
   };
 
+  private _getOfflineSlateUrl = () => {
+    return this.config.offlineSlateUrl || this.player.poster;
+  };
+
   private _addLiveTag = () => {
     this.player.ui.addComponent({
       label: 'kaltura-live-tag',
@@ -122,7 +127,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       presets: ['Live', 'Playback'],
       container: 'VideoArea',
       get: () => {
-        return <OfflineSlate ref={this._offlineSlate} getGuiAreaNode={this._getGuiAreaNode} />;
+        return <OfflineSlate ref={this._offlineSlate} getGuiAreaNode={this._getGuiAreaNode} offlineSlateUrl={this._getOfflineSlateUrl()} />;
       }
     });
   };

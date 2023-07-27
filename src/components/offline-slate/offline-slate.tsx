@@ -3,6 +3,9 @@ import {Offline} from '../offline';
 import {NoLongerLive} from '../no-longer-live';
 import * as styles from './offline-slate.scss';
 
+// @ts-ignore
+const {ErrorOverlay} = KalturaPlayer.ui.components;
+
 export enum OfflineTypes {
   None = 'None',
   Offline = 'Offline',
@@ -19,6 +22,7 @@ interface OfflineSlateProps {
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
+  offlineSlateUrl: string;
 }
 
 const LIVE_PLUGIN_HAS_OVERLAY_CLASSNAME = 'has-live-plugin-overlay';
@@ -75,7 +79,10 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     if (this.state.type === OfflineTypes.NoLongerLive) {
       return <NoLongerLive />;
     }
-    return <Offline httpError={this.state.type === OfflineTypes.HttpError} />;
+    if (this.state.type === OfflineTypes.HttpError) {
+      return <ErrorOverlay />;
+    }
+    return <Offline />;
   };
 
   private _handleFocusChange = (e: FocusEvent) => {
@@ -95,7 +102,10 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
           this._offlineWrapperRef = node;
         }}
         data-testid="kaltura-live_offlineWrapper"
-        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
+        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}
+        style={{
+          backgroundImage: `url(${this.props.offlineSlateUrl})`
+        }}>
         {this._renderSlate()}
       </div>
     );
