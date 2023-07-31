@@ -1,12 +1,8 @@
 {
   "fr": {
     "kalturaLive": {
-      "no_internet_title": "Pas de connexion Internet",
-      "no_internet_body": "Vérifiez votre connexion",
       "offline_title": "Ne diffuse pas actuellement",
       "offline_body": "La vidéo jouera dès le début de la diffusion",
-      "http_problem_title": "Un problème est survenu",
-      "http_problem_body" : "Essayez d’actualiser la page",
       "no_longer_live": "La diffusion n’est plus en direct",
       "live": "En direct",
       "offline": "Hors ligne",

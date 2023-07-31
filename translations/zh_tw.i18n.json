@@ -1,12 +1,8 @@
 {
   "zh_tw": {
     "kalturaLive": {
-      "no_internet_title": "沒有網際網路連線",
-      "no_internet_body": "檢查您的網路",
       "offline_title": "目前未播放",
       "offline_body": "當開始播放時將播放影片",
-      "http_problem_title": "發生錯誤了",
-      "http_problem_body" : "嘗試重新整理頁面",
       "no_longer_live": "廣播不再直播",
       "live": "直播",
       "offline": "離線",

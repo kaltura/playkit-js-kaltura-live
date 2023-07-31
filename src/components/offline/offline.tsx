@@ -1,46 +1,40 @@
 import {h, Component} from 'preact';
 import * as styles from './offline.scss';
-import {OfflineIcon} from './offline-icon';
-import {NetworkIssueIcon} from './network-issue-icon';
+
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
 
-export interface props {
-  httpError?: boolean;
-  noInternetTitle?: string;
-  noInternetBody?: string;
+export interface OfflineProps {
   offlineTitle?: string;
   offlineBody?: string;
-  httpProblemTitle?: string;
-  httpProblemBody?: string;
+  noLongerLive?: string;
+  postBroadcast: boolean;
+  hideText: boolean;
 }
 
 const translates = {
-  noInternetTitle: <Text id="kalturaLive.no_internet_title">No Internet Connection</Text>,
-  noInternetBody: <Text id="kalturaLive.no_internet_body">Check your network</Text>,
-  offlineTitle: <Text id="kalturaLive.offline_title">Currently not broadcasting</Text>,
+  offlineTitle: <Text id="kalturaLive.offline_title">Not broadcasting yet</Text>,
   offlineBody: <Text id="kalturaLive.offline_body">Video will play once broadcasting starts</Text>,
-  httpProblemTitle: <Text id="kalturaLive.http_problem_title">Something went wrong</Text>,
-  httpProblemBody: <Text id="kalturaLive.http_problem_body">Try refreshing the page</Text>
+  noLongerLive: <Text id="kalturaLive.offline_body">Broadcast is no longer live</Text>
 };
-@withText(translates)
-export class Offline extends Component<props> {
-  static defaultProps = {
-    httpError: false
-  };
 
-  render(props: props) {
+@withText(translates)
+export class Offline extends Component<OfflineProps> {
+  get title() {
+    return this.props.postBroadcast ? this.props.noLongerLive : this.props.offlineTitle;
+  }
+  get description() {
+    return this.props.postBroadcast ? null : this.props.offlineBody;
+  }
+
+  render() {
+    if (this.props.hideText) {
+      return null;
+    }
     return (
       <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
-        <div className={styles.offlineIcon} aria-hidden="true">
-          {navigator.onLine ? <OfflineIcon /> : <NetworkIssueIcon />}
-        </div>
-        <div role="contentinfo">
-          <p className={styles.primaryText}>
-            {props.httpError ? (navigator.onLine ? props.httpProblemTitle : props.noInternetTitle) : props.offlineTitle}
-          </p>
-          <p className={styles.secondaryText}>
-            {props.httpError ? (navigator.onLine ? props.httpProblemBody : props.noInternetBody) : props.offlineBody}
-          </p>
+        <div role="contentinfo" className={styles.offlineContent}>
+          <p className={['kaltura-live-title', styles.primaryText].join(' ')}>{this.title}</p>
+          {this.description ? <p className={['kaltura-live-description', styles.secondaryText].join(' ')}>{this.description}</p> : null}
         </div>
       </div>
     );
