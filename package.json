@@ -65,7 +65,7 @@
     "@playkit-js/kaltura-player-js": "canary"
   },
   "dependencies": {
-    "@playkit-js/common": "^1.2.3",
+    "@playkit-js/common": "^1.2.13",
     "@playkit-js/playkit-js-ui": "^0.77.1"
   },
   "publishConfig": {

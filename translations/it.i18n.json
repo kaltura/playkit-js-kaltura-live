@@ -1,12 +1,8 @@
 {
   "it": {
     "kalturaLive": {
-      "no_internet_title": "Nessuna connessione Internet",
-      "no_internet_body": "Controlla la tua rete",
       "offline_title": "Attualmente non in riproduzione",
       "offline_body": "Il video verrà riprodotto una volta iniziata la trasmissione",
-      "http_problem_title": "Qualcosa è andato storto",
-      "http_problem_body" : "Provare ad aggiornare la pagina",
       "no_longer_live": "La trasmissione non è più live",
       "live": "Live",
       "offline": "Offline",

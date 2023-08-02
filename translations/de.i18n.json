@@ -1,12 +1,8 @@
 {
   "de": {
     "kalturaLive": {
-      "no_internet_title": "Keine Internetverbindung",
-      "no_internet_body": "Prüfen Sie Ihr Netzwerk",
       "offline_title": "Derzeit keine Übertragung",
       "offline_body": "Video wird abgespielt, wenn die Übertragung beginnt",
-      "http_problem_title": "Etwas ist schiefgegangen",
-      "http_problem_body" : "Versuchen Sie, die Seite zu aktualisieren",
       "no_longer_live": "Ausstrahlungen sind nicht mehr live",
       "live": "Live",
       "offline": "Offline",

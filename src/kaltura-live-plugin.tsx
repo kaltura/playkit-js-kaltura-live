@@ -8,6 +8,8 @@ import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './provid
 interface LivePluginConfig {
   checkLiveWithKs: boolean;
   isLiveInterval: number;
+  offlineSlateUrl?: string;
+  offlineSlateWithoutText: boolean;
 }
 
 export enum LiveBroadcastStates {
@@ -48,7 +50,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
-    isLiveInterval: 10
+    isLiveInterval: 10,
+    offlineSlateWithoutText: false
   };
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
@@ -106,6 +109,10 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.updateLiveStatus();
   };
 
+  private _getOfflineSlateUrl = () => {
+    return this.config.offlineSlateUrl || this.player.poster;
+  };
+
   private _addLiveTag = () => {
     this.player.ui.addComponent({
       label: 'kaltura-live-tag',
@@ -122,7 +129,14 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       presets: ['Live', 'Playback'],
       container: 'VideoArea',
       get: () => {
-        return <OfflineSlate ref={this._offlineSlate} getGuiAreaNode={this._getGuiAreaNode} />;
+        return (
+          <OfflineSlate
+            ref={this._offlineSlate}
+            getGuiAreaNode={this._getGuiAreaNode}
+            offlineSlateUrl={this._getOfflineSlateUrl()}
+            hideText={this.config.offlineSlateWithoutText}
+          />
+        );
       }
     });
   };
@@ -209,7 +223,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._broadcastState = receivedState;
     this.logger.info('Received isLive with value: ' + receivedState);
     if (receivedState === LiveBroadcastStates.Error && this.player.paused) {
-      this._manageOfflineSlate(OfflineTypes.HttpError);
+      this._manageOfflineSlate(OfflineTypes.Error);
       return;
     }
 
@@ -265,8 +279,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       case OfflineTypes.Offline:
         this._updateOfflineSlate(OfflineTypes.Offline);
         break;
-      case OfflineTypes.HttpError:
-        this._updateOfflineSlate(OfflineTypes.HttpError);
+      case OfflineTypes.Error:
+        this._updateOfflineSlate(OfflineTypes.Error);
         break;
     }
     this.sidePanelsManager?.componentsRegistry?.forEach((plugin: any, key: number) => {

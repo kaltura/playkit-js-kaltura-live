@@ -1,12 +1,8 @@
 {
   "en": {
     "kalturaLive": {
-      "no_internet_title": "No Internet Connection",
-      "no_internet_body": "Check your network",
-      "offline_title": "Currently not broadcasting",
-      "offline_body": "Video will play once broadcasting starts",
-      "http_problem_title": "Something went wrong",
-      "http_problem_body" : "Try refreshing the page",
+      "offline_title": "Not broadcasting yet",
+      "offline_body": "The video will start playing once the broadcast starts",
       "no_longer_live": "Broadcast is no longer live",
       "live": "Live",
       "offline": "Offline",

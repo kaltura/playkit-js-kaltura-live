@@ -7,7 +7,9 @@
   z-index: $slate-zindex;
   width: 0px;
   height: 0px;
-  background-color: $layout-color;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
   font-family: $font-family;
   &.active {
     width: 100%;
@@ -16,5 +18,7 @@
 }
 
 :global(.playkit-player.has-live-plugin-overlay) {
-  // overwrite player styles when live slate active
+  :global(.overlay-portal) {
+    z-index: $slate-zindex - 1;
+  }
 }

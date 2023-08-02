@@ -1,12 +1,14 @@
 import {h, Component} from 'preact';
 import {Offline} from '../offline';
-import {NoLongerLive} from '../no-longer-live';
 import * as styles from './offline-slate.scss';
+
+// @ts-ignore
+const {ErrorOverlay} = KalturaPlayer.ui.components;
 
 export enum OfflineTypes {
   None = 'None',
   Offline = 'Offline',
-  HttpError = 'HttpError',
+  Error = 'Error',
   NoLongerLive = 'NoLongerLive'
 }
 
@@ -19,6 +21,8 @@ interface OfflineSlateProps {
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
+  offlineSlateUrl: string;
+  hideText: boolean;
 }
 
 const LIVE_PLUGIN_HAS_OVERLAY_CLASSNAME = 'has-live-plugin-overlay';
@@ -72,10 +76,10 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     if (this.state.type === OfflineTypes.None) {
       return null;
     }
-    if (this.state.type === OfflineTypes.NoLongerLive) {
-      return <NoLongerLive />;
+    if (this.state.type === OfflineTypes.Error) {
+      return <ErrorOverlay permanent />;
     }
-    return <Offline httpError={this.state.type === OfflineTypes.HttpError} />;
+    return <Offline postBroadcast={this.state.type === OfflineTypes.NoLongerLive} hideText={this.props.hideText} />;
   };
 
   private _handleFocusChange = (e: FocusEvent) => {
@@ -87,6 +91,11 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
   };
 
   render() {
+    const isActive = this.state.type !== OfflineTypes.None;
+    const offlineSlateStyles: Record<string, string> = {};
+    if (isActive) {
+      offlineSlateStyles['backgroundImage'] = `url(${this.props.offlineSlateUrl})`;
+    }
     return (
       <div
         aria-live="polite"
@@ -95,7 +104,8 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
           this._offlineWrapperRef = node;
         }}
         data-testid="kaltura-live_offlineWrapper"
-        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
+        className={[styles.slateWrapper, isActive ? styles.active : ''].join(' ')}
+        style={offlineSlateStyles}>
         {this._renderSlate()}
       </div>
     );

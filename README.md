@@ -71,14 +71,6 @@ Kaltura-live plugin configuration can been found here:
 
 - **[Configuration](#configuration)**
 
-### And coding style tests
-
-We use ESLint [recommended set](http://eslint.org/docs/rules/) with some additions for enforcing [Flow] types and other rules.
-
-See [ESLint config](.eslintrc.json) for full configuration.
-
-We also use [.editorconfig](.editorconfig) to maintain consistent coding styles and settings, please make sure you comply with the styling.
-
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/kaltura/playkit-js-kaltura-live/tags).
@@ -93,6 +85,7 @@ Run dev server: `yarn dev`;<br/>
 Bump version: `yarn release`;<br/>
 
 <a name="configuration"></a>
+
 ## Configuration
 
 #### Configuration Structure
@@ -104,6 +97,8 @@ Bump version: `yarn release`;<br/>
 "kaltura-live" = {
     checkLiveWithKs: boolean,
     isLiveInterval: number,
+    offlineSlateUrl: string,
+    offlineSlateWithoutText: boolean,
 }
 ```
 
@@ -114,7 +109,6 @@ Bump version: `yarn release`;<br/>
 > ##### Type: `boolean`
 >
 > ##### Default: `false`
->
 
 ##
 
@@ -123,8 +117,19 @@ Bump version: `yarn release`;<br/>
 > ##### Type: `number`
 >
 > ##### Default: `10`
->
 
-### Dev env
-Node version: up to 14+<br/>
-If nvm installed: `nvm use` change version of current terminal to required.<br/>
+##
+
+> ### config.offlineSlateUrl
+>
+> ##### Type: `string`
+>
+> ##### Default: `undefined`
+
+##
+
+> ### config.offlineSlateWithoutText
+>
+> ##### Type: `boolean`
+>
+> ##### Default: `false`
