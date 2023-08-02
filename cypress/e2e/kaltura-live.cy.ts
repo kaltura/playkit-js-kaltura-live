@@ -72,12 +72,11 @@ describe('Kaltura-live plugin', () => {
       });
     });
     if (Cypress.browser.name !== 'webkit') {
-      // TODO: update test once kaltura-player got updated
-      it.skip('should render error slate', () => {
+      it('should render error slate', () => {
         mockKalturaBe('live.json', null);
         loadPlayer().then(() => {
           cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('exist');
-          cy.get('[data-testid="kaltura-live_offlineSlate"]').should('exist').should('have.text', 'Something went wrongTry refreshing the page');
+          cy.get('.playkit-error-overlay').should('exist');
         });
       });
     }
