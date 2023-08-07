@@ -21,7 +21,10 @@ interface OfflineSlateProps {
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
-  offlineSlateUrl: string;
+  offlineSlateUrls: {
+    preOfflineSlateUrl: string, 
+    postOfflineSlateUrl: string
+  };
   hideText: boolean;
 }
 
@@ -94,7 +97,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     const isActive = this.state.type !== OfflineTypes.None;
     const offlineSlateStyles: Record<string, string> = {};
     if (isActive) {
-      offlineSlateStyles['backgroundImage'] = `url(${this.props.offlineSlateUrl})`;
+      offlineSlateStyles['backgroundImage'] = `url(${this.state.type === OfflineTypes.NoLongerLive ? this.props.offlineSlateUrls.postOfflineSlateUrl : this.props.offlineSlateUrls.preOfflineSlateUrl})`;
     }
     return (
       <div
