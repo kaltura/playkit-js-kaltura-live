@@ -55,15 +55,15 @@ describe('Kaltura-live plugin', () => {
     });
     it('should render custom image url as pre-broadcast slate background', () => {
       mockKalturaBe('live.json', 'offline-stream.json');
-      loadPlayer({preOfflineSlateUrl: 'https://test/height/360/width/640'}).then(() => {
-        cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/height/360/width/640');
+      loadPlayer({preOfflineSlateUrl: 'https://test/custom-slate'}).then(() => {
+        cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/custom-slate');
       });
     });
     it('should render custom image url as post-broadcast slate background', () => {
       mockKalturaBe('live.json', 'live-stream.json');
-      loadPlayer({postOfflineSlateUrl: 'https://test/height/360/width/640'}, {autoplay: true}).then(kalturaPlayer => {
+      loadPlayer({postOfflineSlateUrl: 'https://test/custom-slate'}, {autoplay: true}).then(kalturaPlayer => {
         kalturaPlayer.currentTime = 60;
-        cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/height/360/width/640');
+        cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/custom-slate');
       });
     });
     it('should render entry poster if custom image url invalid', () => {

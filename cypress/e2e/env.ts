@@ -75,5 +75,5 @@ export const mockKalturaBe = (baseEntryFixture: string, streamStateFixture: stri
       return req.reply({fixture: streamStateFixture});
     }
   });
-  cy.intercept('GET', '**/ks/123', {fixture: 'thumb-asset.jpeg'}).as('getSlides');
+  cy.intercept('GET', 'https://test/custom-slate', {fixture: 'custom-slate.jpeg'});
 };
