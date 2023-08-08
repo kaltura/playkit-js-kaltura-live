@@ -42,10 +42,9 @@ describe('Kaltura-live plugin', () => {
     });
     it('should render post-playback slate', () => {
       mockKalturaBe('live.json', 'live-stream.json');
-      loadPlayer().then(kalturaPlayer => {
+      loadPlayer({}, {autoplay: true}).then(kalturaPlayer => {
         kalturaPlayer.currentTime = 60;
         cy.get('.kaltura-live-title').should('have.text', 'Broadcast is no longer live');
-        kalturaPlayer.dispatchEvent(new FakeEvent(EventType.ENDED));
       });
     });
     it('should render entry poster as offline slate background', () => {
@@ -54,9 +53,16 @@ describe('Kaltura-live plugin', () => {
         cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('have.attr', 'style', `background-image: url("${kalturaPlayer.poster}");`);
       });
     });
-    it('should render custom image url as offline slate background', () => {
+    it('should render custom image url as pre-broadcast slate background', () => {
       mockKalturaBe('live.json', 'offline-stream.json');
-      loadPlayer({offlineSlateUrl: 'http://test'}).then(() => {
+      loadPlayer({preOfflineSlateUrl: 'http://test'}).then(() => {
+        cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('have.attr', 'style', `background-image: url("http://test");`);
+      });
+    });
+    it('should render custom image url as post-broadcast slate background', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer({postOfflineSlateUrl: 'http://test'}, {autoplay: true}).then(kalturaPlayer => {
+        kalturaPlayer.currentTime = 60;
         cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('have.attr', 'style', `background-image: url("http://test");`);
       });
     });
@@ -71,14 +77,14 @@ describe('Kaltura-live plugin', () => {
           });
       });
     });
-    if (Cypress.browser.name !== 'webkit') {
-      it('should render error slate', () => {
-        mockKalturaBe('live.json', null);
-        loadPlayer().then(() => {
-          cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('exist');
-          cy.get('.playkit-error-overlay').should('exist');
-        });
+    it('should render error slate', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer().then(kalturaPlayer => {
+        const error = new Error(Error.Severity.CRITICAL, Error.Category.PLAYER, Error.Code.VIDEO_ERROR, 'test');
+        kalturaPlayer.dispatchEvent(new FakeEvent(EventType.ERROR, error));
+        cy.get('[data-testid="kaltura-live_offlineWrapper"]').should('exist');
+        cy.get('.playkit-error-overlay').should('exist');
       });
-    }
+    });
   });
 });

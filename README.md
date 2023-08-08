@@ -97,7 +97,8 @@ Bump version: `yarn release`;<br/>
 "kaltura-live" = {
     checkLiveWithKs: boolean,
     isLiveInterval: number,
-    offlineSlateUrl: string,
+    preOfflineSlateUrl: string, 
+    postOfflineSlateUrl: string,
     offlineSlateWithoutText: boolean,
 }
 ```
@@ -120,7 +121,15 @@ Bump version: `yarn release`;<br/>
 
 ##
 
-> ### config.offlineSlateUrl
+> ### config.preOfflineSlateUrl
+>
+> ##### Type: `string`
+>
+> ##### Default: `undefined`
+
+##
+
+> ### config.postOfflineSlateUrl
 >
 > ##### Type: `string`
 >
