@@ -131,9 +131,11 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             ref={this._offlineSlate}
             getGuiAreaNode={this._getGuiAreaNode}
             hideText={this.config.offlineSlateWithoutText}
-            preOfflineSlateUrl={this.config.preOfflineSlateUrl}
-            postOfflineSlateUrl={this.config.postOfflineSlateUrl}
-            poster={this.player.poster!}
+            offlineSlateUrls={{
+              preOfflineSlateUrl: this.config.preOfflineSlateUrl,
+              postOfflineSlateUrl: this.config.postOfflineSlateUrl,
+              poster: this.player.poster
+            }}
           />
         );
       }
