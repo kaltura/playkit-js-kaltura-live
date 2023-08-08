@@ -21,10 +21,9 @@ interface OfflineSlateProps {
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
-  offlineSlateUrls: {
-    preOfflineSlateUrl: string;
-    postOfflineSlateUrl: string;
-  };
+  preOfflineSlateUrl?: string;
+  postOfflineSlateUrl?: string;
+  poster?: string;
   hideText: boolean;
 }
 
@@ -52,6 +51,10 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
 
   get _isPostBroadcast() {
     return this.state.type === OfflineTypes.NoLongerLive;
+  }
+
+  get _backgroundSrc() {
+    return this._isPostBroadcast ? this.props.postOfflineSlateUrl : this.props.preOfflineSlateUrl ;
   }
 
   componentWillUnmount() {
@@ -86,7 +89,14 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     if (this.state.type === OfflineTypes.Error) {
       return <ErrorOverlay permanent />;
     }
-    return <Offline postBroadcast={this._isPostBroadcast} hideText={this.props.hideText} />;
+    return (
+      <Offline
+        postBroadcast={this._isPostBroadcast}
+        hideText={this.props.hideText}
+        backgroundSrc={this._backgroundSrc}
+        fallbackSrc={this.props.poster}
+      />
+    );
   };
 
   private _handleFocusChange = (e: FocusEvent) => {
@@ -100,10 +110,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
   render() {
     const isActive = this.state.type !== OfflineTypes.None;
     const offlineSlateStyles: Record<string, string> = {};
-    if (isActive) {
-      const {postOfflineSlateUrl, preOfflineSlateUrl} = this.props.offlineSlateUrls;
-      offlineSlateStyles['backgroundImage'] = `url(${this._isPostBroadcast ? postOfflineSlateUrl : preOfflineSlateUrl})`;
-    }
+
     return (
       <div
         aria-live="polite"

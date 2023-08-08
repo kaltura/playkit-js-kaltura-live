@@ -1,4 +1,4 @@
-import {h, Component} from 'preact';
+import {h, Component, Fragment} from 'preact';
 import * as styles from './offline.scss';
 
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
@@ -9,6 +9,8 @@ export interface OfflineProps {
   noLongerLive?: string;
   postBroadcast: boolean;
   hideText: boolean;
+  backgroundSrc?: string;
+  fallbackSrc?: string;
 }
 
 const translates = {
@@ -26,17 +28,34 @@ export class Offline extends Component<OfflineProps> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
+  private _handleImageError = (event: any): void => {
+    if (this.props.fallbackSrc) {
+      const imageElement = event.target as HTMLImageElement;
+      imageElement.src = this.props.fallbackSrc;
+    }
+  };
+
   render() {
     if (this.props.hideText) {
       return null;
     }
     return (
-      <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
-        <div role="contentinfo" className={styles.offlineContent}>
-          <p className={['kaltura-live-title', styles.primaryText].join(' ')}>{this.title}</p>
-          {this.description ? <p className={['kaltura-live-description', styles.secondaryText].join(' ')}>{this.description}</p> : null}
-        </div>
-      </div>
+      <Fragment>
+        <img
+          src={this.props.backgroundSrc || this.props.fallbackSrc}
+          className={styles.slateBackgroundImage}
+          onError={this._handleImageError}
+          alt={this.title}
+        />
+        {!this.props.hideText && (
+          <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
+            <div role="contentinfo" className={styles.offlineContent}>
+              <p className={['kaltura-live-title', styles.primaryText].join(' ')}>{this.title}</p>
+              {this.description ? <p className={['kaltura-live-description', styles.secondaryText].join(' ')}>{this.description}</p> : null}
+            </div>
+          </div>
+        )}
+      </Fragment>
     );
   }
 }

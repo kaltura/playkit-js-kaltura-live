@@ -110,13 +110,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.updateLiveStatus();
   };
 
-  private _getOfflineSlateUrls = () => {
-    return {
-      preOfflineSlateUrl: (this.config.preOfflineSlateUrl || this.player.poster) as string,
-      postOfflineSlateUrl: (this.config.postOfflineSlateUrl || this.player.poster) as string,
-    };
-  };
-
   private _addLiveTag = () => {
     this.player.ui.addComponent({
       label: 'kaltura-live-tag',
@@ -137,8 +130,10 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
           <OfflineSlate
             ref={this._offlineSlate}
             getGuiAreaNode={this._getGuiAreaNode}
-            offlineSlateUrls={this._getOfflineSlateUrls()}
             hideText={this.config.offlineSlateWithoutText}
+            preOfflineSlateUrl={this.config.preOfflineSlateUrl}
+            postOfflineSlateUrl={this.config.postOfflineSlateUrl}
+            poster={this.player.poster!}
           />
         );
       }
