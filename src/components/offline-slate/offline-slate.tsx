@@ -1,5 +1,5 @@
 import {h, Component} from 'preact';
-import {Offline} from '../offline';
+import {Offline, OfflineSlateUrls} from '../offline';
 import * as styles from './offline-slate.scss';
 
 // @ts-ignore
@@ -21,10 +21,7 @@ interface OfflineSlateProps {
   addPlayerClass?: () => void;
   removePlayerClass?: () => void;
   removeSpinner?: () => void;
-  offlineSlateUrls: {
-    preOfflineSlateUrl: string;
-    postOfflineSlateUrl: string;
-  };
+  offlineSlateUrls: OfflineSlateUrls;
   hideText: boolean;
 }
 
@@ -86,7 +83,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     if (this.state.type === OfflineTypes.Error) {
       return <ErrorOverlay permanent />;
     }
-    return <Offline postBroadcast={this._isPostBroadcast} hideText={this.props.hideText} />;
+    return <Offline postBroadcast={this._isPostBroadcast} hideText={this.props.hideText} offlineSlateUrls={this.props.offlineSlateUrls} />;
   };
 
   private _handleFocusChange = (e: FocusEvent) => {
@@ -98,12 +95,6 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
   };
 
   render() {
-    const isActive = this.state.type !== OfflineTypes.None;
-    const offlineSlateStyles: Record<string, string> = {};
-    if (isActive) {
-      const {postOfflineSlateUrl, preOfflineSlateUrl} = this.props.offlineSlateUrls;
-      offlineSlateStyles['backgroundImage'] = `url(${this._isPostBroadcast ? postOfflineSlateUrl : preOfflineSlateUrl})`;
-    }
     return (
       <div
         aria-live="polite"
@@ -112,8 +103,7 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
           this._offlineWrapperRef = node;
         }}
         data-testid="kaltura-live_offlineWrapper"
-        className={[styles.slateWrapper, isActive ? styles.active : ''].join(' ')}
-        style={offlineSlateStyles}>
+        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
         {this._renderSlate()}
       </div>
     );

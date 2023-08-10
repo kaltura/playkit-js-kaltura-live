@@ -1,7 +1,13 @@
-import {h, Component} from 'preact';
+import {h, Component, Fragment} from 'preact';
 import * as styles from './offline.scss';
 
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
+
+export interface OfflineSlateUrls {
+  preOfflineSlateUrl?: string;
+  postOfflineSlateUrl?: string;
+  poster?: string;
+}
 
 export interface OfflineProps {
   offlineTitle?: string;
@@ -9,6 +15,11 @@ export interface OfflineProps {
   noLongerLive?: string;
   postBroadcast: boolean;
   hideText: boolean;
+  offlineSlateUrls: OfflineSlateUrls;
+}
+
+interface OfflineState {
+  imageSrc?: string;
 }
 
 const translates = {
@@ -18,7 +29,14 @@ const translates = {
 };
 
 @withText(translates)
-export class Offline extends Component<OfflineProps> {
+export class Offline extends Component<OfflineProps, OfflineState> {
+  constructor({postBroadcast, offlineSlateUrls}: OfflineProps) {
+    super();
+    this.state = {
+      imageSrc: (postBroadcast ? offlineSlateUrls.postOfflineSlateUrl : offlineSlateUrls.preOfflineSlateUrl) || offlineSlateUrls.poster
+    };
+  }
+
   get title() {
     return this.props.postBroadcast ? this.props.noLongerLive : this.props.offlineTitle;
   }
@@ -26,17 +44,34 @@ export class Offline extends Component<OfflineProps> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
-  render() {
-    if (this.props.hideText) {
-      return null;
+  private _handleImageError = (): void => {
+    const {poster} = this.props.offlineSlateUrls;
+    if (poster && this.state.imageSrc !== poster) {
+      this.setState({
+        imageSrc: poster
+      });
     }
+  };
+
+  render() {
     return (
-      <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
-        <div role="contentinfo" className={styles.offlineContent}>
-          <p className={['kaltura-live-title', styles.primaryText].join(' ')}>{this.title}</p>
-          {this.description ? <p className={['kaltura-live-description', styles.secondaryText].join(' ')}>{this.description}</p> : null}
-        </div>
-      </div>
+      <Fragment>
+        <img
+          src={this.state.imageSrc}
+          className={styles.slateBackgroundImage}
+          onError={this._handleImageError}
+          alt={this.title}
+          data-testid="kaltura-live_offlineImage"
+        />
+        {this.props.hideText ? null : (
+          <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
+            <div role="contentinfo" className={styles.offlineContent}>
+              <p className={['kaltura-live-title', styles.primaryText].join(' ')}>{this.title}</p>
+              {this.description ? <p className={['kaltura-live-description', styles.secondaryText].join(' ')}>{this.description}</p> : null}
+            </div>
+          </div>
+        )}
+      </Fragment>
     );
   }
 }
