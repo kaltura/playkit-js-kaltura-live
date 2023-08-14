@@ -25,7 +25,7 @@ interface OfflineState {
 const translates = {
   offlineTitle: <Text id="kalturaLive.offline_title">Not broadcasting yet</Text>,
   offlineBody: <Text id="kalturaLive.offline_body">Video will play once broadcasting starts</Text>,
-  noLongerLive: <Text id="kalturaLive.offline_body">Broadcast is no longer live</Text>
+  noLongerLive: <Text id="kalturaLive.no_longer_live">Broadcast is no longer live</Text>
 };
 
 @withText(translates)
