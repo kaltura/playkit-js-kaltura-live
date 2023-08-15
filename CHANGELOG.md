@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.2.4 (2023-08-15)
+
+
+### Bug Fixes
+
+* **FEC-13300:** fix translates for post-broadcast slate ([#390](https://github.com/kaltura/playkit-js-kaltura-live/issues/390)) ([845e73e](https://github.com/kaltura/playkit-js-kaltura-live/commit/845e73edc71a375a6334145cf04876307f938d6e))
+
 ### 3.2.3 (2023-06-27)
 
 
