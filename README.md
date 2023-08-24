@@ -99,7 +99,27 @@ Bump version: `yarn release`;<br/>
     isLiveInterval: number,
     preOfflineSlateUrl: string, 
     postOfflineSlateUrl: string,
-    offlineSlateWithoutText: boolean,
+    offlineSlateWithoutText: boolean
+}
+```
+Player allows customisation of pre and post live broadcast slates per uiconf. 
+
+By default the player will use the live-entry thumbnail as the background to the “brodcast not started” and “broadcast ended” slates. Nevertheless, it allows customising the experience by providing a url to an alternative background image for each of the slates. 
+
+```js
+//Plugin params to configure slates background image
+"kaltura-live" = {
+    preOfflineSlateUrl: string, 
+    postOfflineSlateUrl: string
+}
+```
+
+One can also choose to hide the text message on the slate.
+
+```js
+//Plugin param to hide text messages on the pre and post slates
+"kaltura-live" = {
+    offlineSlateWithoutText: boolean
 }
 ```
 
