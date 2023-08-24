@@ -117,7 +117,7 @@ By default the player will use the live-entry thumbnail as the background to the
 One can also choose to hide the text message on the slate.
 
 ```js
-//Plugin param to hide test messages on the pre and post slates
+//Plugin param to hide text messages on the pre and post slates
 "kaltura-live" = {
     offlineSlateWithoutText: boolean
 }
