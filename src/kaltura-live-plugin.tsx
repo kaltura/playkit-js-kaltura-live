@@ -120,8 +120,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   };
 
   private _handlePlayerStateChange = ({payload}: {payload: {newState: {type: typeof StateType}; oldState: {type: typeof StateType}}}) => {
-    if (this._bufferingTimeout && payload.newState.type === StateType.PLAYING && payload.oldState.type === StateType.BUFFERING) {
-      // playback restored, reset bufferingTimeout
+    if (this._bufferingTimeout && payload.newState.type !== StateType.BUFFERING) {
+      // playback state changed, reset bufferingTimeout
       this._resetBufferingTimeout();
       return;
     }
