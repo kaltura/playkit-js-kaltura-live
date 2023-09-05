@@ -1,13 +1,18 @@
 import {h, createRef} from 'preact';
+// @ts-ignore
+import {core} from '@playkit-js/kaltura-player-js';
 import {KalturaLiveMiddleware} from './middleware/live-middleware';
 import {KalturaLiveEngineDecorator} from './decorator/live-decorator';
 import {OfflineSlate, OfflineTypes} from './components/offline-slate';
 import {LiveTag, LiveTagStates} from './components/live-tag';
 import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './providers/get-stream-details-loader';
 
+const {StateType} = core;
+
 interface LivePluginConfig {
   checkLiveWithKs: boolean;
   isLiveInterval: number;
+  bufferingFailoverTimeout: number;
   preOfflineSlateUrl?: string;
   postOfflineSlateUrl?: string;
   offlineSlateWithoutText: boolean;
@@ -42,6 +47,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _wasPlayed = false;
   private _absolutePosition = null;
   private _isLiveApiCallTimeout: any = null;
+  private _bufferingTimeout: any = null;
   private _liveTagState: LiveTagStates = LiveTagStates.Live;
   private _activeRequest = false;
   public playerHasError = false;
@@ -52,6 +58,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
     isLiveInterval: 10,
+    bufferingFailoverTimeout: 10,
     offlineSlateWithoutText: false
   };
 
@@ -100,7 +107,40 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       this.eventManager.listen(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
       this.eventManager.listen(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
       this.eventManager.listen(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+      this.eventManager.listen(this.player, this.player.Event.PLAYER_STATE_CHANGED, this._handlePlayerStateChange);
     }
+  };
+
+  private _resetBufferingTimeout = () => {
+    this.logger.debug('Reset buffering timeout');
+    if (this._bufferingTimeout) {
+      clearTimeout(this._bufferingTimeout);
+      this._bufferingTimeout = null;
+    }
+  };
+
+  private _handlePlayerStateChange = ({payload}: {payload: {newState: {type: typeof StateType}; oldState: {type: typeof StateType}}}) => {
+    if (this._bufferingTimeout && payload.newState.type !== StateType.BUFFERING) {
+      // playback state changed, reset bufferingTimeout
+      this._resetBufferingTimeout();
+      return;
+    }
+    if (payload.newState.type === StateType.BUFFERING && payload.oldState.type === StateType.PLAYING && !this._bufferingTimeout) {
+      const bufferingFailoverTimeout = this.config.bufferingFailoverTimeout * 1000;
+      this.logger.debug(`Init buffering timeout, ${bufferingFailoverTimeout}ms`);
+      this._bufferingTimeout = setTimeout(() => {
+        this._bufferingTimeout = null;
+        if (this._isBuffering()) {
+          this.updateLiveStatus(true);
+        }
+      }, bufferingFailoverTimeout);
+    }
+  };
+
+  private _isBuffering = () => {
+    const state = this.player.ui.store.getState();
+    const currentState = state?.engine?.playerState?.currentState;
+    return currentState === StateType.BUFFERING;
   };
 
   private _handleMediaLoaded = () => {
@@ -222,7 +262,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   // This is where the magic happens
   private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
     this._broadcastState = receivedState;
-    this.logger.info('Received isLive with value: ' + receivedState);
+    this.logger.debug('Received isLive with value: ' + receivedState);
     if (receivedState === LiveBroadcastStates.Error && this.player.paused) {
       this._manageOfflineSlate(OfflineTypes.Error);
       return;
@@ -297,8 +337,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   };
 
   // The function calls 'isLive' api and then repeats the call every X seconds (10 by default)
-  public updateLiveStatus = () => {
-    this.logger.info(`Calling LiveStreamGetDetailsAction ${this.config.checkLiveWithKs ? 'with' : 'without'} KS`);
+  public updateLiveStatus = (reloadMedia = false) => {
+    this.logger.debug(`Calling LiveStreamGetDetailsAction ${this.config.checkLiveWithKs ? 'with' : 'without'} KS`);
     const {id} = this.player.config.sources;
     const ks = this.config.checkLiveWithKs ? this.player.config.session?.ks : null;
     if (this._activeRequest) {
@@ -321,7 +361,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             return;
           }
           const {primaryStreamStatus, secondaryStreamStatus, broadcastStatus} = streamDetails;
-          this.logger.info(
+          this.logger.debug(
             `LiveStreamGetDetails received:
               Primary stream: ${primaryStreamStatus};
               Secondary stream: ${secondaryStreamStatus};
@@ -344,8 +384,13 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
           switch (broadcastStatus) {
             case KalturaLiveStreamBroadcastStatus.live:
-              this._updateLiveTag(LiveTagStates.Live);
-              this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+              if (reloadMedia && !this.player.paused && this._isBuffering()) {
+                this.logger.debug('Switch between primary/secondary streams by buffering timeout');
+                this._loadMedia();
+              } else {
+                this._updateLiveTag(LiveTagStates.Live);
+                this.handleLiveStatusReceived(LiveBroadcastStates.Live);
+              }
               break;
             case KalturaLiveStreamBroadcastStatus.preview:
               if (this.config.checkLiveWithKs) {
@@ -379,6 +424,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   reset(): void {
     this.player.attachMediaSource();
+    this._resetBufferingTimeout();
     this._resetTimeout();
     this.isMediaLive = false;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
