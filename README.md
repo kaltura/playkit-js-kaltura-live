@@ -97,6 +97,7 @@ Bump version: `yarn release`;<br/>
 "kaltura-live" = {
     checkLiveWithKs: boolean,
     isLiveInterval: number,
+    bufferingFailoverTimeout: number,
     preOfflineSlateUrl: string, 
     postOfflineSlateUrl: string,
     offlineSlateWithoutText: boolean
@@ -133,7 +134,15 @@ One can also choose to hide the text message on the slate.
 
 ##
 
-> ### config.forceChaptersThumb
+> ### config.isLiveInterval
+>
+> ##### Type: `number`
+>
+> ##### Default: `10`
+
+##
+
+> ### config.bufferingFailoverTimeout
 >
 > ##### Type: `number`
 >
