@@ -1,0 +1,22 @@
+## Canary CI/CD
+name: Canary
+run-name: Canary
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    uses: kaltura/playkit-js-common/.github/workflows/cypress.yml@master
+    secrets: inherit
+
+  canary:
+    if: ${{ github.actor != 'PlaykitJs-Bot' }}
+    uses: kaltura/playkit-js-common/.github/workflows/canary_plugin.yaml@master
+    secrets: inherit
+    with:
+      schema-type: "playerV3OvpVersions"
+      node-version: "18.x"
+      tests-yarn-run-to-execute: 'build'
