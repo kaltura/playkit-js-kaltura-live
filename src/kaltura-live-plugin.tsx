@@ -54,6 +54,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _mediaDetached = false;
   private _liveTag = createRef<LiveTag>();
   private _offlineSlate = createRef<OfflineSlate>();
+  private _preOfflinePlayer: any = null;
+  private _postOfflinePlayer: any = null;
 
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
@@ -67,6 +69,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player = player;
     this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
 
+    this._makeBackgroundPlayerPlayers();
     this._addLiveTag();
     this._addOfflineSlateToPlayerArea();
   }
@@ -99,6 +102,46 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
         }
       }
     });
+  }
+
+  private _makeBackgroundPlayerPlayers() {
+    const {preOfflineEntryId, postOfflineEntryId} = this.config;
+    this._preOfflinePlayer = preOfflineEntryId ? this._createBackgroundPlayer(preOfflineEntryId, 'pre-broadcast') : undefined;
+    this._postOfflinePlayer = postOfflineEntryId ? this._createBackgroundPlayer(postOfflineEntryId, 'post-broadcast') : undefined;
+  }
+
+  private _createBackgroundPlayer(entryId: string, tag: string) {
+    const targetId = `${tag}-${entryId}`;
+    let playerPlaceholder = document.createElement('div');
+    playerPlaceholder.setAttribute('id', targetId);
+    playerPlaceholder.hidden = true;
+    document.body.appendChild(playerPlaceholder);
+    const backgroundPlayerConfig = {
+      targetId,
+      disableUserCache: true,
+      playback: {
+        // muted: true,
+        autoplay: false,
+        loop: true
+      },
+      ui: {
+        disable: true
+      },
+      provider: {
+        ...this.player.config.provider,
+        ignoreServerConfig: true
+      }
+    };
+    const backgroundPlayer = (window as any).KalturaPlayer.setup(backgroundPlayerConfig);
+    backgroundPlayer.loadMedia({entryId, ks: this.player.config.session?.isAnonymous ? '' : this.player.config.session?.ks});
+    return backgroundPlayer;
+  }
+
+  private _removeBackgroundPlayer(id: string) {
+    const playerPlaceholderEl = document.getElementById(id);
+    if (playerPlaceholderEl) {
+      document.body.removeChild(playerPlaceholderEl);
+    }
   }
 
   private _activatePlugin = () => {
@@ -174,7 +217,9 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
             offlineSlateUrls={{
               preOfflineSlateUrl: this.config.preOfflineSlateUrl,
               postOfflineSlateUrl: this.config.postOfflineSlateUrl,
-              poster: this.player.poster
+              poster: this.player.poster,
+              preOfflinePlayer: this._preOfflinePlayer,
+              postOfflinePlayer: this._postOfflinePlayer
             }}
           />
         );
@@ -423,6 +468,16 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   reset(): void {
+    if (this._preOfflinePlayer) {
+      this._preOfflinePlayer.destroy();
+      this._removeBackgroundPlayer(this._preOfflinePlayer.config?.targetId);
+      this._preOfflinePlayer = null;
+    }
+    if (this._postOfflinePlayer) {
+      this._postOfflinePlayer.destroy();
+      this._removeBackgroundPlayer(this._postOfflinePlayer.config?.targetId);
+      this._postOfflinePlayer = null;
+    }
     this.player.attachMediaSource();
     this._resetBufferingTimeout();
     this._resetTimeout();
