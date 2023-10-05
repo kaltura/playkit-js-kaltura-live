@@ -100,6 +100,8 @@ Bump version: `yarn release`;<br/>
     bufferingFailoverTimeout: number,
     preOfflineSlateUrl: string, 
     postOfflineSlateUrl: string,
+    preOfflineEntryId: string, 
+    postOfflineEntryId: string,
     offlineSlateWithoutText: boolean
 }
 ```
@@ -112,6 +114,16 @@ By default the player will use the live-entry thumbnail as the background to the
 "kaltura-live" = {
     preOfflineSlateUrl: string, 
     postOfflineSlateUrl: string
+}
+```
+
+Kaltura entries can be used as background of pre and post broadcast slates (media plays in loop). Note that `pre/postOfflineEntryId` has more priority than `pre/postOfflineSlateUrl` properties if both provided.
+
+```js
+//Plugin params to configure slates background image
+"kaltura-live" = {
+    preOfflineEntryId: string, 
+    postOfflineEntryId: string
 }
 ```
 
@@ -159,6 +171,22 @@ One can also choose to hide the text message on the slate.
 ##
 
 > ### config.postOfflineSlateUrl
+>
+> ##### Type: `string`
+>
+> ##### Default: `undefined`
+
+##
+
+> ### config.preOfflineEntryId
+>
+> ##### Type: `string`
+>
+> ##### Default: `undefined`
+
+##
+
+> ### config.postOfflineEntryId
 >
 > ##### Type: `string`
 >
