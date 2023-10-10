@@ -22,7 +22,6 @@ export interface OfflineProps {
 
 interface OfflineState {
   imageSrc?: string;
-  backgroundPlayer?: any;
 }
 
 const translates = {
@@ -34,12 +33,14 @@ const translates = {
 @withText(translates)
 export class Offline extends Component<OfflineProps, OfflineState> {
   private _videoContainerRef = createRef<HTMLDivElement>();
+  private _backgroundPlayer: any;
+  private _originalVideoElementParent?: HTMLDivElement;
 
   constructor({postBroadcast, offlineSlateUrls}: OfflineProps) {
     super();
+    this._backgroundPlayer = postBroadcast ? offlineSlateUrls?.postOfflinePlayer : offlineSlateUrls?.preOfflinePlayer;
     this.state = {
-      imageSrc: (postBroadcast ? offlineSlateUrls.postOfflineSlateUrl : offlineSlateUrls.preOfflineSlateUrl) || offlineSlateUrls.poster,
-      backgroundPlayer: postBroadcast ? offlineSlateUrls?.preOfflinePlayer : offlineSlateUrls?.postOfflinePlayer
+      imageSrc: (postBroadcast ? offlineSlateUrls.postOfflineSlateUrl : offlineSlateUrls.preOfflineSlateUrl) || offlineSlateUrls.poster
     };
   }
 
@@ -51,17 +52,19 @@ export class Offline extends Component<OfflineProps, OfflineState> {
   }
 
   componentDidMount(): void {
-    if (this._videoContainerRef && this.state.backgroundPlayer) {
-      const videoElement = this.state.backgroundPlayer.getVideoElement();
+    if (this._videoContainerRef) {
+      const videoElement = this._backgroundPlayer.getVideoElement();
+      this._originalVideoElementParent = videoElement.parentElement;
       videoElement.tabIndex = -1;
       this._videoContainerRef.current!.prepend(videoElement);
-      this.state.backgroundPlayer.play();
+      this._backgroundPlayer.play();
     }
   }
 
   componentWillUnmount(): void {
-    if (this.state.backgroundPlayer) {
-      this.state.backgroundPlayer.pause();
+    if (this._backgroundPlayer) {
+      this._backgroundPlayer.pause();
+      this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
     }
   }
 

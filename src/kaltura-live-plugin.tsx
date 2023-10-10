@@ -69,7 +69,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.player = player;
     this.eventManager.listen(this.player, this.player.Event.SOURCE_SELECTED, this._activatePlugin);
 
-    this._makeBackgroundPlayerPlayers();
+    this._makeBackgroundPlayers();
     this._addLiveTag();
     this._addOfflineSlateToPlayerArea();
   }
@@ -104,7 +104,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     });
   }
 
-  private _makeBackgroundPlayerPlayers() {
+  private _makeBackgroundPlayers() {
     const {preOfflineEntryId, postOfflineEntryId} = this.config;
     this._preOfflinePlayer = preOfflineEntryId ? this._createBackgroundPlayer(preOfflineEntryId, 'pre-broadcast') : undefined;
     this._postOfflinePlayer = postOfflineEntryId ? this._createBackgroundPlayer(postOfflineEntryId, 'post-broadcast') : undefined;
@@ -120,7 +120,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       targetId,
       disableUserCache: true,
       playback: {
-        // muted: true,
+        muted: true,
         autoplay: false,
         loop: true
       },
@@ -468,16 +468,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   reset(): void {
-    if (this._preOfflinePlayer) {
-      this._preOfflinePlayer.destroy();
-      this._removeBackgroundPlayer(this._preOfflinePlayer.config?.targetId);
-      this._preOfflinePlayer = null;
-    }
-    if (this._postOfflinePlayer) {
-      this._postOfflinePlayer.destroy();
-      this._removeBackgroundPlayer(this._postOfflinePlayer.config?.targetId);
-      this._postOfflinePlayer = null;
-    }
     this.player.attachMediaSource();
     this._resetBufferingTimeout();
     this._resetTimeout();
@@ -489,6 +479,16 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   destroy(): void {
     this.reset();
+    if (this._preOfflinePlayer) {
+      this._preOfflinePlayer.destroy();
+      this._removeBackgroundPlayer(this._preOfflinePlayer.config?.targetId);
+      this._preOfflinePlayer = null;
+    }
+    if (this._postOfflinePlayer) {
+      this._postOfflinePlayer.destroy();
+      this._removeBackgroundPlayer(this._postOfflinePlayer.config?.targetId);
+      this._postOfflinePlayer = null;
+    }
     this.eventManager.destroy();
   }
 }
