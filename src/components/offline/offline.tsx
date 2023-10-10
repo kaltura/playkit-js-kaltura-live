@@ -52,7 +52,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
   }
 
   componentDidMount(): void {
-    if (this._videoContainerRef) {
+    if (this._videoContainerRef && this._backgroundPlayer) {
       const videoElement = this._backgroundPlayer.getVideoElement();
       this._originalVideoElementParent = videoElement.parentElement;
       videoElement.tabIndex = -1;

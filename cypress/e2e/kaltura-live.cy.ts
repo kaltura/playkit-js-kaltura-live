@@ -92,5 +92,24 @@ describe('Kaltura-live plugin', () => {
         cy.get('.playkit-error-overlay').should('exist');
       });
     });
+    it('should render player as pre-broadcast slate background', () => {
+      mockKalturaBe('live.json', 'offline-stream.json');
+      loadPlayer({preOfflineEntryId: '0_wifqaipd'}).then(() => {
+        cy.get('#pre-broadcast-0_wifqaipd').should('exist');
+        cy.get('#post-broadcast-0_wifqaipd').should('not.exist');
+        cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
+        cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
+      });
+    });
+    it('should render custom image url as post-broadcast slate background', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer({postOfflineEntryId: '0_wifqaipd'}, {autoplay: true}).then(kalturaPlayer => {
+        cy.get('#pre-broadcast-0_wifqaipd').should('not.exist');
+        cy.get('#post-broadcast-0_wifqaipd').should('exist');
+        kalturaPlayer.currentTime = 60;
+        cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
+        cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
+      });
+    });
   });
 });
