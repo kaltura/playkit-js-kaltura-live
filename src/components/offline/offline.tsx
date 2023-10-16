@@ -1,4 +1,4 @@
-import {h, Component, Fragment} from 'preact';
+import {h, Component, Fragment, createRef} from 'preact';
 import * as styles from './offline.scss';
 
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
@@ -7,6 +7,8 @@ export interface OfflineSlateUrls {
   preOfflineSlateUrl?: string;
   postOfflineSlateUrl?: string;
   poster?: string;
+  preOfflinePlayer?: any;
+  postOfflinePlayer?: any;
 }
 
 export interface OfflineProps {
@@ -30,8 +32,13 @@ const translates = {
 
 @withText(translates)
 export class Offline extends Component<OfflineProps, OfflineState> {
+  private _videoContainerRef = createRef<HTMLDivElement>();
+  private _backgroundPlayer: any;
+  private _originalVideoElementParent?: HTMLDivElement;
+
   constructor({postBroadcast, offlineSlateUrls}: OfflineProps) {
     super();
+    this._backgroundPlayer = postBroadcast ? offlineSlateUrls?.postOfflinePlayer : offlineSlateUrls?.preOfflinePlayer;
     this.state = {
       imageSrc: (postBroadcast ? offlineSlateUrls.postOfflineSlateUrl : offlineSlateUrls.preOfflineSlateUrl) || offlineSlateUrls.poster
     };
@@ -44,6 +51,23 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
+  componentDidMount(): void {
+    if (this._videoContainerRef && this._backgroundPlayer) {
+      const videoElement = this._backgroundPlayer.getVideoElement();
+      this._originalVideoElementParent = videoElement.parentElement;
+      videoElement.tabIndex = -1;
+      this._videoContainerRef.current!.prepend(videoElement);
+      this._backgroundPlayer.play();
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this._backgroundPlayer) {
+      this._backgroundPlayer.pause();
+      this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
+    }
+  }
+
   private _handleImageError = (): void => {
     const {poster} = this.props.offlineSlateUrls;
     if (poster && this.state.imageSrc !== poster) {
@@ -53,16 +77,27 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     }
   };
 
+  private _renderBackground = () => {
+    const {postBroadcast, offlineSlateUrls} = this.props;
+    const {preOfflinePlayer, postOfflinePlayer} = offlineSlateUrls;
+    if ((!postBroadcast && preOfflinePlayer) || (postBroadcast && postOfflinePlayer)) {
+      return <div ref={this._videoContainerRef} className={styles.videoContainer} data-testid="kaltura-live_videoContainer" />;
+    }
+    return (
+      <img
+        src={this.state.imageSrc}
+        className={styles.slateBackgroundImage}
+        onError={this._handleImageError}
+        alt={this.title}
+        data-testid="kaltura-live_offlineImage"
+      />
+    );
+  };
+
   render() {
     return (
       <Fragment>
-        <img
-          src={this.state.imageSrc}
-          className={styles.slateBackgroundImage}
-          onError={this._handleImageError}
-          alt={this.title}
-          data-testid="kaltura-live_offlineImage"
-        />
+        {this._renderBackground()}
         {this.props.hideText ? null : (
           <div className={styles.offlineWrapper} role="banner" data-testid="kaltura-live_offlineSlate">
             <div role="contentinfo" className={styles.offlineContent}>
