@@ -1,7 +1,7 @@
 import {h, Component} from 'preact';
 import * as styles from './live-tag.scss';
 import {LiveTagStates} from './live-tag';
-import {A11yWrapper} from '@playkit-js/common';
+import {A11yWrapper} from '@playkit-js/common/dist/hoc/a11y-wrapper';
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
 
 export interface props {

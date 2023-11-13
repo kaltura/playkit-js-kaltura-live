@@ -1,4 +1,5 @@
 import {h, Component, Fragment, createRef} from 'preact';
+import {MuteButton} from '../mute-button';
 import * as styles from './offline.scss';
 
 const {withText, Text} = KalturaPlayer.ui.preacti18n;
@@ -81,7 +82,12 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     const {postBroadcast, offlineSlateUrls} = this.props;
     const {preOfflinePlayer, postOfflinePlayer} = offlineSlateUrls;
     if ((!postBroadcast && preOfflinePlayer) || (postBroadcast && postOfflinePlayer)) {
-      return <div ref={this._videoContainerRef} className={styles.videoContainer} data-testid="kaltura-live_videoContainer" />;
+      return (
+        <Fragment>
+          <div ref={this._videoContainerRef} className={styles.videoContainer} data-testid="kaltura-live_videoContainer" />
+          <MuteButton onClick={() => {}} muted={true} />
+        </Fragment>
+      );
     }
     return (
       <img

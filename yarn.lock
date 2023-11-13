@@ -130,10 +130,10 @@
   resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
   integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
 
-"@playkit-js/common@^1.2.13":
-  version "1.2.13"
-  resolved "https://registry.yarnpkg.com/@playkit-js/common/-/common-1.2.13.tgz#ddf8a82d43b40b355b8e8b85304be503a614cf23"
-  integrity sha512-vlITke+xm4ijYWnfCp+fwEokHF+9Mu1rOF16OLGzh1CHMa5a5xeqHaY3CMjZE+wGBL9Cw7MODhOCtb50CHhuQg==
+"@playkit-js/common@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@playkit-js/common/-/common-1.5.0.tgz#15995b26cef4c5de7f7f6aa37131f383c144617a"
+  integrity sha512-cJc5cl3QUxaw2FgjyW7fVJiG1b+sYrsiki/IynChKcJE5E2AKS/AXtLnUuf7sOEDrl1edNSqPIWDdMvbXgE+Cw==
   dependencies:
     "@playkit-js/playkit-js-ui" "^0.77.1"
     classnames "^2.3.2"

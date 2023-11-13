@@ -18,6 +18,7 @@
 }
 
 :global(.playkit-player.has-live-plugin-overlay) {
+  cursor: default;
   :global(.overlay-portal) {
     z-index: $slate-zindex - 1;
   }
