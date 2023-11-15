@@ -13,7 +13,7 @@ export const MuteButton = (props: MuteButtonProps) => {
   return (
     <div className={styles.muteButtonContainer}>
       <Button testId="kaltura-live_mute-button" type={ButtonType.translucent} onClick={props.onClick} icon={props.muted ? 'volumeMute' : 'volumeOn'}>
-        <Text id={props.muted ? 'kalturaLive.unmute' : 'kalturaLive.mute'}>{props.muted ? 'Unmute' : 'Mute'}</Text>
+        <Text id={props.muted ? 'controls.unmute' : 'controls.mute'}>{props.muted ? 'Unmute' : 'Mute'}</Text>
       </Button>
     </div>
   );
