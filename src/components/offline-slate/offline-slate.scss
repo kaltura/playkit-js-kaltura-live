@@ -1,6 +1,7 @@
 @import '../../variables.scss';
 
 .slate-wrapper {
+  cursor: default;
   position: absolute;
   top: 0;
   right: 0;
@@ -18,7 +19,6 @@
 }
 
 :global(.playkit-player.has-live-plugin-overlay) {
-  cursor: default;
   :global(.overlay-portal) {
     z-index: $slate-zindex - 1;
   }

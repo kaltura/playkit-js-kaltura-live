@@ -1,8 +1,12 @@
 import {h, Component, Fragment, createRef} from 'preact';
+//@ts-ignore
+import {ui} from '@playkit-js/kaltura-player-js';
 import {MuteButton} from '../mute-button';
 import * as styles from './offline.scss';
 
-const {withText, Text} = KalturaPlayer.ui.preacti18n;
+//@ts-ignore
+const {withPlayer} = ui.Components;
+const {withText, Text} = ui.preacti18n;
 
 export interface OfflineSlateUrls {
   preOfflineSlateUrl?: string;
@@ -19,6 +23,7 @@ export interface OfflineProps {
   postBroadcast: boolean;
   hideText: boolean;
   offlineSlateUrls: OfflineSlateUrls;
+  player?: any;
 }
 
 interface OfflineState {
@@ -31,6 +36,7 @@ const translates = {
   noLongerLive: <Text id="kalturaLive.no_longer_live">Broadcast is no longer live</Text>
 };
 
+@withPlayer
 @withText(translates)
 export class Offline extends Component<OfflineProps, OfflineState> {
   private _videoContainerRef = createRef<HTMLDivElement>();
@@ -54,10 +60,13 @@ export class Offline extends Component<OfflineProps, OfflineState> {
 
   componentDidMount(): void {
     if (this._videoContainerRef && this._backgroundPlayer) {
+      const {player} = this.props;
       const videoElement = this._backgroundPlayer.getVideoElement();
       this._originalVideoElementParent = videoElement.parentElement;
       videoElement.tabIndex = -1;
       this._videoContainerRef.current!.prepend(videoElement);
+      this._backgroundPlayer.volume = player.volume;
+      this._backgroundPlayer.muted = player.muted;
       this._backgroundPlayer.play();
     }
   }
@@ -68,6 +77,12 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
     }
   }
+
+  private _handleMute = (): void => {
+    this._backgroundPlayer.muted = !this._backgroundPlayer.muted;
+    this.props.player.muted = this._backgroundPlayer.muted;
+    this.forceUpdate();
+  };
 
   private _handleImageError = (): void => {
     const {poster} = this.props.offlineSlateUrls;
@@ -85,7 +100,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       return (
         <Fragment>
           <div ref={this._videoContainerRef} className={styles.videoContainer} data-testid="kaltura-live_videoContainer" />
-          <MuteButton onClick={() => {}} muted={true} />
+          <MuteButton onClick={this._handleMute} muted={this.props.player.muted} />
         </Fragment>
       );
     }
