@@ -18,6 +18,11 @@ interface LivePluginConfig {
   offlineSlateWithoutText: boolean;
 }
 
+enum PrePostBrodcastTags {
+  PreBroadcast = 'pre-broadcast',
+  PostBroadcast = 'post-broadcast'
+}
+
 export enum LiveBroadcastStates {
   Unknown = 'Unknown',
   Error = 'Error',
@@ -106,12 +111,12 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
 
   private _makeBackgroundPlayers() {
     const {preOfflineEntryId, postOfflineEntryId} = this.config;
-    this._preOfflinePlayer = preOfflineEntryId ? this._createBackgroundPlayer(preOfflineEntryId, 'pre-broadcast') : undefined;
-    this._postOfflinePlayer = postOfflineEntryId ? this._createBackgroundPlayer(postOfflineEntryId, 'post-broadcast') : undefined;
+    this._preOfflinePlayer = preOfflineEntryId ? this._createBackgroundPlayer(preOfflineEntryId, PrePostBrodcastTags.PreBroadcast) : undefined;
+    this._postOfflinePlayer = postOfflineEntryId ? this._createBackgroundPlayer(postOfflineEntryId, PrePostBrodcastTags.PostBroadcast) : undefined;
   }
 
   private _createBackgroundPlayer(entryId: string, tag: string) {
-    const targetId = `${tag}-${entryId}`;
+    const targetId = `${this.player.config?.targetId}-${tag}`;
     let playerPlaceholder = document.createElement('div');
     playerPlaceholder.setAttribute('id', targetId);
     playerPlaceholder.hidden = true;
@@ -120,7 +125,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       targetId,
       disableUserCache: true,
       playback: {
-        muted: true,
         autoplay: false,
         loop: true
       },

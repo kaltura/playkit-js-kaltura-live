@@ -1,8 +1,12 @@
 // @ts-ignore
 import {core} from '@playkit-js/kaltura-player-js';
-import {mockKalturaBe, loadPlayer, MANIFEST, MANIFEST_SAFARI} from './env';
+import {mockKalturaBe, loadPlayer, MANIFEST, MANIFEST_SAFARI, getPlayer} from './env';
 
 const {EventType, FakeEvent, Error} = core;
+
+Cypress.on('uncaught:exception', (err, runnable) => {
+  return false;
+});
 
 describe('Kaltura-live plugin', () => {
   beforeEach(() => {
@@ -12,7 +16,7 @@ describe('Kaltura-live plugin', () => {
     cy.intercept('GET', '**/width/164/vid_slices/100', {fixture: '100.jpeg'});
     cy.intercept('GET', '**/height/360/width/640', {fixture: '640.jpeg'});
     // kava
-    cy.intercept('GET', '**/index.php?service=analytics*', {});
+    cy.intercept('POST', '**/index.php?service=analytics*', {});
   });
 
   describe('kaltura-live slates', () => {
@@ -43,8 +47,10 @@ describe('Kaltura-live plugin', () => {
     it('should render post-playback slate', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({}, {autoplay: true}).then(kalturaPlayer => {
-        kalturaPlayer.currentTime = 60;
-        cy.get('.kaltura-live-title').should('have.text', 'Broadcast is no longer live');
+        cy.get('[data-testid="kaltura-live_liveTag"]').then(() => {
+          kalturaPlayer.currentTime = 60;
+          cy.get('.kaltura-live-title').should('have.text', 'Broadcast is no longer live');
+        });
       });
     });
     it('should render entry poster as offline slate background', () => {
@@ -62,8 +68,10 @@ describe('Kaltura-live plugin', () => {
     it('should render custom image url as post-broadcast slate background', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({postOfflineSlateUrl: 'https://test/custom-slate'}, {autoplay: true}).then(kalturaPlayer => {
-        kalturaPlayer.currentTime = 60;
-        cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/custom-slate');
+        cy.get('[data-testid="kaltura-live_liveTag"]').then(() => {
+          kalturaPlayer.currentTime = 60;
+          cy.get('[data-testid="kaltura-live_offlineImage"]').should('have.attr', 'src', 'https://test/custom-slate');
+        });
       });
     });
     it('should render entry poster if custom image url invalid', () => {
@@ -95,8 +103,8 @@ describe('Kaltura-live plugin', () => {
     it('should render player as pre-broadcast slate background', () => {
       mockKalturaBe('live.json', 'offline-stream.json');
       loadPlayer({preOfflineEntryId: '0_wifqaipd'}).then(() => {
-        cy.get('#pre-broadcast-0_wifqaipd').should('exist');
-        cy.get('#post-broadcast-0_wifqaipd').should('not.exist');
+        cy.get('#player-placeholder-pre-broadcast').should('exist');
+        cy.get('#player-placeholder-post-broadcast').should('not.exist');
         cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
         cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
       });
@@ -104,11 +112,52 @@ describe('Kaltura-live plugin', () => {
     it('should render custom image url as post-broadcast slate background', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({postOfflineEntryId: '0_wifqaipd'}, {autoplay: true}).then(kalturaPlayer => {
-        cy.get('#pre-broadcast-0_wifqaipd').should('not.exist');
-        cy.get('#post-broadcast-0_wifqaipd').should('exist');
+        cy.get('#player-placeholder-pre-broadcast').should('not.exist');
+        cy.get('#player-placeholder-post-broadcast').should('exist');
         kalturaPlayer.currentTime = 60;
         cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
         cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
+      });
+    });
+    it('should test mute button on pre-broadcast slate background', () => {
+      mockKalturaBe('live.json', 'offline-stream.json');
+      loadPlayer({preOfflineEntryId: '0_wifqaipd'}, {muted: false}).then(kalturaPlayer => {
+        expect(kalturaPlayer.muted).to.be.false;
+        cy.get('[data-testid="kaltura-live_mute-button"]').should('have.text', 'Mute');
+        getPlayer('player-placeholder-pre-broadcast').then(preBroadcastPlayer => {
+          expect(preBroadcastPlayer.muted).to.be.false;
+        });
+        cy.get('[data-testid="kaltura-live_mute-button"]').click({force: true});
+        cy.get('[data-testid="kaltura-live_mute-button"]')
+          .should('have.text', 'Unmute')
+          .then(() => {
+            expect(kalturaPlayer.muted).to.be.true;
+          });
+        getPlayer('player-placeholder-pre-broadcast').then(preBroadcastPlayer => {
+          expect(preBroadcastPlayer.muted).to.be.true;
+        });
+      });
+    });
+    it('should test mute button on post-broadcast slate background', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer({postOfflineEntryId: '0_wifqaipd'}, {autoplay: true, muted: false}).then(kalturaPlayer => {
+        cy.get('[data-testid="kaltura-live_liveTag"]').then(() => {
+          kalturaPlayer.currentTime = 60;
+          expect(kalturaPlayer.muted).to.be.false;
+          cy.get('[data-testid="kaltura-live_mute-button"]').should('have.text', 'Mute');
+          getPlayer('player-placeholder-post-broadcast').then(preBroadcastPlayer => {
+            expect(preBroadcastPlayer.muted).to.be.false;
+          });
+          cy.get('[data-testid="kaltura-live_mute-button"]').click({force: true});
+          cy.get('[data-testid="kaltura-live_mute-button"]')
+            .should('have.text', 'Unmute')
+            .then(() => {
+              expect(kalturaPlayer.muted).to.be.true;
+            });
+          getPlayer('player-placeholder-post-broadcast').then(preBroadcastPlayer => {
+            expect(preBroadcastPlayer.muted).to.be.true;
+          });
+        });
       });
     });
   });

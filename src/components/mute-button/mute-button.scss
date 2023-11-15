@@ -1,0 +1,8 @@
+@import '../../variables.scss';
+
+.mute-button-container {
+  z-index: $slate-zindex;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
