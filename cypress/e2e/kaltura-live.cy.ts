@@ -103,8 +103,8 @@ describe('Kaltura-live plugin', () => {
     it('should render player as pre-broadcast slate background', () => {
       mockKalturaBe('live.json', 'offline-stream.json');
       loadPlayer({preOfflineEntryId: '0_wifqaipd'}).then(() => {
-        cy.get('#player-placeholder-pre-broadcast').should('exist');
-        cy.get('#player-placeholder-post-broadcast').should('not.exist');
+        cy.get('#pre-broadcast-player-placeholder').should('exist');
+        cy.get('#post-broadcast-player-placeholder').should('not.exist');
         cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
         cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
       });
@@ -112,8 +112,8 @@ describe('Kaltura-live plugin', () => {
     it('should render custom image url as post-broadcast slate background', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({postOfflineEntryId: '0_wifqaipd'}, {autoplay: true}).then(kalturaPlayer => {
-        cy.get('#player-placeholder-pre-broadcast').should('not.exist');
-        cy.get('#player-placeholder-post-broadcast').should('exist');
+        cy.get('#pre-broadcast-player-placeholder').should('not.exist');
+        cy.get('#post-broadcast-player-placeholder').should('exist');
         kalturaPlayer.currentTime = 60;
         cy.get('[data-testid="kaltura-live_videoContainer"]').should('exist');
         cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
@@ -124,7 +124,7 @@ describe('Kaltura-live plugin', () => {
       loadPlayer({preOfflineEntryId: '0_wifqaipd'}, {muted: false}).then(kalturaPlayer => {
         expect(kalturaPlayer.muted).to.be.false;
         cy.get('[data-testid="kaltura-live_mute-button"]').should('have.text', 'Mute');
-        getPlayer('player-placeholder-pre-broadcast').then(preBroadcastPlayer => {
+        getPlayer('pre-broadcast-player-placeholder').then(preBroadcastPlayer => {
           expect(preBroadcastPlayer.muted).to.be.false;
         });
         cy.get('[data-testid="kaltura-live_mute-button"]').click({force: true});
@@ -133,7 +133,7 @@ describe('Kaltura-live plugin', () => {
           .then(() => {
             expect(kalturaPlayer.muted).to.be.true;
           });
-        getPlayer('player-placeholder-pre-broadcast').then(preBroadcastPlayer => {
+        getPlayer('pre-broadcast-player-placeholder').then(preBroadcastPlayer => {
           expect(preBroadcastPlayer.muted).to.be.true;
         });
       });
@@ -145,7 +145,7 @@ describe('Kaltura-live plugin', () => {
           kalturaPlayer.currentTime = 60;
           expect(kalturaPlayer.muted).to.be.false;
           cy.get('[data-testid="kaltura-live_mute-button"]').should('have.text', 'Mute');
-          getPlayer('player-placeholder-post-broadcast').then(preBroadcastPlayer => {
+          getPlayer('post-broadcast-player-placeholder').then(preBroadcastPlayer => {
             expect(preBroadcastPlayer.muted).to.be.false;
           });
           cy.get('[data-testid="kaltura-live_mute-button"]').click({force: true});
@@ -154,7 +154,7 @@ describe('Kaltura-live plugin', () => {
             .then(() => {
               expect(kalturaPlayer.muted).to.be.true;
             });
-          getPlayer('player-placeholder-post-broadcast').then(preBroadcastPlayer => {
+          getPlayer('post-broadcast-player-placeholder').then(preBroadcastPlayer => {
             expect(preBroadcastPlayer.muted).to.be.true;
           });
         });
