@@ -1,6 +1,6 @@
 import {h, Component, Fragment, createRef} from 'preact';
 //@ts-ignore
-import {ui} from '@playkit-js/kaltura-player-js';
+import {ui, core} from '@playkit-js/kaltura-player-js';
 import {MuteButton} from '../mute-button';
 import * as styles from './offline.scss';
 
@@ -93,6 +93,13 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     }
   };
 
+  private _renderMuteButton = () => {
+    if (this._backgroundPlayer?.sources?.type === core.MediaType.IMAGE) {
+      return null;
+    }
+    return <MuteButton onClick={this._handleMute} muted={this.props.player.muted} />;
+  };
+
   private _renderBackground = () => {
     const {postBroadcast, offlineSlateUrls} = this.props;
     const {preOfflinePlayer, postOfflinePlayer} = offlineSlateUrls;
@@ -100,7 +107,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       return (
         <Fragment>
           <div ref={this._videoContainerRef} className={styles.videoContainer} data-testid="kaltura-live_videoContainer" />
-          <MuteButton onClick={this._handleMute} muted={this.props.player.muted} />
+          {this._renderMuteButton()}
         </Fragment>
       );
     }
