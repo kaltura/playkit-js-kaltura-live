@@ -485,13 +485,15 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   destroy(): void {
     this.reset();
     if (this._preOfflinePlayer) {
+      const targetId = this._preOfflinePlayer.config?.targetId;
       this._preOfflinePlayer.destroy();
-      this._removeBackgroundPlayer(this._preOfflinePlayer.config?.targetId);
+      this._removeBackgroundPlayer(targetId);
       this._preOfflinePlayer = null;
     }
     if (this._postOfflinePlayer) {
+      const targetId = this._postOfflinePlayer.config?.targetId;
       this._postOfflinePlayer.destroy();
-      this._removeBackgroundPlayer(this._postOfflinePlayer.config?.targetId);
+      this._removeBackgroundPlayer(targetId);
       this._postOfflinePlayer = null;
     }
     this.eventManager.destroy();

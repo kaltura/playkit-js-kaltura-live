@@ -109,6 +109,19 @@ describe('Kaltura-live plugin', () => {
         cy.get('[data-testid="kaltura-live_offlineImage"]').should('not.exist');
       });
     });
+    it('should remove pre and post broadcast players', () => {
+      mockKalturaBe('live.json', 'offline-stream.json');
+      loadPlayer({preOfflineEntryId: '0_wifqaipd', postOfflineEntryId: '0_wifqaipd'}).then(kalturaPlayer => {
+        cy.get('#pre-broadcast-player-placeholder').should('exist');
+        cy.get('#post-broadcast-player-placeholder')
+          .should('exist')
+          .then(() => {
+            kalturaPlayer.destroy();
+            cy.get('#pre-broadcast-player-placeholder').should('not.exist');
+            cy.get('#post-broadcast-player-placeholder').should('not.exist');
+          });
+      });
+    });
     it('should render custom image url as post-broadcast slate background', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({postOfflineEntryId: '0_wifqaipd'}, {autoplay: true}).then(kalturaPlayer => {
