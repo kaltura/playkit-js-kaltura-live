@@ -116,7 +116,8 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   private _createBackgroundPlayer(entryId: string, tag: string) {
-    const targetId = `${this.player.config?.targetId}-${tag}`;
+    // v7 Studio uses '[id^="pre(post)-broadcast"]' selector to clean DOM on player reloads
+    const targetId = `${tag}-${this.player.config?.targetId}`;
     let playerPlaceholder = document.createElement('div');
     playerPlaceholder.setAttribute('id', targetId);
     playerPlaceholder.hidden = true;
