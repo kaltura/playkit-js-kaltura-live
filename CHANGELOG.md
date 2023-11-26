@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.2.6 (2023-11-26)
+
+
+### Bug Fixes
+
+* **FEC-13493:** pre/post live entry| unmute/mute button appears for image entries (FEC-13487) ([#397](https://github.com/kaltura/playkit-js-kaltura-live/issues/397)) ([040ba34](https://github.com/kaltura/playkit-js-kaltura-live/commit/040ba343f6adacf5738a281e717261e174b3cf06))
+
 ### 3.2.5 (2023-10-22)
 
 ### 3.2.4 (2023-08-15)
