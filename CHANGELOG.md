@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.2.7 (2023-12-07)
+
+
+### Bug Fixes
+
+* **FEC-13537:** remove deprecated dash config ([#398](https://github.com/kaltura/playkit-js-kaltura-live/issues/398)) ([90413ac](https://github.com/kaltura/playkit-js-kaltura-live/commit/90413ace6654361bca2359a037087150f53d9008))
+
 ### 3.2.6 (2023-11-26)
 
 
