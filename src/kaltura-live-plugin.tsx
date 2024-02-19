@@ -370,7 +370,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
         break;
     }
     this.sidePanelsManager?.componentsRegistry?.forEach((plugin: any, key: number) => {
-      if (plugin.isActive) {
+      if (plugin.item.label !== 'Playlist' && plugin.isActive) {
         this.sidePanelsManager.deactivateItem(key);
       }
     });
