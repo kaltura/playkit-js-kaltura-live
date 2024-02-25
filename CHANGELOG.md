@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.2.8 (2024-02-25)
+
+
+### Bug Fixes
+
+* **SUP-41353:** Future live event in a playlist will remove the access to the side panel ([#399](https://github.com/kaltura/playkit-js-kaltura-live/issues/399)) ([9d651c4](https://github.com/kaltura/playkit-js-kaltura-live/commit/9d651c42f33d51cddcf15d3c1ae152c40e02b2f1))
+
 ### 3.2.7 (2023-12-07)
 
 
