@@ -44,6 +44,12 @@ describe('Kaltura-live plugin', () => {
         cy.get('[data-testid="kaltura-live_liveTag"]').should('exist').should('have.text', 'Live');
       });
     });
+    it('should add preview classname to seekbar', () => {
+      mockKalturaBe('live.json', 'preview-stream.json');
+      loadPlayer({checkLiveWithKs: true}).then(() => {
+        cy.get('.playkit-seek-bar.live-priview').should('exist');
+      });
+    });
     it('should render post-playback slate', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({}, {autoplay: true}).then(kalturaPlayer => {

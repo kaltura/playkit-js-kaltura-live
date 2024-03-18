@@ -1,0 +1,16 @@
+[
+  {
+    "partnerId": 1091,
+    "ks": "",
+    "userId": 0,
+    "objectType": "KalturaStartWidgetSessionResponse"
+  },
+  {
+    "primaryStreamStatus": 3,
+    "secondaryStreamStatus": 0,
+    "viewMode": 0,
+    "wasBroadcast": false,
+    "broadcastStatus": 2,
+    "objectType": "KalturaLiveStreamDetails"
+  }
+]
