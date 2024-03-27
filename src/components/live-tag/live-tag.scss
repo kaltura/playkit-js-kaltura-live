@@ -26,6 +26,6 @@
   }
 }
 
-:global(.playkit-seek-bar.playkit-live.live-priview .playkit-progress-bar .playkit-progress) {
+:global(.playkit-player .playkit-seek-bar.playkit-live.live-priview .playkit-progress-bar .playkit-progress) {
   background-color: $secondary-color;
 }
