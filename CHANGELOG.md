@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.2.9 (2024-03-31)
+
+
+### Bug Fixes
+
+* **FEC-13707:** fix selector for preview mode ([#401](https://github.com/kaltura/playkit-js-kaltura-live/issues/401)) ([cbaf931](https://github.com/kaltura/playkit-js-kaltura-live/commit/cbaf931b4d1be4260927436e658ea06e9a83a005))
+
 ### 3.2.8 (2024-02-25)
 
 
