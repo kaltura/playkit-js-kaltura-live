@@ -20,7 +20,7 @@ export class LiveViewersManager {
       label: 'kaltura-live-viewers',
       presets: ['Live'],
       container: 'BottomBarLeftControls',
-      get: () => <LiveViewers ref={this._liveViewersRef} liveViewers={0} />
+      get: () => <LiveViewers ref={this._liveViewersRef} />
     });
   };
 
