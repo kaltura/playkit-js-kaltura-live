@@ -2,7 +2,7 @@ import {GetLiveStatsLoader} from '../../providers/get-live-stats';
 import {h, createRef} from 'preact';
 import {LiveViewers} from './live-viewers';
 
-const API_CALL_TIMEOUT_MS = 10000;
+const API_CALL_INTERVAL_MS = 20000;
 
 export class LiveViewersManager {
   private _player: any;
@@ -26,7 +26,7 @@ export class LiveViewersManager {
 
   public initInterval = () => {
     this.resetInterval();
-    this._isLiveApiCallInterval = setInterval(this._updateLiveViewers, API_CALL_TIMEOUT_MS);
+    this._isLiveApiCallInterval = setInterval(this._updateLiveViewers, API_CALL_INTERVAL_MS);
   };
 
   public resetInterval = () => {
