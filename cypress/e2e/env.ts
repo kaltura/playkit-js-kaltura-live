@@ -74,6 +74,9 @@ export const mockKalturaBe = (baseEntryFixture: string, streamStateFixture: stri
       }
       return req.reply({fixture: streamStateFixture});
     }
+    if (checkRequest(req.body[2], 'livestream', 'getLiveStreamStats')) {
+      return req.reply({fixture: 'live-stream-stats.json'});
+    }
   });
   cy.intercept('GET', 'https://test/custom-slate', {fixture: 'custom-slate.jpeg'});
 };
