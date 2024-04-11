@@ -2,13 +2,10 @@ import {h, Component} from 'preact';
 import * as styles from './live-viewers.scss';
 import {LiveViewersIcon} from './live-viewers-icon';
 
-const {redux: {connect}} = KalturaPlayer.ui;
-
 interface LiveViewersState {
   liveViewers: string;
 }
 
-@connect(null, null, null, {forwardRef: true})
 export class LiveViewers extends Component<{}, LiveViewersState> {
   constructor() {
     super();
