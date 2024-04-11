@@ -12,7 +12,15 @@ export class LiveViewersManager {
   constructor(player: any) {
     this._player = player;
     this._addLiveViewers();
-    this.initInterval();
+  }
+
+  public loadMedia(): void {
+    if (this._player.isLive()) {
+      this.initInterval();
+    }
+    else {
+      this.resetInterval();
+    }
   }
 
   private _addLiveViewers = () => {

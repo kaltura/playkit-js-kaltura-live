@@ -110,6 +110,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
         }
       }
     });
+    this._liveViewersManager?.loadMedia();
   }
 
   private _makeBackgroundPlayers() {
