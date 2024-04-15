@@ -6,6 +6,7 @@ import {KalturaLiveEngineDecorator} from './decorator/live-decorator';
 import {OfflineSlate, OfflineTypes} from './components/offline-slate';
 import {LiveTag, LiveTagStates} from './components/live-tag';
 import {GetStreamDetailsLoader, KalturaLiveStreamBroadcastStatus} from './providers/get-stream-details-loader';
+import {LiveViewersManager} from './components/live-viewers';
 
 const {StateType} = core;
 
@@ -16,6 +17,7 @@ interface LivePluginConfig {
   preOfflineSlateUrl?: string;
   postOfflineSlateUrl?: string;
   offlineSlateWithoutText: boolean;
+  showLiveViewers: boolean;
 }
 
 enum PrePostBrodcastTags {
@@ -61,12 +63,14 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _offlineSlate = createRef<OfflineSlate>();
   private _preOfflinePlayer: any = null;
   private _postOfflinePlayer: any = null;
+  private _liveViewersManager: LiveViewersManager | null = null;
 
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
     isLiveInterval: 10,
     bufferingFailoverTimeout: 10,
-    offlineSlateWithoutText: false
+    offlineSlateWithoutText: false,
+    showLiveViewers: true
   };
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
@@ -77,6 +81,10 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._makeBackgroundPlayers();
     this._addLiveTag();
     this._addOfflineSlateToPlayerArea();
+
+    if (this.config.showLiveViewers) {
+      this._liveViewersManager = new LiveViewersManager(this.player);
+    }
   }
 
   getMiddlewareImpl(): any {
@@ -102,6 +110,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
         }
       }
     });
+    this._liveViewersManager?.loadMedia();
   }
 
   private _makeBackgroundPlayers() {
@@ -308,6 +317,12 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private handleLiveStatusReceived(receivedState: LiveBroadcastStates) {
     this._broadcastState = receivedState;
     this.logger.debug('Received isLive with value: ' + receivedState);
+
+    if (receivedState === LiveBroadcastStates.Error || receivedState === LiveBroadcastStates.Offline) {
+      // stop pinging the BE for live viewers if the stream is not live
+      this._liveViewersManager?.resetInterval();
+    }
+
     if (receivedState === LiveBroadcastStates.Error && this.player.paused) {
       this._manageOfflineSlate(OfflineTypes.Error);
       return;
@@ -339,6 +354,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       }
       // Live. Remove slate
       this._manageOfflineSlate(OfflineTypes.None);
+      this._liveViewersManager?.initInterval();
     }
   }
 
@@ -475,6 +491,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
+    this._liveViewersManager?.reset();
   }
 
   destroy(): void {

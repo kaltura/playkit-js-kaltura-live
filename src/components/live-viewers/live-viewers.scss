@@ -1,0 +1,25 @@
+.live-viewers-container {
+  display: inline-block;
+  margin: 4px 8px;
+  position: relative;
+
+  .live-viewers {
+    display: flex;
+    flex-direction: row;
+    height: 24px;
+    padding: 3px 4px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.60);
+
+    span {
+      font-size: 13px;
+      color: #fff;
+      font-style: normal;
+      font-weight: 700;
+      line-height: normal;
+    }
+  }
+}

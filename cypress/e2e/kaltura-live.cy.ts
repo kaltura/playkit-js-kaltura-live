@@ -180,4 +180,27 @@ describe('Kaltura-live plugin', () => {
       });
     });
   });
+
+  describe('kaltura-live live viewers', () => {
+    it('should not render liveViewers component for VOD media', () => {
+      mockKalturaBe('vod.json', null);
+      loadPlayer().then(() => {
+        cy.get('[data-testid="kaltura-live_liveViewers"]').should('not.exist');
+      });
+    });
+    it('should not render liveViewers component when disabled', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer({showLiveViewers: false}, {autoplay: true}).then(() => {
+        cy.get('[data-testid="kaltura-live_liveViewers"]').should('not.exist');
+      });
+    });
+    it('should render liveViewers component', () => {
+      mockKalturaBe('live.json', 'live-stream.json');
+      loadPlayer().then(() => {
+        cy.get('[data-testid="kaltura-live_liveViewers"]').should('exist');
+        cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('exist').should('have.text', '0');
+        cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('have.text', '3,124');
+      });
+    });
+  });
 });

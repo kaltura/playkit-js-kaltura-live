@@ -102,7 +102,8 @@ Bump version: `yarn release`;<br/>
     postOfflineSlateUrl: string,
     preOfflineEntryId: string, 
     postOfflineEntryId: string,
-    offlineSlateWithoutText: boolean
+    offlineSlateWithoutText: boolean,
+    showLiveViewers: boolean
 }
 ```
 Player allows customisation of pre and post live broadcast slates per uiconf. 
@@ -199,3 +200,11 @@ One can also choose to hide the text message on the slate.
 > ##### Type: `boolean`
 >
 > ##### Default: `false`
+
+##
+
+> ### config.showLiveViewers
+>
+> ##### Type: `boolean`
+>
+> ##### Default: `true`
