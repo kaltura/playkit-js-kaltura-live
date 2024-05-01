@@ -52,7 +52,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   public isMediaLive = false;
   private _broadcastState: LiveBroadcastStates = LiveBroadcastStates.Unknown;
   private _wasPlayed = false;
-  private _absolutePosition = null;
+  private _absolutePosition: number | null = null;
   private _isLiveApiCallTimeout: any = null;
   private _bufferingTimeout: any = null;
   private _liveTagState: LiveTagStates = LiveTagStates.Live;
@@ -249,6 +249,14 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     return this._broadcastState;
   }
 
+  private _getId3TagSetId = ( id3TagDataSetId: any) =>  {
+    return id3TagDataSetId.split(',').reduce((result: any, currValue: string) => {
+      const [key, value] = currValue.split('=');
+      return {...result,
+              [key]: value};
+      }, {});
+  }
+
   public handleTimedMetadata = ({payload}: any) => {
     if (!payload || !payload.cues) {
       this._absolutePosition = null;
@@ -257,13 +265,20 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     const id3TagCues = payload.cues.filter((cue: any) => cue.value && cue.value.key === 'TEXT');
     if (id3TagCues.length) {
       try {
-        this._absolutePosition = JSON.parse(id3TagCues[id3TagCues.length - 1].value.data).timestamp;
+        const id3TagData = JSON.parse(id3TagCues[id3TagCues.length - 1].value.data);
+        this._absolutePosition = +id3TagData.timestamp;
+        if(id3TagData.setId) {
+          const setIdData = this._getId3TagSetId(id3TagData.setId);
+          if(!!setIdData.offset) {
+            this._absolutePosition -= +setIdData.offset;
+          }
+        }
       } catch (error) {
         this._absolutePosition = null;
         this.logger.warn('Failed parsing timedmetadata payload cue ', error);
       }
     }
-  };
+  }
 
   private _tamperAnalyticsHandler = (e: any) => {
     if (this._absolutePosition) {
