@@ -207,4 +207,4 @@ One can also choose to hide the text message on the slate.
 >
 > ##### Type: `boolean`
 >
-> ##### Default: `true`
+> ##### Default: `false`

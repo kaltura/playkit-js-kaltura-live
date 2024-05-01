@@ -70,7 +70,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     isLiveInterval: 10,
     bufferingFailoverTimeout: 10,
     offlineSlateWithoutText: false,
-    showLiveViewers: true
+    showLiveViewers: false
   };
 
   constructor(name: string, player: KalturaPlayerTypes.Player, config: LivePluginConfig) {
