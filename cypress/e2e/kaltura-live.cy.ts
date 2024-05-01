@@ -196,7 +196,7 @@ describe('Kaltura-live plugin', () => {
     });
     it('should render liveViewers component', () => {
       mockKalturaBe('live.json', 'live-stream.json');
-      loadPlayer().then(() => {
+      loadPlayer({showLiveViewers: true}).then(() => {
         cy.get('[data-testid="kaltura-live_liveViewers"]').should('exist');
         cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('exist').should('have.text', '0');
         cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('have.text', '3,124');
