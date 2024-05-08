@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<xml>
-    <result>
-        <objectType>KalturaLiveStreamStats</objectType>
-        <relatedObjects></relatedObjects>
-        <liveViewers>3124</liveViewers>
-    </result>
-    <executionTime>0.0098509788513184</executionTime>
-</xml>

@@ -2,6 +2,8 @@ import {h, createRef} from 'preact';
 import {LiveViewers} from './live-viewers';
 
 const API_CALL_INTERVAL_MS = 20000;
+const URL_JSON_FORMAT = 'format/1';
+const ENTRY_ID_URL_PLACEHOLDER = '{entryId}';
 
 export class LiveViewersManager {
   private _player: any;
@@ -28,7 +30,7 @@ export class LiveViewersManager {
 
   private _buildBaseRequestUrl = () => {
     const {serviceUrl} = this._player.provider.env;
-    this._baseRequestUrl = `${serviceUrl}/service/LiveStream/action/getLiveStreamStats/entryId`;
+    this._baseRequestUrl = `${serviceUrl}/service/LiveStream/action/getLiveStreamStats/entryId/${ENTRY_ID_URL_PLACEHOLDER}/${URL_JSON_FORMAT}`;
   };
 
   private _addLiveViewers = () => {
@@ -54,19 +56,14 @@ export class LiveViewersManager {
 
   private _updateLiveViewers = () => {
     const entryId = this._player.config.sources.id;
-    // make api call to get live viewers
-    const requestUrl = `${this._baseRequestUrl}/${entryId}`
+    // make the api call to get live viewers, request it in json format
+    const requestUrl = this._baseRequestUrl.replace(ENTRY_ID_URL_PLACEHOLDER, entryId);
     try {
       fetch(requestUrl)
-        .then(response => response.text())
-        .then((textResponse: any) => {
-          if (textResponse) {
-            const domParser: DOMParser = new DOMParser();
-            const xml: any = domParser.parseFromString(textResponse, 'text/xml');
-            const liveViewersElement = xml.querySelector("liveViewers");
-            if (liveViewersElement) {
-              this._liveViewersRef?.current?.updateLiveViewers(liveViewersElement.innerHTML || 0);
-            }
+        .then(response => response.json())
+        .then((liveViewersResponse: any) => {
+          if (liveViewersResponse) {
+            this._liveViewersRef?.current?.updateLiveViewers(liveViewersResponse.liveViewers || 0);
           }
       })
     } catch (e) {
