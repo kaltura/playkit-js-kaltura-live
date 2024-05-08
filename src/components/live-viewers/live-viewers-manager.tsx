@@ -4,6 +4,7 @@ import {LiveViewers} from './live-viewers';
 const API_CALL_INTERVAL_MS = 20000;
 const URL_JSON_FORMAT = 'format/1';
 const ENTRY_ID_URL_PLACEHOLDER = '{entryId}';
+const REQUEST_URL_TEMPLATE = 'service/LiveStream/action/getLiveStreamStats/entryId';
 
 export class LiveViewersManager {
   private _player: any;
@@ -30,7 +31,7 @@ export class LiveViewersManager {
 
   private _buildBaseRequestUrl = () => {
     const {serviceUrl} = this._player.provider.env;
-    this._baseRequestUrl = `${serviceUrl}/service/LiveStream/action/getLiveStreamStats/entryId/${ENTRY_ID_URL_PLACEHOLDER}/${URL_JSON_FORMAT}`;
+    this._baseRequestUrl = `${serviceUrl}/${REQUEST_URL_TEMPLATE}/${ENTRY_ID_URL_PLACEHOLDER}/${URL_JSON_FORMAT}`;
   };
 
   private _addLiveViewers = () => {
