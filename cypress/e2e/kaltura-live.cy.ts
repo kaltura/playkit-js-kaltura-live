@@ -184,7 +184,7 @@ describe('Kaltura-live plugin', () => {
   describe('kaltura-live live viewers', () => {
     it('should not render liveViewers component for VOD media', () => {
       mockKalturaBe('vod.json', null);
-      loadPlayer().then(() => {
+      loadPlayer({showLiveViewers: true}).then(() => {
         cy.get('[data-testid="kaltura-live_liveViewers"]').should('not.exist');
       });
     });

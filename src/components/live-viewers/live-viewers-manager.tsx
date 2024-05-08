@@ -1,4 +1,3 @@
-import {GetLiveStatsLoader} from '../../providers/get-live-stats';
 import {h, createRef} from 'preact';
 import {LiveViewers} from './live-viewers';
 
@@ -8,10 +7,14 @@ export class LiveViewersManager {
   private _player: any;
   private _isLiveApiCallInterval: any = null;
   private _liveViewersRef = createRef<LiveViewers>();
+  private _baseRequestUrl: string = '';
+  private _logger: KalturaPlayerTypes.Logger;
 
-  constructor(player: any) {
+  constructor(player: any, logger: KalturaPlayerTypes.Logger) {
     this._player = player;
+    this._logger = logger;
     this._addLiveViewers();
+    this._buildBaseRequestUrl();
   }
 
   public loadMedia(): void {
@@ -22,6 +25,11 @@ export class LiveViewersManager {
       this.resetInterval();
     }
   }
+
+  private _buildBaseRequestUrl = () => {
+    const {serviceUrl} = this._player.provider.env;
+    this._baseRequestUrl = `${serviceUrl}/service/LiveStream/action/getLiveStreamStats/entryId`;
+  };
 
   private _addLiveViewers = () => {
     this._player.ui.addComponent({
@@ -46,17 +54,24 @@ export class LiveViewersManager {
 
   private _updateLiveViewers = () => {
     const entryId = this._player.config.sources.id;
-    const ks = this._player.config.session?.ks || null;
     // make api call to get live viewers
-    this._player.provider.doRequest([{loader: GetLiveStatsLoader, params: {ks, entryId}}])
-      .then((data: Map<string, any>) => {
-        if (data && data.has(GetLiveStatsLoader.id)) {
-          const liveStatsLoader = data.get(GetLiveStatsLoader.id);
-          const liveStats = liveStatsLoader?.response;
-          // liveViewers from response is possibly false (in case of 0 viewers)
-          this._liveViewersRef?.current?.updateLiveViewers(liveStats.liveViewers || 0);
-        }
-      });
+    const requestUrl = `${this._baseRequestUrl}/${entryId}`
+    try {
+      fetch(requestUrl)
+        .then(response => response.text())
+        .then((textResponse: any) => {
+          if (textResponse) {
+            const domParser: DOMParser = new DOMParser();
+            const xml: any = domParser.parseFromString(textResponse, 'text/xml');
+            const liveViewersElement = xml.querySelector("liveViewers");
+            if (liveViewersElement) {
+              this._liveViewersRef?.current?.updateLiveViewers(liveViewersElement.innerHTML || 0);
+            }
+          }
+      })
+    } catch (e) {
+      this._logger.debug(`There was an issue with getting the number of live viewers. The request has failed: ${requestUrl}. error:`, e);
+    }
   };
 
   reset(): void {

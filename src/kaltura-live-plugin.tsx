@@ -83,7 +83,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._addOfflineSlateToPlayerArea();
 
     if (this.config.showLiveViewers) {
-      this._liveViewersManager = new LiveViewersManager(this.player);
+      this._liveViewersManager = new LiveViewersManager(this.player, this.logger);
     }
   }
 
