@@ -55,22 +55,23 @@ export class LiveViewersManager {
     }
   };
 
-  private _updateLiveViewers = () => {
+  private _updateLiveViewers = async () => {
     const entryId = this._player.config.sources.id;
-    // make the api call to get live viewers, request it in json format
-    const requestUrl = this._baseRequestUrl.replace(ENTRY_ID_URL_PLACEHOLDER, entryId);
+    const requestUrl: string = this._baseRequestUrl.replace(ENTRY_ID_URL_PLACEHOLDER, entryId);
+    const liveViewers: number | undefined = await this._getLiveViewers(requestUrl);
+    typeof liveViewers === 'number' && this._liveViewersRef?.current?.updateLiveViewers(liveViewers);
+  };
+
+  private _getLiveViewers = async (requestUrl: string): Promise<number | undefined> => {
     try {
-      fetch(requestUrl)
-        .then(response => response.json())
-        .then((liveViewersResponse: any) => {
-          if (liveViewersResponse) {
-            this._liveViewersRef?.current?.updateLiveViewers(liveViewersResponse.liveViewers || 0);
-          }
-      })
+      const response = await fetch(requestUrl);
+      const liveViewersParsed = await response.json();
+      return Number(liveViewersParsed?.liveViewers);
     } catch (e) {
       this._logger.debug(`There was an issue with getting the number of live viewers. The request has failed: ${requestUrl}. error:`, e);
+      return undefined;
     }
-  };
+  }
 
   reset(): void {
     this.resetInterval();
