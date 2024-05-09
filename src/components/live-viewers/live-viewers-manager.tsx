@@ -1,17 +1,23 @@
-import {GetLiveStatsLoader} from '../../providers/get-live-stats';
 import {h, createRef} from 'preact';
 import {LiveViewers} from './live-viewers';
 
 const API_CALL_INTERVAL_MS = 20000;
+const URL_JSON_FORMAT = 'format/1';
+const ENTRY_ID_URL_PLACEHOLDER = '{entryId}';
+const REQUEST_URL_TEMPLATE = 'service/LiveStream/action/getLiveStreamStats/entryId';
 
 export class LiveViewersManager {
   private _player: any;
   private _isLiveApiCallInterval: any = null;
   private _liveViewersRef = createRef<LiveViewers>();
+  private _baseRequestUrl: string = '';
+  private _logger: KalturaPlayerTypes.Logger;
 
-  constructor(player: any) {
+  constructor(player: any, logger: KalturaPlayerTypes.Logger) {
     this._player = player;
+    this._logger = logger;
     this._addLiveViewers();
+    this._buildBaseRequestUrl();
   }
 
   public loadMedia(): void {
@@ -22,6 +28,11 @@ export class LiveViewersManager {
       this.resetInterval();
     }
   }
+
+  private _buildBaseRequestUrl = () => {
+    const {serviceUrl} = this._player.provider.env;
+    this._baseRequestUrl = `${serviceUrl}/${REQUEST_URL_TEMPLATE}/${ENTRY_ID_URL_PLACEHOLDER}/${URL_JSON_FORMAT}`;
+  };
 
   private _addLiveViewers = () => {
     this._player.ui.addComponent({
@@ -44,20 +55,25 @@ export class LiveViewersManager {
     }
   };
 
-  private _updateLiveViewers = () => {
+  private _updateLiveViewers = async () => {
     const entryId = this._player.config.sources.id;
-    const ks = this._player.config.session?.ks || null;
-    // make api call to get live viewers
-    this._player.provider.doRequest([{loader: GetLiveStatsLoader, params: {ks, entryId}}])
-      .then((data: Map<string, any>) => {
-        if (data && data.has(GetLiveStatsLoader.id)) {
-          const liveStatsLoader = data.get(GetLiveStatsLoader.id);
-          const liveStats = liveStatsLoader?.response;
-          // liveViewers from response is possibly false (in case of 0 viewers)
-          this._liveViewersRef?.current?.updateLiveViewers(liveStats.liveViewers || 0);
-        }
-      });
+    const requestUrl: string = this._baseRequestUrl.replace(ENTRY_ID_URL_PLACEHOLDER, entryId);
+    const liveViewers: number | null = await this._getLiveViewers(requestUrl);
+    if (typeof liveViewers === 'number') {
+      this._liveViewersRef?.current?.updateLiveViewers(liveViewers);
+    }
   };
+
+  private _getLiveViewers = async (requestUrl: string): Promise<number | null> => {
+    try {
+      const response = await fetch(requestUrl);
+      const liveViewersParsed = await response.json();
+      return Number(liveViewersParsed?.liveViewers);
+    } catch (e) {
+      this._logger.debug(`There was an issue with getting the number of live viewers. The request has failed: ${requestUrl}. error:`, e);
+      return null;
+    }
+  }
 
   reset(): void {
     this.resetInterval();
