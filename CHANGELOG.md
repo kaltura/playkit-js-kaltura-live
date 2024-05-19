@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 3.3.0 (2024-05-19)
+
+
+### Features
+
+* **FEC-13902:** convert liveStats multirequest to fetch request ([#405](https://github.com/kaltura/playkit-js-kaltura-live/issues/405)) ([f6c8d71](https://github.com/kaltura/playkit-js-kaltura-live/commit/f6c8d71a3ba0abd0d53f6f452623145711f8b45e))
+
 ### 3.2.10 (2024-05-02)
 
 ### 3.2.9 (2024-03-31)
