@@ -1,0 +1,12 @@
+{
+  "ca": {
+    "kalturaLive": {
+      "offline_title": "No s'està emetent encara",
+      "offline_body": "El vídeo començarà a reproduir-se un cop comenci l'emissió",
+      "no_longer_live": "L'emissió ja no és en directe",
+      "live": "En directe",
+      "offline": "Desconnectat",
+      "preview": "Previsualització"
+    }
+  }
+}
