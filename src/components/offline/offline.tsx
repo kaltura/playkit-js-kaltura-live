@@ -69,6 +69,16 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.muted = player.muted;
       this._backgroundPlayer.play();
     }
+    // Make all interactive elements in the playkit-gui-area class not focusable
+    const guiAreaElements = document.querySelectorAll('.playkit-gui-area *');
+    guiAreaElements.forEach((element) => {
+      if (
+        element instanceof HTMLElement &&
+        (element.tagName === 'button' || element.tagName === 'a' || element.hasAttribute('tabindex'))
+      ) {
+        element.tabIndex = -1;
+      }
+    });
   }
 
   componentWillUnmount(): void {
