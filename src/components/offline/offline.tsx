@@ -58,6 +58,27 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
+  private originalTabIndexes: Map<HTMLElement, number | null> = new Map();
+
+  private disableGuiFocus() {
+    const guiAreaElements = document.querySelectorAll('.playkit-gui-area *');
+    guiAreaElements.forEach((element) => {
+      if (element instanceof HTMLElement && (element.tagName === 'button' || element.tagName === 'a' || element.hasAttribute('tabindex'))) {
+        this.originalTabIndexes.set(element, element.tabIndex);
+        element.tabIndex = -1;
+      }
+    });
+  }
+
+  private restoreGuiFocus() {
+    this.originalTabIndexes.forEach((tabIndex, element) => {
+      if (element) {
+        element.tabIndex = tabIndex ?? 0;
+      }
+    });
+    this.originalTabIndexes.clear();
+  }
+
   componentDidMount(): void {
     if (this._videoContainerRef && this._backgroundPlayer) {
       const {player} = this.props;
@@ -69,16 +90,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.muted = player.muted;
       this._backgroundPlayer.play();
     }
-    // Make all interactive elements in the playkit-gui-area class not focusable
-    const guiAreaElements = document.querySelectorAll('.playkit-gui-area *');
-    guiAreaElements.forEach((element) => {
-      if (
-        element instanceof HTMLElement &&
-        (element.tagName === 'button' || element.tagName === 'a' || element.hasAttribute('tabindex'))
-      ) {
-        element.tabIndex = -1;
-      }
-    });
+    this.disableGuiFocus();
   }
 
   componentWillUnmount(): void {
@@ -86,6 +98,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.pause();
       this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
     }
+    this.restoreGuiFocus();
   }
 
   private _handleMute = (): void => {
