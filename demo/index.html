@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Live plugin</title>
+  <script src="https://unpkg.com/@playkit-js/kaltura-player-js@latest/dist/kaltura-ovp-player.js"></script>
+  <script src="../playkit-kaltura-live.js"></script>
+</head>
+
+<body>
+  <label for="width-selector">Player size:</label>
+  <select id="width-selector">
+    <option value="280">TINY</option>
+    <option value="380">EXTRA_SMALL</option>
+    <option value="480">SMALL</option>
+    <option value="768" selected>MEDIUM</option>
+    <option value="1024">LARGE</option>
+    <option value="1280">EXTRA_LARGE</option>
+  </select>
+  <script type="text/javascript">
+    document.getElementById('width-selector').addEventListener('change', function () {
+      const width = this.value + 'px';
+      document.getElementById('player-placeholder').style.width = width;
+    });
+  </script>
+  <hr />
+  <div id="player-placeholder" style="width: 768px; height: 480px"></div>
+  <script>
+    const config = {
+      logLevel: 'DEBUG',
+      targetId: 'player-placeholder',
+      provider: {
+        partnerId: 1740481,
+        log: {
+          level: "DEBUG"
+        }
+      },
+      playback: {
+        autoplay: true
+      },
+      plugins: {
+        'kaltura-live': {
+          preOfflineSlateUrl: undefined,
+          postOfflineSlateUrl: undefined,
+          checkLiveWithKs: false,
+          isLiveInterval: 10,
+          bufferingFailoverTimeout: 10,
+          offlineSlateWithoutText: false,
+          showLiveViewers: false
+        },
+      }
+    };
+
+    const player = KalturaPlayer.setup(config);
+
+    player.loadMedia({ entryId: '0_3ai9qbgy' });
+  </script>
+</body>
+
+</html>
