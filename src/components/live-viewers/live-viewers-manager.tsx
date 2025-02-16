@@ -59,7 +59,7 @@ export class LiveViewersManager {
     const entryId = this._player.config.sources.id;
     const requestUrl: string = this._baseRequestUrl.replace(ENTRY_ID_URL_PLACEHOLDER, entryId);
     const liveViewers: number | null = await this._getLiveViewers(requestUrl);
-    if (typeof liveViewers === 'number') {
+    if (typeof liveViewers === 'number' && liveViewers > 0) {
       this._liveViewersRef?.current?.updateLiveViewers(liveViewers);
     }
   };

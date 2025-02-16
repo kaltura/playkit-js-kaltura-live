@@ -197,9 +197,11 @@ describe('Kaltura-live plugin', () => {
     it('should render liveViewers component', () => {
       mockKalturaBe('live.json', 'live-stream.json');
       loadPlayer({showLiveViewers: true}).then(() => {
+        // initially, the component should not render since liveViewers is 0
+        cy.get('[data-testid="kaltura-live_liveViewers"]').should('not.exist');
+        // the component should render since liveViewers is bigger than 0
         cy.get('[data-testid="kaltura-live_liveViewers"]').should('exist');
-        cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('exist').should('have.text', '0');
-        cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('have.text', '3,124');
+        cy.get('[data-testid="kaltura-live_liveViewersNumber"]').should('exist').should('have.text', '3,124');
       });
     });
   });
