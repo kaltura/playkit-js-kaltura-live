@@ -31,10 +31,12 @@ export class LiveViewers extends Component<{}, LiveViewersState> {
   render() {
     return (
       <div className={styles.liveViewersContainer}>
-        <div className={styles.liveViewers} data-testid="kaltura-live_liveViewers">
-          <LiveViewersIcon/>
-          <span data-testid="kaltura-live_liveViewersNumber">{this.state.liveViewers}</span>
-        </div>
+        {this.state.liveViewers !== "0" && (
+            <div className={styles.liveViewers} data-testid="kaltura-live_liveViewers">
+              <LiveViewersIcon />
+              <span data-testid="kaltura-live_liveViewersNumber">{this.state.liveViewers}</span>
+            </div>
+        )}
       </div>
     );
   }
