@@ -1,6 +1,7 @@
 import {h, Component} from 'preact';
 import {Offline, OfflineSlateUrls} from '../offline';
 import * as styles from './offline-slate.scss';
+import { FocusTrap } from '@playkit-js/common/dist/components';
 
 // @ts-ignore
 const {ErrorOverlay} = KalturaPlayer.ui.components;
@@ -53,7 +54,6 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
 
   componentWillUnmount() {
     this.props.removePlayerClass!();
-    document.removeEventListener('focusin', this._handleFocusChange, true);
   }
 
   componentDidUpdate(prevProps: OfflineSlateProps, prevState: OfflineSlateState) {
@@ -61,11 +61,12 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
       if (this.state.type !== OfflineTypes.None) {
         this.props.addPlayerClass!();
         this.props.removeSpinner!();
-        this._offlineWrapperRef?.focus();
-        document.addEventListener('focusin', this._handleFocusChange, true);
+        if (this._offlineWrapperRef) {
+          this._offlineWrapperRef.focus();
+          this._offlineWrapperRef.tabIndex = 0;
+        }
       } else {
         this.props.removePlayerClass!();
-        document.removeEventListener('focusin', this._handleFocusChange, true);
       }
     }
   }
@@ -86,26 +87,20 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     return <Offline postBroadcast={this._isPostBroadcast} hideText={this.props.hideText} offlineSlateUrls={this.props.offlineSlateUrls} />;
   };
 
-  private _handleFocusChange = (e: FocusEvent) => {
-    const playerGuiWrapper = this.props.getGuiAreaNode();
-    if (playerGuiWrapper?.contains(e.target as Node | null)) {
-      // prevent focus on playe gui area
-      this._offlineWrapperRef?.focus();
-    }
-  };
-
   render() {
     return (
-      <div
-        aria-live="polite"
-        tabIndex={-1}
-        ref={node => {
-          this._offlineWrapperRef = node;
-        }}
-        data-testid="kaltura-live_offlineWrapper"
-        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
-        {this._renderSlate()}
-      </div>
+      <FocusTrap active={this.state.type !== OfflineTypes.None}>
+        <div
+          aria-live="polite"
+          tabIndex={-1}
+          ref={node => {
+            this._offlineWrapperRef = node;
+          }}
+          data-testid="kaltura-live_offlineWrapper"
+          className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
+          {this._renderSlate()}
+        </div>
+      </FocusTrap>
     );
   }
 }
