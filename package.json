@@ -66,7 +66,8 @@
   },
   "dependencies": {
     "@playkit-js/common": "^1.5.1",
-    "@playkit-js/playkit-js-ui": "^0.77.1"
+    "@playkit-js/playkit-js-ui": "^0.77.1",
+    "@playkit-js/webpack-common": "^1.0.1-canary.0-dfd24a9"
   },
   "publishConfig": {
     "access": "public"
