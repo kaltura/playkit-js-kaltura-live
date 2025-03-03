@@ -1,7 +1,6 @@
 import {h, Component} from 'preact';
 import {Offline, OfflineSlateUrls} from '../offline';
 import * as styles from './offline-slate.scss';
-import { FocusTrap } from '@playkit-js/common/dist/components';
 
 // @ts-ignore
 const {ErrorOverlay} = KalturaPlayer.ui.components;
@@ -89,18 +88,16 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
 
   render() {
     return (
-      <FocusTrap active={this.state.type !== OfflineTypes.None}>
-        <div
-          aria-live="polite"
-          tabIndex={-1}
-          ref={node => {
-            this._offlineWrapperRef = node;
-          }}
-          data-testid="kaltura-live_offlineWrapper"
-          className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
-          {this._renderSlate()}
-        </div>
-      </FocusTrap>
+      <div
+        aria-live="polite"
+        tabIndex={-1}
+        ref={node => {
+          this._offlineWrapperRef = node;
+        }}
+        data-testid="kaltura-live_offlineWrapper"
+        className={[styles.slateWrapper, this.state.type !== OfflineTypes.None ? styles.active : ''].join(' ')}>
+        {this._renderSlate()}
+      </div>
     );
   }
 }
