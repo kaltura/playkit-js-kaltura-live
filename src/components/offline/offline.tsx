@@ -58,20 +58,6 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
-  private disableControls() {
-    const guiContainer = document.querySelector('.playkit-gui-area');
-    if (guiContainer) {
-        guiContainer.classList.add('controls-hidden');
-    }
-  }
-
-  private restoreControls() {
-    const guiContainer = document.querySelector('.playkit-gui-area');
-    if (guiContainer) {
-        guiContainer.classList.remove('controls-hidden');
-    }
-  }
-
   componentDidMount(): void {
     if (this._videoContainerRef && this._backgroundPlayer) {
       const {player} = this.props;
@@ -83,7 +69,6 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.muted = player.muted;
       this._backgroundPlayer.play();
     }
-    this.disableControls();
   }
 
   componentWillUnmount(): void {
@@ -91,7 +76,6 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.pause();
       this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
     }
-    this.restoreControls();
   }
 
   private _handleMute = (): void => {

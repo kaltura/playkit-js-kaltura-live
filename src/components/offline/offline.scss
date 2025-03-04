@@ -57,12 +57,3 @@
     }
   }
 }
-
-:global {
-  .controls-hidden .playkit-top-bar,
-  .controls-hidden .playkit-bottom-bar,
-  .controls-hidden .playkit-playback-controls,
-  .controls-hidden .playkit-center-playback-controls {
-    display: none !important;
-  }
-}
