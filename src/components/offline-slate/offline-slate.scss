@@ -23,3 +23,11 @@
     z-index: $slate-zindex - 1;
   }
 }
+:global {
+  .has-live-plugin-overlay .playkit-top-bar,
+  .has-live-plugin-overlay .playkit-bottom-bar,
+  .has-live-plugin-overlay .playkit-playback-controls,
+  .has-live-plugin-overlay .playkit-center-playback-controls {
+    display: none !important;
+  }
+}
