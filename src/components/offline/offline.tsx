@@ -58,25 +58,18 @@ export class Offline extends Component<OfflineProps, OfflineState> {
     return this.props.postBroadcast ? null : this.props.offlineBody;
   }
 
-  private originalTabIndexes: Map<HTMLElement, number | null> = new Map();
-
-  private disableGuiFocus() {
-    const guiAreaElements = document.querySelectorAll('.playkit-gui-area *');
-    guiAreaElements.forEach((element) => {
-      if (element instanceof HTMLElement && (element.tagName === 'button' || element.tagName === 'a' || element.hasAttribute('tabindex'))) {
-        this.originalTabIndexes.set(element, element.tabIndex);
-        element.tabIndex = -1;
-      }
-    });
+  private disableControls() {
+    const guiContainer = document.querySelector('.playkit-gui-area');
+    if (guiContainer) {
+        guiContainer.classList.add('controls-hidden');
+    }
   }
 
-  private restoreGuiFocus() {
-    this.originalTabIndexes.forEach((tabIndex, element) => {
-      if (element) {
-        element.tabIndex = tabIndex ?? 0;
-      }
-    });
-    this.originalTabIndexes.clear();
+  private restoreControls() {
+    const guiContainer = document.querySelector('.playkit-gui-area');
+    if (guiContainer) {
+        guiContainer.classList.remove('controls-hidden');
+    }
   }
 
   componentDidMount(): void {
@@ -90,7 +83,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.muted = player.muted;
       this._backgroundPlayer.play();
     }
-    this.disableGuiFocus();
+    this.disableControls();
   }
 
   componentWillUnmount(): void {
@@ -98,7 +91,7 @@ export class Offline extends Component<OfflineProps, OfflineState> {
       this._backgroundPlayer.pause();
       this._originalVideoElementParent!.prepend(this._backgroundPlayer.getVideoElement());
     }
-    this.restoreGuiFocus();
+    this.restoreControls();
   }
 
   private _handleMute = (): void => {
