@@ -525,6 +525,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     this._liveViewersManager?.reset();
+    this._prevPositionData = { position: null, updatedAt: 0 };
   }
 
   destroy(): void {
