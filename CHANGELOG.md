@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.4.1 (2025-04-03)
+
+
+### Bug Fixes
+
+* **FEC-14441:** live view analytic - fix absolutePosition ([#413](https://github.com/kaltura/playkit-js-kaltura-live/issues/413)) ([4f9d5b7](https://github.com/kaltura/playkit-js-kaltura-live/commit/4f9d5b743c9ce97c2802d8ab14df2d0aa6de7a8e))
+
 ## 3.4.0 (2025-03-06)
 
 
