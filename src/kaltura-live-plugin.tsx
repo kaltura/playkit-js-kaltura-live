@@ -46,6 +46,11 @@ export enum KalturaEntryServerNodeStatus {
   taskUploading = 8
 }
 
+interface PrevAbsolutePositionData {
+  position: number | null;
+  updatedAt: number;
+}
+
 // @ts-ignore
 export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements IMiddlewareProvider, IEngineDecoratorProvider {
   public player: KalturaPlayerTypes.Player;
@@ -64,6 +69,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   private _preOfflinePlayer: any = null;
   private _postOfflinePlayer: any = null;
   private _liveViewersManager: LiveViewersManager | null = null;
+  private _prevPositionData: PrevAbsolutePositionData = { position: null, updatedAt: 0 };
 
   static defaultConfig: LivePluginConfig = {
     checkLiveWithKs: false,
@@ -281,8 +287,20 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   private _tamperAnalyticsHandler = (e: any) => {
-    if (this._absolutePosition) {
+    const updatePosition = () => {
       e.absolutePosition = this._absolutePosition;
+      this._prevPositionData = {
+        position: this._absolutePosition,
+        updatedAt: this.player.currentTime
+      };
+    };
+
+    if (this._absolutePosition && this._absolutePosition !== this._prevPositionData.position) {
+      updatePosition();
+    } else if (this._absolutePosition && this._prevPositionData.updatedAt !== this.player.currentTime) {
+      const deltaSec = Math.floor(this.player.currentTime - this._prevPositionData.updatedAt);
+      this._absolutePosition += (deltaSec * 1000); // absolute position is in ms - convert delta seconds to ms
+      updatePosition();
     }
     return true;
   };
@@ -507,6 +525,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
     this._liveViewersManager?.reset();
+    this._prevPositionData = { position: null, updatedAt: 0 };
   }
 
   destroy(): void {
