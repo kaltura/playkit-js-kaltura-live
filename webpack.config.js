@@ -23,7 +23,7 @@ module.exports = {
     library: ['KalturaPlayer', 'plugins', 'kaltura-live'],
     devtoolModuleFilenameTemplate: './kaltura-live/[resource-path]'
   },
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   plugins: plugins,
   module: {
     rules: [

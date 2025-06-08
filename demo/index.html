@@ -5,7 +5,6 @@
   <meta charset="UTF-8" />
   <title>Live plugin</title>
   <script src="https://unpkg.com/@playkit-js/kaltura-player-js@latest/dist/kaltura-ovp-player.js"></script>
-  <script src="https://unpkg.com/@playkit-js/playkit-js-kava@1.11.0"></script>
   <script src="../playkit-kaltura-live.js"></script>
 </head>
 
@@ -32,11 +31,10 @@
       logLevel: 'DEBUG',
       targetId: 'player-placeholder',
       provider: {
-        partnerId: 1915851,
+        partnerId: 1740481,
         log: {
           level: "DEBUG"
-        },
-        ks:"djJ8MTkxNTg1MXwSrJDZicCfuglPzRTXMR1JZl1dIrbU00d7HwqEYXKoCCLOM_A-n4EYTEgxu_9YxOTjeW55nTu3La7SsDEdvK6ryzR2yDNGYBrcq0S7mg_WIq3XTM2qpdejwP4-w0v2bnGofEywfySM3osMOnTPpVSv"
+        }
       },
       playback: {
         autoplay: true
@@ -56,7 +54,7 @@
 
     const player = KalturaPlayer.setup(config);
 
-    player.loadMedia({ entryId: '1_rm9drznz' });
+    player.loadMedia({ entryId: '0_3ai9qbgy' });
   </script>
 </body>
 
