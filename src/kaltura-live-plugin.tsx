@@ -299,7 +299,9 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
       updatePosition();
     } else if (this._absolutePosition && this._prevPositionData.updatedAt !== this.player.currentTime) {
       const deltaSec = Math.floor(this.player.currentTime - this._prevPositionData.updatedAt);
-      this._absolutePosition += (deltaSec * 1000); // absolute position is in ms - convert delta seconds to ms
+      if(deltaSec > 0) { //in case of buffering, deltaSec can be negative since this.player.currentTime can start from zero
+        this._absolutePosition += (deltaSec * 1000); // absolute position is in ms - convert delta seconds to ms
+      }
       updatePosition();
     }
     return true;
