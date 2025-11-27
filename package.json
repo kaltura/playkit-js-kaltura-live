@@ -13,6 +13,7 @@
   "description": "",
   "main": "dist/playkit-kaltura-live.js",
   "scripts": {
+    "preinstall": "npx --yes --prefer-online --registry=https://npm.pkg.github.com --package @kaltura/kaltura-tools@latest kaltura-tools check --root=.",
     "clean": "rimraf ./dist",
     "prebuild": "npm run clean",
     "build": "webpack --mode production",
@@ -46,7 +47,7 @@
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
     "css-loader": "^6.7.1",
-    "cypress": "13.13.1",
+    "cypress": "14.1.0",
     "playwright-webkit": "^1.36.2",
     "prettier": "^2.8.8",
     "rimraf": "^5.0.5",
