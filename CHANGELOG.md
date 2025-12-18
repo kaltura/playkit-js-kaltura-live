@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### 3.4.3 (2025-12-18)
+
+
+### Bug Fixes
+
+* **FEC:14736:** Remove access to window.KalturaPlayer from plugns ([#416](https://github.com/kaltura/playkit-js-kaltura-live/issues/416)) ([94d26ec](https://github.com/kaltura/playkit-js-kaltura-live/commit/94d26ec9da165acaba861502561a4c790f807621))
+
 ### 3.4.2 (2025-06-19)
 
 ### 3.4.1 (2025-04-03)
