@@ -1,0 +1,161 @@
+{
+  "repositoryName": "playkit-js-kaltura-live",
+  "version": "1.0.0",
+  "coreResponsibility": {
+    "summary": "A PlayKit JS plugin that manages Kaltura live stream playback lifecycle, handling broadcast state detection, offline/pre-broadcast slates, live edge tracking, DVR functionality, and live viewer count display.",
+    "type": "plugin"
+  },
+  "domainAndLogicOwnership": {
+    "featureOwnership": [
+      "Live stream broadcast state detection (live, offline, preview)",
+      "Pre-broadcast slate display (before stream goes live)",
+      "Post-broadcast slate display (after stream ends)",
+      "Live tag indicator with states (Live, Preview, Offline)",
+      "Live edge tracking and seek-to-live functionality",
+      "DVR support for live streams",
+      "Live viewer count display and polling",
+      "Buffering failover handling for live streams",
+      "Media detachment and reattachment for stream recovery",
+      "ID3 timed metadata parsing for absolute position tracking",
+      "Background player support for slate media playback",
+      "Simulive (simulated live) detection and handling"
+    ],
+    "dataHandling": [
+      "LiveBroadcastStates (Unknown, Error, Live, Offline)",
+      "KalturaEntryServerNodeStatus (streaming server node states)",
+      "KalturaLiveStreamBroadcastStatus (live, offline, preview)",
+      "Absolute position from ID3 timed metadata",
+      "Live viewer count statistics",
+      "Primary/secondary stream status",
+      "Player buffering state management",
+      "Media source attachment state"
+    ]
+  },
+  "integrationPoints": {
+    "upstream": [
+      "Kaltura API: livestream.getDetails - retrieves live stream broadcast status",
+      "Kaltura API: LiveStream/action/getLiveStreamStats - retrieves live viewer counts",
+      "@playkit-js/kaltura-player-js - core player framework",
+      "@playkit-js/playkit-js-ui - UI components framework",
+      "@playkit-js/common - shared utilities"
+    ],
+    "downstream": [
+      "Kaltura Player UI layer - provides LiveTag, OfflineSlate, LiveViewers components",
+      "Kaltura Player middleware layer - intercepts play/load actions",
+      "Kaltura Player engine decorator - handles error/ended events",
+      "KAVA analytics plugin - provides tampered absolute position data"
+    ],
+    "externalApis": [
+      "Kaltura livestream.getDetails API",
+      "Kaltura LiveStream/action/getLiveStreamStats API"
+    ]
+  },
+  "technicalStack": {
+    "primaryLanguages": ["TypeScript", "TSX"],
+    "frameworks": ["Preact", "PlayKit JS"],
+    "buildTools": ["Webpack", "ts-loader", "sass-loader"],
+    "testingFrameworks": ["Cypress"],
+    "entryPoints": [
+      {
+        "file": "src/index.ts",
+        "description": "Main entry point - registers the kaltura-live plugin with Kaltura Player"
+      },
+      {
+        "file": "src/kaltura-live-plugin.tsx",
+        "description": "Core plugin class - KalturaLivePlugin implementing IMiddlewareProvider and IEngineDecoratorProvider"
+      },
+      {
+        "file": "src/middleware/live-middleware.ts",
+        "description": "KalturaLiveMiddleware - intercepts play/load to wait for live status"
+      },
+      {
+        "file": "src/decorator/live-decorator.ts",
+        "description": "KalturaLiveEngineDecorator - handles error recovery and stream end detection"
+      },
+      {
+        "file": "src/providers/get-stream-details-loader.ts",
+        "description": "GetStreamDetailsLoader - Kaltura API request builder for livestream.getDetails"
+      }
+    ]
+  },
+  "triageKeywords": [
+    "kaltura-live",
+    "live stream",
+    "broadcast not started",
+    "broadcast ended",
+    "no longer live",
+    "live tag",
+    "offline slate",
+    "pre-broadcast",
+    "post-broadcast",
+    "live viewers",
+    "isLive",
+    "broadcastStatus",
+    "LiveStreamGetDetails",
+    "LIVE_MANIFEST_REFRESH_ERROR",
+    "live edge",
+    "seek to live",
+    "DVR live",
+    "simulive",
+    "buffering failover",
+    "detachMediaSource",
+    "primaryStreamStatus",
+    "secondaryStreamStatus",
+    "ID3 timestamp",
+    "timed metadata",
+    "preview mode",
+    "checkLiveWithKs"
+  ],
+  "configurationOptions": [
+    {
+      "name": "checkLiveWithKs",
+      "type": "boolean",
+      "default": false,
+      "description": "Whether to include KS in live status API calls (for admin preview mode)"
+    },
+    {
+      "name": "isLiveInterval",
+      "type": "number",
+      "default": 10,
+      "description": "Interval in seconds between live status polling API calls"
+    },
+    {
+      "name": "bufferingFailoverTimeout",
+      "type": "number",
+      "default": 10,
+      "description": "Timeout in seconds before triggering failover when buffering during live playback"
+    },
+    {
+      "name": "preOfflineSlateUrl",
+      "type": "string",
+      "description": "Custom background image URL for pre-broadcast slate"
+    },
+    {
+      "name": "postOfflineSlateUrl",
+      "type": "string",
+      "description": "Custom background image URL for post-broadcast slate"
+    },
+    {
+      "name": "preOfflineEntryId",
+      "type": "string",
+      "description": "Kaltura entry ID for video to play as pre-broadcast slate background"
+    },
+    {
+      "name": "postOfflineEntryId",
+      "type": "string",
+      "description": "Kaltura entry ID for video to play as post-broadcast slate background"
+    },
+    {
+      "name": "offlineSlateWithoutText",
+      "type": "boolean",
+      "default": false,
+      "description": "Hide text messages on offline slates"
+    },
+    {
+      "name": "showLiveViewers",
+      "type": "boolean",
+      "default": false,
+      "description": "Show live viewer count in player UI"
+    }
+  ]
+}
