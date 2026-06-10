@@ -287,6 +287,12 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   private _tamperAnalyticsHandler = (e: any) => {
+    // Only send absolute position for live media playback
+    // This prevents sending stale absolute positions after live-to-VOD transition
+    if (!this.isMediaLive) {
+      return true;
+    }
+
     const updatePosition = () => {
       e.absolutePosition = this._absolutePosition;
       this._prevPositionData = {
@@ -523,6 +529,7 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
     this._resetBufferingTimeout();
     this._resetTimeout();
     this.isMediaLive = false;
+    this._absolutePosition = null;
     this.eventManager.unlisten(this.player, this.player.Event.FIRST_PLAY, this._handleFirstPlay);
     this.eventManager.unlisten(this.player, this.player.Event.TIMED_METADATA, this.handleTimedMetadata);
     this.eventManager.unlisten(this.player, this.player.Event.MEDIA_LOADED, this._handleMediaLoaded);
