@@ -287,12 +287,6 @@ export class KalturaLivePlugin extends KalturaPlayer.core.BasePlugin implements 
   }
 
   private _tamperAnalyticsHandler = (e: any) => {
-    // Only send absolute position for live media playback
-    // This prevents sending stale absolute positions after live-to-VOD transition
-    if (!this.isMediaLive) {
-      return true;
-    }
-
     const updatePosition = () => {
       e.absolutePosition = this._absolutePosition;
       this._prevPositionData = {
