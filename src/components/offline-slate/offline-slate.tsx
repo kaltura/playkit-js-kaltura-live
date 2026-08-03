@@ -90,7 +90,6 @@ export class OfflineSlate extends Component<OfflineSlateProps, OfflineSlateState
     return (
       <div
         aria-live="polite"
-        tabIndex={-1}
         ref={node => {
           this._offlineWrapperRef = node;
         }}
